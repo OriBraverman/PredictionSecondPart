@@ -37,14 +37,14 @@ public class PredictionConsuleUI {
                 case LOAD_WORLD_XML:
                     System.out.println(this.mainMenu.getMenuItemInstructions(userChoice.ordinal()));
                     this.currentLoadedPathString = scanner.next();
-                    try {
+                    /*try {
                         this.engine.loadXML(this.currentLoadedPathString);
                         System.out.println("XML file loaded successfully\n");
                     } catch (FileNotFoundException e) {
                         System.out.println("Error loading XML file: " + e.getMessage() + "\n");
                     } catch (Exception e) {
                         System.out.println("Error loading XML file: " + e.getMessage() + "\n");
-                    }
+                    }*/
                     break;
                 case SHOW_SIMULATION_DETAILS:
                     showSimulationDetails(engine.getSimulationDetailsDTO());

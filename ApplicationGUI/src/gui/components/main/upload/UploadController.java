@@ -14,17 +14,10 @@ import javafx.stage.FileChooser;
 import java.io.File;
 
 public class UploadController {
-    @FXML
-    private Button uploadButton;
-
-    @FXML
-    private Label fileLabel;
-
-    @FXML
-    private Label fileChosenLabel;
-
+    @FXML private Button LoadFileButton;
+    @FXML private Label fileChosenLabel;
+    @FXML private Label fileLabel;
     private AppController appController;
-
     private final SimpleStringProperty fileChosenStringProperty;
     private final SimpleBooleanProperty isXMLLoaded;
 
@@ -32,8 +25,6 @@ public class UploadController {
         fileChosenStringProperty = new SimpleStringProperty();
         isXMLLoaded = new SimpleBooleanProperty(false);
     }
-
-
     @FXML
     public void initialize(){
         fileChosenLabel.textProperty().bind(fileChosenStringProperty);
@@ -46,13 +37,16 @@ public class UploadController {
     }
 
     @FXML
-    void uploadMachineFromXML(ActionEvent event) {
+    void uploadWorldFromXMLButtonAction(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open XML file");
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("XML Files", "*.xml"));
-        File selectedFile = fileChooser.showOpenDialog(uploadButton.getScene().getWindow());
-        //appController.uploadPredictionFromXML(selectedFile);
+        File selectedFile = fileChooser.showOpenDialog(LoadFileButton.getScene().getWindow());
+        if (selectedFile == null) {
+            return;
+        }
+        appController.uploadWorldFromXML(selectedFile);
     }
 
 

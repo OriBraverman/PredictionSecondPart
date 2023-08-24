@@ -59,8 +59,7 @@ public class Engine {
         return null;
     }
 
-    public void loadXML(String path) throws FileNotFoundException {
-        Path xmlPath = Paths.get(path);
+    public void loadXML(Path xmlPath) throws FileNotFoundException {
         validateFileExists(xmlPath);
         validateFileIsXML(xmlPath);
         PRDWorld generatedWorld = fromXmlFileToObject(xmlPath);

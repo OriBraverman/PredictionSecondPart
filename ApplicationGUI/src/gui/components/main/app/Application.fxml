@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<ScrollPane xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.app.AppController">
    <content>
       <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" stylesheets="@Application.css">
          <children>
-            <fx:include source="../header/header.fxml" />
+            <fx:include fx:id="headerComponent" source="../header/header.fxml" />
+            <StackPane prefHeight="447.0" prefWidth="1000.0">
+               <children>
+                  <fx:include fx:id="detailsComponent" source="../details/details.fxml" />
+                  <fx:include source="../execution/execution.fxml" />
+                  <fx:include source="../results/results.fxml" />
+               </children>
+            </StackPane>
          </children>
       </VBox>
    </content>
