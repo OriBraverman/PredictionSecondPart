@@ -26,18 +26,18 @@ public class UploadController {
     private AppController appController;
 
     private final SimpleStringProperty fileChosenStringProperty;
-    private final SimpleBooleanProperty isMachineLoaded;
+    private final SimpleBooleanProperty isXMLLoaded;
 
     public UploadController() {
         fileChosenStringProperty = new SimpleStringProperty();
-        isMachineLoaded = new SimpleBooleanProperty(false);
+        isXMLLoaded = new SimpleBooleanProperty(false);
     }
 
 
     @FXML
     public void initialize(){
         fileChosenLabel.textProperty().bind(fileChosenStringProperty);
-        fileLabel.visibleProperty().bind(isMachineLoaded);
+        fileLabel.visibleProperty().bind(isXMLLoaded);
 
     }
 
@@ -56,8 +56,8 @@ public class UploadController {
     }
 
 
-    public SimpleBooleanProperty isMachineLoadedProperty() {
-        return isMachineLoaded;
+    public SimpleBooleanProperty isXMLLoadedProperty() {
+        return isXMLLoaded;
     }
 
     public void setAppController(AppController appController) {
