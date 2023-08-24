@@ -1,4 +1,4 @@
-package gui.components.main;
+package gui.components.main.app;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;

@@ -15,10 +15,10 @@ public class PredictionApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Prediction Application");
-        Parent load = FXMLLoader.load(getClass().getResource("application.fxml"));
+        Parent load = FXMLLoader.load(getClass().getResource("app/Application.fxml"));
         primaryStage.getIcons().add(
                 new Image(
-                        PredictionApplication.class.getResourceAsStream( "prediction-icon.png" )));
+                        PredictionApplication.class.getResourceAsStream( "app/prediction-icon.png")));
         Scene scene = new Scene(load);
         primaryStage.setScene(scene);
         primaryStage.show();
