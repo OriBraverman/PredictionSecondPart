@@ -109,7 +109,7 @@ public class Engine {
     }
 
     private TerminationDTO getTerminationDTO() {
-        return new TerminationDTO(this.world.getTermination().getTicksCount(), this.world.getTermination().getSecondsCount());
+        return new TerminationDTO(this.world.getTermination().getSecondsCount(), this.world.getTermination().getTicksCount());
     }
 
     private RuleDTO[] getRulesDTO() {
