@@ -14,4 +14,10 @@ public class IntegerPropertyDefinition extends AbstractNumericPropertyDefinition
     public boolean isNumeric() {
         return true;
     }
+
+    @Override
+    public boolean isInRange(String value) {
+        int intValue = Integer.parseInt(value);
+        return intValue >= (Integer) this.range.getFrom() && intValue <= (Integer) this.range.getTo();
+    }
 }

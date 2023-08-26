@@ -36,34 +36,76 @@ public class DetailsController {
         root = detailsTreeView.getRoot();
         root.getChildren().add(new TreeItem<>("Entities"));
         for (EntityDefinitionDTO entityDefinitionDTO : simulationDetailsDTO.getEntities()) {
-            TreeItem<String> entityItem = new TreeItem<>("");
-            // Create a button for each entity
-            Button entityButton = new Button(entityDefinitionDTO.getName());
-            entityButton.setOnAction(event -> {
-                updateEntityComponent(entityDefinitionDTO);
-            });
-            entityItem.setGraphic(entityButton); // Set the button as the graphic
-            root.getChildren().get(0).getChildren().add(entityItem);
+            makeButton(entityDefinitionDTO, root.getChildren().get(0));
         }
         root.getChildren().add(new TreeItem<>("Rules"));
         for (RuleDTO rule : simulationDetailsDTO.getRules()) {
-            TreeItem<String> ruleItem = new TreeItem<>("");
-            // Create a button for each rule
-            Button ruleButton = new Button(rule.getName());
-            ruleButton.setOnAction(event -> {
-                updateRuleComponent(rule);
-            });
-            ruleItem.setGraphic(ruleButton); // Set the button as the graphic
-            root.getChildren().get(1).getChildren().add(ruleItem);
+            makeButton(rule, root.getChildren().get(1));
         }
         root.getChildren().add(new TreeItem<>("Environment Properties"));
+        for (EnvVariableDefinitionDTO envVariable : simulationDetailsDTO.getEnvVariables()) {
+            makeButton(envVariable, root.getChildren().get(2));
+        }
         root.getChildren().add(new TreeItem<>("Termination Conditions"));
         TerminationDTO termination = simulationDetailsDTO.getTermination();
-        if (termination.getTicksCount() != -1) {
-            root.getChildren().get(3).getChildren().add(new TreeItem<>("Ticks: " + termination.getTicksCount()));
+        makeButton(termination, root.getChildren().get(3));
+    }
+
+    private void makeButton(Object object, TreeItem<String> root) {
+        TreeItem<String> item = new TreeItem<>("");
+
+        Button button = new Button(getObjectString(object));
+        button.setOnAction(event -> {
+            if (object instanceof EntityDefinitionDTO) {
+                updateEntityComponent((EntityDefinitionDTO) object);
+            } else if (object instanceof RuleDTO) {
+                updateRuleComponent((RuleDTO) object);
+            } else if (object instanceof EnvVariableDefinitionDTO) {
+                updateEnvVariableComponent((EnvVariableDefinitionDTO) object);
+            } else if (object instanceof TerminationDTO) {
+                updateTerminationComponent((TerminationDTO) object);
+            }
+        });
+        item.setGraphic(button);
+        root.getChildren().add(item);
+    }
+
+    private String getObjectString(Object object) {
+        if (object instanceof EntityDefinitionDTO) {
+            return ((EntityDefinitionDTO) object).getName();
+        } else if (object instanceof RuleDTO) {
+            return ((RuleDTO) object).getName();
+        } else if (object instanceof EnvVariableDefinitionDTO) {
+            return ((EnvVariableDefinitionDTO) object).getName();
+        } else if (object instanceof TerminationDTO) {
+            return "Termination";
         }
-        if (termination.getSecondsCount() != -1) {
-            root.getChildren().get(3).getChildren().add(new TreeItem<>("Seconds: " + termination.getSecondsCount()));
+        return "";
+    }
+
+    private void updateTerminationComponent(TerminationDTO object) {
+        TreeItem<String> root = fullInfoTree.getRoot();
+        fullInfoTree.setRoot(new TreeItem<>("Termination Conditions:"));
+        if (root != null) {
+            root.getChildren().clear();
+        }
+        root = fullInfoTree.getRoot();
+        root.getChildren().add(new TreeItem<>("Ticks: " + object.getTicksCount()));
+        root.getChildren().add(new TreeItem<>("Probability: " + object.getSecondsCount()));
+    }
+
+    private void updateEnvVariableComponent(EnvVariableDefinitionDTO envVariable) {
+        TreeItem<String> root = fullInfoTree.getRoot();
+        fullInfoTree.setRoot(new TreeItem<>("Environment Variable Details:"));
+        if (root != null) {
+            root.getChildren().clear();
+        }
+        root = fullInfoTree.getRoot();
+        root.getChildren().add(new TreeItem<>("Name: " + envVariable.getName()));
+        root.getChildren().add(new TreeItem<>("Type: " + envVariable.getType()));
+        if (envVariable.getFromRange() != null) {
+            root.getChildren().add(new TreeItem<>("From Range: " + envVariable.getFromRange()));
+            root.getChildren().add(new TreeItem<>("To Range: " + envVariable.getToRange()));
         }
     }
 

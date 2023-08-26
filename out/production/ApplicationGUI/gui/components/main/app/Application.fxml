@@ -36,19 +36,15 @@
               <tabs>
                 <Tab text="Details">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <fx:include fx:id="detailsComponent" source="../details/details.fxml" />
-                           </children>
-                        </AnchorPane>
+                      <fx:include fx:id="detailsComponent" source="../details/details.fxml" />
                   </content>
                 </Tab>
-                <Tab fx:id="newExecutionComponent" text="New Execution">
+                <Tab text="New Execution">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                      <fx:include fx:id="newExecutionComponent" source="../execution/execution.fxml" />
                   </content>
                 </Tab>
-                  <Tab fx:id="resultsComponent" text="Results">
+                  <Tab text="Results">
                     <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                     </content>

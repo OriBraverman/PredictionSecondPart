@@ -14,4 +14,10 @@ public class FloatPropertyDefinition extends AbstractNumericPropertyDefinition<F
     public boolean isNumeric() {
         return true;
     }
+
+    @Override
+    public boolean isInRange(String value) {
+        float floatValue = Float.parseFloat(value);
+        return floatValue >= (Float) this.range.getFrom() && floatValue <= (Float) this.range.getTo();
+    }
 }

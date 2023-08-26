@@ -16,6 +16,9 @@ import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.property.definition.api.NumericPropertyDefinition;
 import world.factors.property.definition.api.PropertyDefinition;
+import world.factors.property.definition.api.PropertyType;
+import world.factors.property.definition.impl.FloatPropertyDefinition;
+import world.factors.property.definition.impl.IntegerPropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
 import world.factors.property.execution.PropertyInstanceImpl;
 import world.factors.rule.Rule;
@@ -101,8 +104,9 @@ public class Engine implements Serializable {
     public SimulationDetailsDTO getSimulationDetailsDTO() {
         EntityDefinitionDTO[] entityDefinitionDTOS = getEntitiesDTO();
         RuleDTO[] ruleDTOS = getRulesDTO();
+        EnvVariablesDTO envVariablesDTO = getEnvVariablesDTO();
         TerminationDTO terminationDTO = getTerminationDTO();
-        return new SimulationDetailsDTO(entityDefinitionDTOS, ruleDTOS, terminationDTO);
+        return new SimulationDetailsDTO(entityDefinitionDTOS, ruleDTOS, envVariablesDTO.getEnvVariables(), terminationDTO);
     }
 
     private TerminationDTO getTerminationDTO() {
@@ -189,6 +193,13 @@ public class Engine implements Serializable {
 
     public boolean validateEnvVariableValue(EnvVariableValueDTO envVariableValueDTO) {
         PropertyDefinition propertyDefinition = this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName());
+        if (propertyDefinition instanceof IntegerPropertyDefinition) {
+            IntegerPropertyDefinition property = (IntegerPropertyDefinition) propertyDefinition;
+            return property.isInRange(envVariableValueDTO.getValue());
+        } else if (propertyDefinition instanceof FloatPropertyDefinition) {
+            FloatPropertyDefinition property = (FloatPropertyDefinition) propertyDefinition;
+            return property.isInRange(envVariableValueDTO.getValue());
+        }
         return propertyDefinition.getType().isMyType(envVariableValueDTO.getValue());
     }
 
