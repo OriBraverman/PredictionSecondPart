@@ -1,6 +1,8 @@
 package world.factors.rule;
 
-public class Activation {
+import java.io.Serializable;
+
+public class Activation implements Serializable {
     private int ticks = 1;
     private double probabilty = 1;
 

@@ -3,7 +3,9 @@ package world.factors.property.execution;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.definition.api.PropertyType;
 
-public class PropertyInstanceImpl implements PropertyInstance {
+import java.io.Serializable;
+
+public class PropertyInstanceImpl implements PropertyInstance, Serializable {
 
     private PropertyDefinition propertyDefinition;
     private Object value;

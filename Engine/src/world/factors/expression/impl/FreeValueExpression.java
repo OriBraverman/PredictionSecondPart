@@ -14,7 +14,7 @@ public class FreeValueExpression extends AbstractExpression {
     }
 
     @Override
-    public Object evaluate(Object object) {
+    public Object evaluate(Context context) {
         // if the expression is an integer, return it as an integer
          if (expression.matches("-?\\d+")) {
             return Integer.parseInt(expression);

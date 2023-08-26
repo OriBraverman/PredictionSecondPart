@@ -2,9 +2,10 @@ package world.factors.condition;
 
 import context.Context;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MultipleCondition implements Condition{
+public class MultipleCondition implements Condition, Serializable {
     private final LogicalType logical;
     private final List<Condition> conditions;
 
@@ -31,4 +32,12 @@ public class MultipleCondition implements Condition{
         return false;
     }
 
+    @Override
+    public boolean isPropertyExistInEntity() {
+        for (Condition condition : conditions) {
+            if (!condition.isPropertyExistInEntity())
+                return false;
+        }
+        return true;
+    }
 }

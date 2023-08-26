@@ -10,7 +10,7 @@ import java.util.List;
 public interface Expression {
     ExpressionType getExpressionType();
     String getStringExpression();
-    Object evaluate(Object object);
+    Object evaluate(Context context);
     boolean isNumericExpression(List<EntityDefinition> entityDefinitions, EnvVariableManagerImpl envVariableManagerImpl);
     FunctionType getFunctionTypeByExpression(String expression);
 }

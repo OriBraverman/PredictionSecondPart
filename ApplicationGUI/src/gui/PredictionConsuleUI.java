@@ -67,7 +67,7 @@ public class PredictionConsuleUI {
     }
 
     private void activateSimulation() {
-        EnvVariablesDTO envVariablesDTO = engine.getEnvVariablesDTO();
+       /* EnvVariablesDTO envVariablesDTO = engine.getEnvVariablesDTO();
         EnvVariablesValuesDTO envVariablesValuesDTO = getEnvVariablesValuesDTOFromUser(envVariablesDTO);
         SimulationResultDTO simulationResultDTO = engine.activateSimulation(envVariablesValuesDTO);
         System.out.println("Simulation ended");
@@ -77,7 +77,7 @@ public class PredictionConsuleUI {
         }
         if(simulationResultDTO.isTerminatedByTicksCount()){
             System.out.println("Simulation terminated by ticks count");
-        }
+        }*/
     }
 
     private EnvVariablesValuesDTO getEnvVariablesValuesDTOFromUser(EnvVariablesDTO envVariablesDTO) {

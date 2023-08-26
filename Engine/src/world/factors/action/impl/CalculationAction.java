@@ -1,9 +1,11 @@
 package world.factors.action.impl;
 
 import context.Context;
+import world.World;
 import world.factors.action.api.AbstractAction;
 import world.factors.action.api.ActionType;
 import world.factors.entity.definition.EntityDefinition;
+import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.expression.api.AbstractExpression;
 import world.factors.expression.api.Expression;
 import world.factors.expression.api.ExpressionType;
@@ -11,6 +13,8 @@ import world.factors.function.api.Function;
 import world.factors.function.api.FunctionType;
 import world.factors.property.definition.api.PropertyType;
 import world.factors.property.execution.PropertyInstance;
+
+import java.util.List;
 
 public class CalculationAction extends AbstractAction {
     private final String resultProperty;
@@ -87,5 +91,22 @@ public class CalculationAction extends AbstractAction {
 
     private float Multiply(float exp1Value, float exp2Value) {
         return exp1Value * exp2Value;
+    }
+
+    @Override
+    public boolean isPropertyExistInEntity() {
+        return entityDefinition.getPropertyDefinitionByName(resultProperty) != null;
+    }
+
+    public boolean isMathActionHasNumericArgs(List<EntityDefinition> entities, EnvVariableManagerImpl envVariableManagerImpl) {
+        Expression expr1 = AbstractExpression.getExpressionByString(argument1, entityDefinition);
+        Expression expr2 = AbstractExpression.getExpressionByString(argument2, entityDefinition);
+        if (!(expr1.isNumericExpression(entities, envVariableManagerImpl))) {
+            return false;
+        }
+        if (!(expr2.isNumericExpression(entities, envVariableManagerImpl))) {
+            return false;
+        }
+        return true;
     }
 }

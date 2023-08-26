@@ -1,14 +1,15 @@
-package world.factors.property.definition.api.entity;
+package world.factors.property.definition.api;
 
 import value.generator.api.ValueGenerator;
+import world.factors.property.definition.api.AbstractPropertyDefinition;
 import world.factors.property.definition.api.NumericPropertyDefinition;
 import world.factors.property.definition.api.PropertyType;
 import world.factors.property.definition.api.Range;
 
-public abstract class AbstractNumericEntityPropertyDefinition<T> extends AbstractEntityPropertyDefinition implements NumericPropertyDefinition{
+public abstract class AbstractNumericPropertyDefinition<T> extends AbstractPropertyDefinition implements NumericPropertyDefinition {
     private Range range;
 
-    public AbstractNumericEntityPropertyDefinition(String name, PropertyType propertyType, ValueGenerator<T> valueGenerator, Range range) {
+    public AbstractNumericPropertyDefinition(String name, PropertyType propertyType, ValueGenerator valueGenerator, Range range) {
         super(name, propertyType, valueGenerator);
         this.range = range;
     }
@@ -17,5 +18,4 @@ public abstract class AbstractNumericEntityPropertyDefinition<T> extends Abstrac
     public Range getRange() {
         return range;
     }
-
 }

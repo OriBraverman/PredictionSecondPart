@@ -3,10 +3,11 @@ package world.factors.environment.execution.impl;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.property.execution.PropertyInstance;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ActiveEnvironmentImpl implements ActiveEnvironment {
+public class ActiveEnvironmentImpl implements ActiveEnvironment, Serializable {
 
     private final Map<String, PropertyInstance> envVariables;
 

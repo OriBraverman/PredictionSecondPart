@@ -1,7 +1,8 @@
 package world.factors.termination;
+import java.io.Serializable;
 import java.sql.Time;
 
-public class Termination {
+public class Termination implements Serializable {
     private int secondsCount = -1;
     private int ticksCount = -1;
     //private boolean interactive; //TODO: check type
@@ -23,16 +24,16 @@ public class Termination {
         this.ticksCount = ticksCount;
     }
 
-    public boolean isTerminated(int currentTick, Time currentTime) {
-        if (isTerminatedBySecondsCount(currentTime) || isTerminatedByTicksCount(currentTick)) {
+    public boolean isTerminated(int currentTick, long seconds) {
+        if (isTerminatedBySecondsCount(seconds) || isTerminatedByTicksCount(currentTick)) {
             return true;
         }
         return false;
     }
 
-    public boolean isTerminatedBySecondsCount(Time timer) {
+    public boolean isTerminatedBySecondsCount(long seconds) {
         if (this.secondsCount != -1) {
-            if (timer.getSeconds() >= this.secondsCount) {
+            if (seconds >= this.secondsCount) {
                 return true;
             }
         }

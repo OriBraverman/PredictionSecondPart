@@ -3,7 +3,9 @@ package world.factors.action.api;
 
 import world.factors.entity.definition.EntityDefinition;
 
-public abstract class AbstractAction implements Action {
+import java.io.Serializable;
+
+public abstract class AbstractAction implements Action, Serializable {
 
     protected final ActionType actionType;
     protected final EntityDefinition entityDefinition;

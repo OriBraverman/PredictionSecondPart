@@ -2,10 +2,11 @@ package world.factors.rule;
 
 import world.factors.action.api.Action;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RuleImpl implements Rule {
+public class RuleImpl implements Rule, Serializable {
 
     private final String name;
     private Activation activation;

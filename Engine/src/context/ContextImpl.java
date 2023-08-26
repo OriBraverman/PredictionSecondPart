@@ -1,19 +1,14 @@
 package context;
 
-import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.entity.execution.manager.EntityInstanceManager;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.expression.api.AbstractExpression;
 import world.factors.expression.api.Expression;
 import world.factors.expression.api.ExpressionType;
-import world.factors.expression.impl.FreeValueExpression;
-import world.factors.expression.impl.PropertyNameExpression;
-import world.factors.expression.impl.UtilFunctionExpression;
 import world.factors.function.api.Function;
 import world.factors.function.api.FunctionType;
-import world.factors.function.impl.EnvironmentFunction;
-import world.factors.function.impl.RandomFunction;
+import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
 
 import java.util.ArrayList;
@@ -116,8 +111,8 @@ public class ContextImpl implements Context {
     }
 
     @Override
-    public PropertyInstance getPropertyByName(String expression) {
-        return primaryEntityInstance.getPropertyByName(expression);
+    public PropertyInstance getPropertyInstanceByPropertyDefinition(PropertyDefinition propertyDefinition) {
+        return primaryEntityInstance.getPropertyByName(propertyDefinition.getName());
     }
 
     @Override
@@ -137,14 +132,15 @@ public class ContextImpl implements Context {
 
     @Override
     public void setPropertyValue(String name, String property, String value) {
-        Expression expression = AbstractExpression.getExpressionByString(value, primaryEntityInstance.getEntityDefinition());
-        Object evaluateValue = expression.evaluate(this);
         EntityInstance entityInstance = entityInstanceManager.getEntityInstanceByName(name);
+        Expression expression = AbstractExpression.getExpressionByString(value, primaryEntityInstance.getEntityDefinition());
+        Object evaluateValue = getValueByExpression(expression);
+        // check if entity instance is exist
         if (entityInstance == null) {
             throw new IllegalArgumentException("entity [" + name + "] is not exist");
         }
         // check if entity instance property type is the same as evaluate type
-        if (!entityInstance.getPropertyByName(property).getType().equals(evaluateValue.getClass())) {
+        if (!entityInstance.getPropertyByName(property).getValue().getClass().equals(evaluateValue.getClass())) {
             throw new IllegalArgumentException("property [" + property + "] type is not the same as evaluate type");
         }
         entityInstance.getPropertyByName(property).updateValue(evaluateValue);

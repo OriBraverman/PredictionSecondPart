@@ -1,6 +1,8 @@
 package world.factors.property.definition.api;
 
-public class Range<T> {
+import java.io.Serializable;
+
+public class Range<T> implements Serializable {
     private final T to;
     private final T from;
 

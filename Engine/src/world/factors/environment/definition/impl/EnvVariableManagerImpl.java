@@ -6,11 +6,12 @@ import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.environment.execution.impl.ActiveEnvironmentImpl;
 import world.factors.property.definition.api.PropertyType;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EnvVariableManagerImpl implements EnvVariablesManager {
+public class EnvVariableManagerImpl implements EnvVariablesManager, Serializable {
 
     private final Map<String, PropertyDefinition> propNameToPropDefinition;
 

@@ -3,20 +3,19 @@ package engine;
 import convertor.Convertor;
 import dtos.*;
 import resources.schema.generatedWorld.PRDWorld;
+
+import static java.util.Arrays.stream;
 import static validator.XMLValidator.*;
 
 import simulation.Simulation;
 import simulation.SimulationManager;
-import value.generator.api.ValueGenerator;
-import value.generator.api.ValueGeneratorFactory;
 import world.World;
 import world.factors.entity.definition.EntityDefinition;
+import world.factors.entity.execution.EntityInstance;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
-import world.factors.property.definition.api.EntityPropertyDefinition;
 import world.factors.property.definition.api.NumericPropertyDefinition;
 import world.factors.property.definition.api.PropertyDefinition;
-import world.factors.property.definition.api.PropertyType;
 import world.factors.property.execution.PropertyInstance;
 import world.factors.property.execution.PropertyInstanceImpl;
 import world.factors.rule.Rule;
@@ -27,20 +26,23 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class Engine {
-    World world;
-    Convertor convertor;
-    SimulationManager simulationManager;
+public class Engine implements Serializable {
+    private World world;
+    private SimulationManager simulationManager;
+    private ActiveEnvironment activeEnvironment;
 
     public Engine() {
         this.world = null;
-        this.convertor = new Convertor();
         this.simulationManager = new SimulationManager();
+        this.activeEnvironment = null;
     }
 
     private static PRDWorld fromXmlFileToObject(Path path) {
@@ -64,41 +66,36 @@ public class Engine {
         validateFileIsXML(xmlPath);
         PRDWorld generatedWorld = fromXmlFileToObject(xmlPath);
         validateXMLContent(generatedWorld);
-        this.convertor.setGeneratedWorld(generatedWorld);
-        this.world = convertor.convertPRDWorldToWorld();
-        validateMathActionHasNumericArgs(this.world.getRules(), this.world.getEntities(), (EnvVariableManagerImpl) this.world.getEnvironment());
-
+        Convertor convertor = new Convertor();
+        convertor.setGeneratedWorld(generatedWorld);
+        World tempWorld = convertor.convertPRDWorldToWorld();
+        validateAllActionsReferToExistingEntityProperties(tempWorld);
+        validateMathActionHasNumericArgs(tempWorld.getRules(), tempWorld.getEntities(), (EnvVariableManagerImpl) tempWorld.getEnvironment());
+        // if loaded successfully, clear the old engine and set the new one
+        this.world = tempWorld;
+        this.simulationManager = new SimulationManager();
+        this.activeEnvironment = null;
     }
 
-
-    public SimulationResultDTO activateSimulation(EnvVariablesValuesDTO envVariablesValuesDTO) {
+    public EnvVariablesValuesDTO updateActiveEnvironmentAndInformUser(EnvVariablesValuesDTO envVariablesValuesDTO) {
         ActiveEnvironment activeEnvironment = this.world.getEnvironment().createActiveEnvironment();
-        for (EnvVariableValueDTO envVariableValueDTO : envVariablesValuesDTO.getEnvVariablesValues()) {
+        for (int i = 0; i < envVariablesValuesDTO.getEnvVariablesValues().length; i++) {
+            EnvVariableValueDTO envVariableValueDTO = envVariablesValuesDTO.getEnvVariablesValues()[i];
             Object value = envVariableValueDTO.getValue();
-            if (envVariableValueDTO.getValue().equals("")) {
-                ValueGenerator valueGenerator = createValueGenerator(envVariableValueDTO.getName());
-                value = valueGenerator.generateValue();
+            if (value.equals("")) {
+                value = this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName()).generateValue();
             }
             PropertyInstance propertyInstance = new PropertyInstanceImpl(this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName()), value);
             activeEnvironment.addPropertyInstance(propertyInstance);
+            envVariablesValuesDTO.getEnvVariablesValues()[i] = new EnvVariableValueDTO(envVariableValueDTO.getName(), value.toString(), true);
         }
-        Simulation simulation = this.simulationManager.createSimulation(this.world, activeEnvironment);
+        this.activeEnvironment = activeEnvironment;
+        return envVariablesValuesDTO;
+    }
+    public SimulationResultDTO activateSimulation() {
+        Simulation simulation = this.simulationManager.createSimulation(this.world, this.activeEnvironment);
         simulation.run();
         return new SimulationResultDTO(simulation.getId(), simulation.isTerminatedBySecondsCount(), simulation.isTerminatedByTicksCount());
-    }
-
-    private ValueGenerator createValueGenerator(String name) {
-        PropertyDefinition propertyDefinition = this.world.getEnvironment().getPropertyDefinitionByName(name);
-        if (propertyDefinition.getType() == PropertyType.BOOLEAN) {
-            ValueGeneratorFactory.createRandomBoolean();
-        } else if (propertyDefinition.getType() == PropertyType.DECIMAL) {
-            NumericPropertyDefinition numericPropertyDefinition = (NumericPropertyDefinition) propertyDefinition;
-            return ValueGeneratorFactory.createRandomInteger((int)numericPropertyDefinition.getRange().getFrom(), (int)numericPropertyDefinition.getRange().getTo());
-        } else if (propertyDefinition.getType() == PropertyType.FLOAT) {
-            NumericPropertyDefinition numericPropertyDefinition = (NumericPropertyDefinition) propertyDefinition;
-            return ValueGeneratorFactory.createRandomFloat((float)numericPropertyDefinition.getRange().getFrom(), (float)numericPropertyDefinition.getRange().getTo());
-        }
-        return ValueGeneratorFactory.createRandomString();
     }
 
     public SimulationDetailsDTO getSimulationDetailsDTO() {
@@ -109,7 +106,7 @@ public class Engine {
     }
 
     private TerminationDTO getTerminationDTO() {
-        return new TerminationDTO(this.world.getTermination().getSecondsCount(), this.world.getTermination().getTicksCount());
+        return new TerminationDTO(this.world.getTermination().getTicksCount(), this.world.getTermination().getSecondsCount());
     }
 
     private RuleDTO[] getRulesDTO() {
@@ -148,7 +145,7 @@ public class Engine {
         return new EntityDefinitionDTO(name, population, entityPropertyDefinitionDTOS);
     }
 
-    private EntityPropertyDefinitionDTO[] getEntityPropertyDefinitionDTOS(List<EntityPropertyDefinition> properties) {
+    private EntityPropertyDefinitionDTO[] getEntityPropertyDefinitionDTOS(List<PropertyDefinition> properties) {
         EntityPropertyDefinitionDTO[] entityPropertyDefinitionDTOS = new EntityPropertyDefinitionDTO[properties.size()];
         for (int i = 0; i < properties.size(); i++) {
             entityPropertyDefinitionDTOS[i] = getEntityPropertyDefinitionDTO(properties.get(i));
@@ -156,7 +153,7 @@ public class Engine {
         return entityPropertyDefinitionDTOS;
     }
 
-    private EntityPropertyDefinitionDTO getEntityPropertyDefinitionDTO(EntityPropertyDefinition property) {
+    private EntityPropertyDefinitionDTO getEntityPropertyDefinitionDTO(PropertyDefinition property) {
         String name = property.getName();
         String type = property.getType().toString();
         String valueGenerated = property.generateValue().toString();
@@ -193,6 +190,57 @@ public class Engine {
     public boolean validateEnvVariableValue(EnvVariableValueDTO envVariableValueDTO) {
         PropertyDefinition propertyDefinition = this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName());
         return propertyDefinition.getType().isMyType(envVariableValueDTO.getValue());
+    }
+
+    public SimulationIDListDTO getSimulationListDTO() {
+        SimulationIDDTO[] simulationIDDTOS = this.simulationManager.getSimulationIDDTOS();
+        return new SimulationIDListDTO(simulationIDDTOS);
+    }
+
+    public boolean validateSimulationID(int userChoice) {
+        return this.simulationManager.isSimulationIDExists(userChoice);
+    }
+
+    public SimulationResultByAmountDTO getSimulationResultByAmountDTO(int simulationID) {
+        Simulation simulation = this.simulationManager.getSimulationByID(simulationID);
+        return new SimulationResultByAmountDTO(simulation.getId(), getEntityResultsDTO(simulation));
+    }
+
+    private EntityResultDTO[] getEntityResultsDTO(Simulation simulation) {
+        //use stream
+        EntityResultDTO[] entityResultDTOS = stream(this.world.getEntities().toArray())
+                .map(entityDefinition -> {
+                    String name = ((EntityDefinition) entityDefinition).getName();
+                    int startingPopulation = ((EntityDefinition) entityDefinition).getPopulation();
+                    int endingPopulation = simulation.getEntityInstanceManager().getEntityCountByName(name);
+                    return new EntityResultDTO(name, startingPopulation, endingPopulation);
+                })
+                .toArray(EntityResultDTO[]::new);
+        return entityResultDTOS;
+    }
+
+
+    public HistogramDTO getHistogramDTO(int simulationID, String entityName, String propertyName) {
+        Map<Object, Integer> histogram = new HashMap<>();
+        EntityDefinition entityDefinition = this.world.getEntityByName(entityName);
+        PropertyDefinition propertyDefinition = entityDefinition.getPropertyDefinitionByName(propertyName);
+        for (EntityInstance entityInstance : this.simulationManager.getSimulationByID(simulationID).getEntityInstanceManager().getInstances()) {
+            if (entityInstance.getEntityDefinition().getName().equals(entityName)) {
+                // we already know that the property is there
+                PropertyInstance propertyInstance = entityInstance.getPropertyByName(propertyName);
+                Object value = propertyInstance.getValue();
+                if (histogram.containsKey(value)) {
+                    histogram.put(value, histogram.get(value) + 1);
+                } else {
+                    histogram.put(value, 1);
+                }
+            }
+        }
+        return new HistogramDTO(histogram);
+    }
+
+    public boolean isXMLLoaded() {
+        return this.world != null;
     }
 }
 

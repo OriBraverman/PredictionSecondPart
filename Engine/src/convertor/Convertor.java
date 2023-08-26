@@ -1,11 +1,7 @@
 package convertor;
 
-import context.Context;
-import context.ContextImpl;
 import resources.schema.generatedWorld.*;
-import value.generator.api.ValueGenerator;
 import value.generator.api.ValueGeneratorFactory;
-import value.generator.fixed.FixedValueGenerator;
 import world.World;
 import world.factors.action.api.AbstractAction;
 import world.factors.action.api.Action;
@@ -16,30 +12,23 @@ import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.definition.EntityDefinitionImpl;
 import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
-import world.factors.property.definition.api.EntityPropertyDefinition;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.definition.api.Range;
-import world.factors.property.definition.impl.entity.BooleanEntityPropertyDefinition;
-import world.factors.property.definition.impl.entity.FloatEntityPropertyDefinition;
-import world.factors.property.definition.impl.entity.IntegerEntityPropertyDefinition;
-import world.factors.property.definition.impl.entity.StringEntityPropertyDefinition;
-import world.factors.property.definition.impl.env.BooleanEnvPropertyDefinition;
-import world.factors.property.definition.impl.env.FloatEnvPropertyDefinition;
-import world.factors.property.definition.impl.env.IntegerEnvPropertyDefinition;
-import world.factors.property.definition.impl.env.StringEnvPropertyDefinition;
+import world.factors.property.definition.impl.BooleanPropertyDefinition;
+import world.factors.property.definition.impl.FloatPropertyDefinition;
+import world.factors.property.definition.impl.IntegerPropertyDefinition;
+import world.factors.property.definition.impl.StringPropertyDefinition;
 import world.factors.rule.Activation;
 import world.factors.rule.Rule;
 import world.factors.rule.RuleImpl;
 import world.factors.termination.Termination;
 
-import java.beans.Expression;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Convertor {
+public class Convertor implements Serializable {
     private PRDWorld generatedWorld;
 
     public World convertPRDWorldToWorld() {
@@ -57,13 +46,15 @@ public class Convertor {
                 if (!isConvertableToInteger(envProp.getPRDRange().getFrom()) || !isConvertableToInteger(envProp.getPRDRange().getTo())) {
                     throw new RuntimeException("Range of decimal environment property must be integer");
                 }
-                environment.addEnvironmentVariable(new IntegerEnvPropertyDefinition(envProp.getPRDName(), new Range((int)envProp.getPRDRange().getTo(), (int)envProp.getPRDRange().getFrom())));
+                Range<Integer> range = new Range((int)envProp.getPRDRange().getTo(), (int)envProp.getPRDRange().getFrom());
+                environment.addEnvironmentVariable(new IntegerPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomInteger(range), range));
             } else if (envProp.getType().equals("float")) {
-                environment.addEnvironmentVariable(new FloatEnvPropertyDefinition(envProp.getPRDName(), new Range(envProp.getPRDRange().getTo(), envProp.getPRDRange().getFrom())));
+                Range<Float> range = new Range((float)envProp.getPRDRange().getTo(), (float)envProp.getPRDRange().getFrom());
+                environment.addEnvironmentVariable(new FloatPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomFloat(range), range));
             } else if (envProp.getType().equals("boolean")) {
-                environment.addEnvironmentVariable(new BooleanEnvPropertyDefinition(envProp.getPRDName()));
+                environment.addEnvironmentVariable(new BooleanPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomBoolean()));
             } else if (envProp.getType().equals("string")) {
-                environment.addEnvironmentVariable(new StringEnvPropertyDefinition(envProp.getPRDName()));
+                environment.addEnvironmentVariable(new StringPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomString()));
             } else {
                 throw new RuntimeException("Unknown type: " + envProp.getType());
             }
@@ -96,36 +87,38 @@ public class Convertor {
         return entityDefinition;
     }
 
-    private EntityPropertyDefinition getRandomProperty(PRDProperty property){
+    private PropertyDefinition getRandomProperty(PRDProperty property){
         if(property.getType().equals("decimal")){
-            return new IntegerEntityPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createRandomInteger((int)property.getPRDRange().getFrom(), (int)property.getPRDRange().getTo()), new Range<Integer>((int)property.getPRDRange().getTo(), (int)property.getPRDRange().getFrom()));
+            Range<Integer> range = new Range((int)property.getPRDRange().getTo(), (int)property.getPRDRange().getFrom());
+            return new IntegerPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createRandomInteger(range), range);
         }
         else if(property.getType().equals("float")){
-            return new FloatEntityPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createRandomFloat((float)property.getPRDRange().getFrom(), (float)property.getPRDRange().getTo()), new Range<Float>((float)property.getPRDRange().getTo(), (float)property.getPRDRange().getFrom()));
+            Range<Float> range = new Range((float)property.getPRDRange().getTo(), (float)property.getPRDRange().getFrom());
+            return new FloatPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createRandomFloat(range), range);
         }
         else if(property.getType().equals("boolean")){
-            return new BooleanEntityPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createRandomBoolean());
+            return new BooleanPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createRandomBoolean());
         }
         else if(property.getType().equals("string")){
-            return new StringEntityPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createRandomString());
+            return new StringPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createRandomString());
         }
         else{
             throw new RuntimeException("Unknown type: " + property.getType());
         }
     }
 
-    private EntityPropertyDefinition getFixedProperty(PRDProperty property) {
+    private PropertyDefinition getFixedProperty(PRDProperty property) {
         if(property.getType().equals("decimal")){
-            return new IntegerEntityPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createFixed(Integer.valueOf(property.getPRDValue().getInit())), new Range<Integer>((int)property.getPRDRange().getTo(), (int)property.getPRDRange().getFrom()));
+            return new IntegerPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createFixed(Integer.valueOf(property.getPRDValue().getInit())), new Range<Integer>((int)property.getPRDRange().getTo(), (int)property.getPRDRange().getFrom()));
         }
         else if(property.getType().equals("float")){
-            return new FloatEntityPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createFixed(Float.valueOf(property.getPRDValue().getInit())), new Range<Float>((float)property.getPRDRange().getTo(), (float)property.getPRDRange().getFrom()));
+            return new FloatPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createFixed(Float.valueOf(property.getPRDValue().getInit())), new Range<Float>((float)property.getPRDRange().getTo(), (float)property.getPRDRange().getFrom()));
         }
         else if(property.getType().equals("boolean")){
-            return new BooleanEntityPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createFixed(Boolean.valueOf(property.getPRDValue().getInit())));
+            return new BooleanPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createFixed(Boolean.valueOf(property.getPRDValue().getInit())));
         }
         else if(property.getType().equals("string")){
-            return new StringEntityPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createFixed(property.getPRDValue().getInit()));
+            return new StringPropertyDefinition(property.getPRDName(), ValueGeneratorFactory.createFixed(property.getPRDValue().getInit()));
         }
         else{
             throw new RuntimeException("Unknown type: " + property.getType());
@@ -219,7 +212,7 @@ public class Convertor {
         String singularity = prdCondition.getSingularity();
         if (singularity.equals("single")) {
             EntityDefinition entityDefinition = getEntityDefinition(prdCondition.getEntity(), entities);
-            EntityPropertyDefinition property = getEntityPropertyDefinition(prdCondition.getProperty(), entityDefinition.getProps());
+            PropertyDefinition property = getEntityPropertyDefinition(prdCondition.getProperty(), entityDefinition.getProps());
             OperatorType operatorType = OperatorType.getOperatorType(prdCondition.getOperator());
             String value = prdCondition.getValue();
             return new SingleCondition(entityDefinition, property, operatorType, value);
@@ -235,13 +228,13 @@ public class Convertor {
         }
     }
 
-    private EntityPropertyDefinition getEntityPropertyDefinition(String property, List<EntityPropertyDefinition> props) {
-        List<EntityPropertyDefinition> filteredProps = props
+    private PropertyDefinition getEntityPropertyDefinition(String property, List<PropertyDefinition> props) {
+        List<PropertyDefinition> filteredProps = props
                 .stream()
                 .filter(entityPropertyDefinition -> entityPropertyDefinition.getName().equals(property))
                 .collect(Collectors.toList());
         if (filteredProps.size() != 1) {
-            throw new RuntimeException("There is no property named " + property + " or there are more than one");
+            throw new RuntimeException("5. Action " + property + " refers to non-existing entity property");
         }
         return filteredProps.get(0);
     }

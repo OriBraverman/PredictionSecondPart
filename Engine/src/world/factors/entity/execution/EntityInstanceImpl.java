@@ -3,10 +3,11 @@ package world.factors.entity.execution;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.property.execution.PropertyInstance;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EntityInstanceImpl implements EntityInstance {
+public class EntityInstanceImpl implements EntityInstance, Serializable {
 
     private final EntityDefinition entityDefinition;
     private final int id;
@@ -41,4 +42,5 @@ public class EntityInstanceImpl implements EntityInstance {
     public EntityDefinition getEntityDefinition() {
         return entityDefinition;
     }
+
 }

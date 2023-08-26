@@ -17,4 +17,8 @@ public class KillAction extends AbstractAction {
         context.removeEntity(context.getPrimaryEntityInstance());
     }
 
+    @Override
+    public boolean isPropertyExistInEntity() {
+        return true;
+    }
 }

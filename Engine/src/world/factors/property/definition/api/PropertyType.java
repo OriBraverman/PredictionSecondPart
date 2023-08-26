@@ -4,8 +4,15 @@ public enum PropertyType {
     DECIMAL {
 
         public Integer convert(Object value) {
+            // if the value is 75.0, convert it to 75
+            // if the value is 75.5, do not convert it
+            if (value instanceof Float) {
+                if ((float) value % 1 == 0) {
+                    return ((Float) value).intValue();
+                }
+            }
             if (!(value instanceof Integer)) {
-                throw new IllegalArgumentException("value " + value + " is not of a DECIMAL type (expected Integer class)");
+                throw new IllegalArgumentException("value " + value + " is not of a DECIMAL type (expected Decimal class)");
             }
             return (Integer) value;
         }
@@ -26,11 +33,15 @@ public enum PropertyType {
         }
     }, FLOAT {
 
-        public Double convert(Object value) {
-            if (!(value instanceof Double)) {
-                throw new IllegalArgumentException("value " + value + " is not of a FLOAT type (expected Double class)");
+        public Float convert(Object value) {
+            // if the value is an integer, convert it to float
+            if (value instanceof Integer) {
+                return ((Integer) value).floatValue();
             }
-            return (Double) value;
+            if (!(value instanceof Float)) {
+                throw new IllegalArgumentException("value " + value + " is not of a FLOAT type (expected Float class)");
+            }
+            return (Float) value;
         }
         public boolean isMyType(String value) {
             return value.matches("-?\\d+(\\.\\d+)?");

@@ -22,9 +22,29 @@ public class UtilFunctionExpression extends AbstractExpression {
     }
 
     @Override
-    public Function evaluate(Object object) {
-        List<EntityDefinition> entityDefinitions = (List<EntityDefinition>) object;
-        return getFunctionByExpression(expression, entityDefinitions.get(0));
+    public Function evaluate(Context context) {
+        // this function receives only function expression
+        // the function expression structure is: functionName(arg1,arg2,arg3,...)
+        // so we need to extract the function name and the arguments
+        List<String> elements = splitExpressionString(this.expression);
+        List<Expression> args = new ArrayList<>();
+        for (int i = 1; i < elements.size(); i++) {
+            args.add(getExpressionByString(elements.get(i), context.getPrimaryEntityInstance().getEntityDefinition()));
+        }
+        switch(FunctionType.getFunctionType(elements.get(0))) {
+            case ENVIRONMENT:
+                if (elements.size() != 2) {
+                    throw new IllegalArgumentException("environment function must have only one argument");
+                }
+                return new EnvironmentFunction(args);
+            case RANDOM:
+                if (elements.size() != 2) {
+                    throw new IllegalArgumentException("random function must have only one argument");
+                }
+                return new RandomFunction(args);
+            default:
+                throw new IllegalArgumentException("function [" + elements.get(0) + "] is not exist");
+        }
     }
 
     @Override
@@ -57,14 +77,19 @@ public class UtilFunctionExpression extends AbstractExpression {
         }
     }
     private static List<String> splitExpressionString(String expression) {
+        // this function receives only function expression
+        // the function expression structure is: functionName(arg1,arg2,arg3,...)
+        // the return list will be: [functionName, arg1, arg2, arg3, ...]
         List<String> elements = new ArrayList<>();
-        Pattern pattern = Pattern.compile("\\w+\\([^()]*\\)");
+        Pattern pattern = Pattern.compile("([a-zA-Z]+)\\((.*)\\)");
         Matcher matcher = pattern.matcher(expression);
-
-        while (matcher.find()) {
-            elements.add(matcher.group());
+        if (matcher.find()) {
+            elements.add(matcher.group(1));
+            String[] args = matcher.group(2).split(",");
+            for (String arg : args) {
+                elements.add(arg);
+            }
         }
-
         return elements;
     }
 }
