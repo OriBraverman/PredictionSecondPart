@@ -8,10 +8,7 @@ import gui.components.main.results.ResultsController;
 import gui.components.main.upload.UploadController;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -28,19 +25,27 @@ public class AppController {
     @FXML private DetailsController detailsComponentController;
     @FXML private AnchorPane newExecutionComponent;
     @FXML private NewExecutionController newExecutionComponentController;
+    @FXML private AnchorPane resultsComponent;
     @FXML private ResultsController resultsComponentController;
+    @FXML private TabPane tabPane;
     private final Engine engine = new Engine();
     private final SimpleBooleanProperty isXMLLoaded;
+    private final SimpleBooleanProperty isSimulationExecuted;
 
     public AppController() {
         this.isXMLLoaded = new SimpleBooleanProperty(false);
+        this.isSimulationExecuted = new SimpleBooleanProperty(false);
     }
 
     @FXML public void initialize(){
-        if (uploadComponentController != null && detailsComponentController != null && newExecutionComponentController != null) {
+        tabPane.getTabs().get(1).disableProperty().bind(isXMLLoaded.not());
+        tabPane.getTabs().get(2).disableProperty().bind(isSimulationExecuted.not());
+        if (uploadComponentController != null && detailsComponentController != null && newExecutionComponentController != null
+                && resultsComponentController != null) {
             uploadComponentController.setAppController(this);
             detailsComponentController.setAppController(this);
             newExecutionComponentController.setAppController(this);
+            resultsComponentController.setAppController(this);
         }
     }
 
@@ -51,6 +56,9 @@ public class AppController {
                 uploadComponentController.isXMLLoadedProperty().set(true);
                 detailsComponentController.updateDetailsTreeView(engine.getSimulationDetailsDTO());
                 newExecutionComponentController.updateEnvVariablesInputVBox(engine.getEnvVariablesDTO());
+                resultsComponentController.resetExecutionList();
+                isXMLLoaded.set(true);
+                isSimulationExecuted.set(false);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -61,7 +69,25 @@ public class AppController {
     }
 
     public void activateSimulation(EnvVariablesValuesDTO envVariablesValuesDTO) {
-        engine.activateSimulation(envVariablesValuesDTO);
-        //resultsComponentController.updateResultsTreeView(engine.getResultsDTO());
+        isSimulationExecuted.set(true);
+        engine.updateActiveEnvironmentAndInformUser(envVariablesValuesDTO);
+        SimulationResultDTO simulationResultDTO = engine.activateSimulation();
+        resultsComponentController.updateExecutionList(simulationResultDTO);
+    }
+
+    public SimulationIDListDTO getSimulationListDTO() {
+        return engine.getSimulationListDTO();
+    }
+
+    public SimulationResultByAmountDTO getSimulationResultByAmountDTO(int simulationID) {
+        return engine.getSimulationResultByAmountDTO(simulationID);
+    }
+
+    public SimulationDetailsDTO getSimulationDetailsDTO() {
+        return engine.getSimulationDetailsDTO();
+    }
+
+    public HistogramDTO getHistogramDTO(int simulationID, String entityName, String propertyName) {
+        return engine.getHistogramDTO(simulationID, entityName, propertyName);
     }
 }

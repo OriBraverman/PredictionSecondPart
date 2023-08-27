@@ -67,31 +67,39 @@ public class NewExecutionController {
         typeValueLabel.setLayoutX(137.0);
         typeValueLabel.setLayoutY(85.0);
 
-        Label rangeLabel = new Label("Range:");
-        rangeLabel.setLayoutX(72.0);
-        rangeLabel.setLayoutY(116.0);
+        if (envVariableDefinitionDTO.getFromRange() != null) {
+            Label rangeLabel = new Label("Range:");
+            rangeLabel.setLayoutX(72.0);
+            rangeLabel.setLayoutY(116.0);
 
-        Label fromLabel = new Label("From");
-        fromLabel.setLayoutX(137.0);
-        fromLabel.setLayoutY(116.0);
+            Label fromLabel = new Label("From");
+            fromLabel.setLayoutX(137.0);
+            fromLabel.setLayoutY(116.0);
 
-        Label fromValueLabel = new Label(envVariableDefinitionDTO.getFromRange().toString());
-        fromValueLabel.setLayoutX(187.0);
-        fromValueLabel.setLayoutY(116.0);
+            Label fromValueLabel = new Label(envVariableDefinitionDTO.getFromRange().toString());
+            fromValueLabel.setLayoutX(187.0);
+            fromValueLabel.setLayoutY(116.0);
 
-        Label toLabel = new Label("To");
-        toLabel.setLayoutX(240.0);
-        toLabel.setLayoutY(116.0);
+            Label toLabel = new Label("To");
+            toLabel.setLayoutX(240.0);
+            toLabel.setLayoutY(116.0);
 
-        Label toValueLabel = new Label(envVariableDefinitionDTO.getToRange().toString());
-        toValueLabel.setLayoutX(286.0);
-        toValueLabel.setLayoutY(116.0);
+            Label toValueLabel = new Label(envVariableDefinitionDTO.getToRange().toString());
+            toValueLabel.setLayoutX(286.0);
+            toValueLabel.setLayoutY(116.0);
 
-        anchorPane.getChildren().addAll(
-                checkBox, nameLabel, textField, typeLabel, rangeLabel,
-                fromLabel, fromValueLabel, toLabel, toValueLabel,
-                typeValueLabel, nameLabel2
-        );
+            anchorPane.getChildren().addAll(
+                    checkBox, nameLabel, textField, typeLabel, rangeLabel,
+                    fromLabel, fromValueLabel, toLabel, toValueLabel,
+                    typeValueLabel, nameLabel2
+            );
+        } else {
+            anchorPane.getChildren().addAll(
+                    checkBox, nameLabel, textField, typeLabel,
+                    typeValueLabel, nameLabel2
+            );
+        }
+
         titledPane.setContent(anchorPane);
         return titledPane;
     }
@@ -122,5 +130,16 @@ public class NewExecutionController {
         }
     EnvVariablesValuesDTO envVariablesValuesDTO = new EnvVariablesValuesDTO(envVariablesDTOS);
     appController.activateSimulation(envVariablesValuesDTO);
+    }
+
+    @FXML
+    void clearSimulationButtonAction(ActionEvent event) {
+        for (TitledPane titledPane : envVariablesAccordion.getPanes()) {
+            AnchorPane anchorPane = (AnchorPane) titledPane.getContent();
+            CheckBox checkBox = (CheckBox) anchorPane.getChildren().get(0);
+            checkBox.setSelected(false);
+            TextField textField = (TextField) anchorPane.getChildren().get(2);
+            textField.setText("");
+        }
     }
 }

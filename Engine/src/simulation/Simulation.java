@@ -26,7 +26,7 @@ public class Simulation implements Serializable {
     private final EntityInstanceManager entityInstanceManager;
     private boolean isTerminatedBySecondsCount = false;
     private boolean isTerminatedByTicksCount = false;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy | hh.mm.ss");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy | hh.mm.ss");
     private String formattedStartTime;
 
 

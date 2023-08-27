@@ -1,3 +1,6 @@
+.base {
+    -fx-background-color: #279EFF;
+}
 .button {
     -fx-background-color: linear-gradient(to bottom, #4a90e2, #357cd1);
     -fx-background-radius: 20;
@@ -10,7 +13,41 @@
     -fx-background-color: linear-gradient(to bottom, #357cd1, #4a90e2);
 }
 #HeaderLabel {
-    -fx-font-size: 32px;
+    -fx-font-size: 28px;
+    -fx-font-family: Calibri;
     -fx-font-weight: bold;
-    -fx-text-fill: #4a90e2;
+    -fx-text-fill: #0C356A;
+}
+.tab-pane {
+    -fx-background-color: #279EFF;
+}
+
+.tab-header-background {
+    -fx-background-color: #40F8FF;
+}
+
+.tab {
+    -fx-background-color: #279EFF;
+    -fx-border-color: #279EFF;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10 10 0 0;
+    -fx-padding: 5px 10px;
+}
+
+.tab:selected {
+    -fx-background-color: #69b4ff;
+    -fx-text-fill: white;
+}
+
+.tab-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.tab-content-area {
+    -fx-background-color: #D5FFD0;
+    -fx-padding: 10px;
+    -fx-border-width: 1px;
+    -fx-border-color: #69d7ff;
+    -fx-border-radius: 0 0 10 10;
 }
