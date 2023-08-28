@@ -1,1 +1,1 @@
-xjc -p resources.schema.generatedWorld ./predictions-v1.xsd
+xjc -p resources.schema.generatedWorld ./predictions-v2.xsd
