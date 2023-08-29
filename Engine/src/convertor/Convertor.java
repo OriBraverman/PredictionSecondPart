@@ -245,7 +245,7 @@ public class Convertor implements Serializable {
             String argument1 = action.getPRDMultiply().getArg1();
             String argument2 = action.getPRDMultiply().getArg2();
             return new CalculationAction(entityDefinition, resultProperty, argument1, argument2, CalculationAction.CalculationOperator.MULTIPLY);
-        } else /*if (action.getPRDDivide() != null) */{
+        } else /*if (action.getPRDDivide() != null)*/ {
             String argument1 = action.getPRDDivide().getArg1();
             String argument2 = action.getPRDDivide().getArg2();
             return new CalculationAction(entityDefinition, resultProperty, argument1, argument2, CalculationAction.CalculationOperator.DIVIDE);

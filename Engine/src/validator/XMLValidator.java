@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static world.factors.expression.api.AbstractExpression.getExpressionByString;
-
+/*
 public class XMLValidator {
     public static void validateFileExists(Path file) throws FileNotFoundException {
         if(!file.toFile().exists()) {
@@ -158,3 +158,4 @@ public class XMLValidator {
 
 
 }
+*/

@@ -2,7 +2,7 @@
 <PRD-world xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="predictions-v2.xsd">
 	<PRD-thread-count>1</PRD-thread-count>
 	<PRD-environment>
-		<PRD-env-property type="decimal">
+		<PRD-env-property type="float">
 			<PRD-name>infection-proximity</PRD-name>			
 		</PRD-env-property>
 	</PRD-environment>
@@ -10,7 +10,7 @@
 	<PRD-entities>
 		<PRD-entity name="Healthy">
 			<PRD-properties>
-				<PRD-property type="decimal">
+				<PRD-property type="float">
 					<PRD-name>age</PRD-name>
 					<PRD-range to="70" from="20"/>
 					<PRD-value random-initialize="true"/>
@@ -19,7 +19,7 @@
 		</PRD-entity>
 		<PRD-entity name="Sick">
 			<PRD-properties>
-				<PRD-property type="decimal">
+				<PRD-property type="float">
 					<PRD-name>age</PRD-name>
 					<PRD-range to="70" from="20"/>
 					<PRD-value random-initialize="true"/>
