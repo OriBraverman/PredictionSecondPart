@@ -1,25 +1,30 @@
-package grid;
+package world.factors.grid;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 public class Grid {
     // the grid is a 2D array of Coordinates
-    private Coordinate[][] grid;
+    private Cell[][] grid;
+    private int horizontalDiameter;
+    private int verticalDiameter;
     enum Direction {
         UP, DOWN, LEFT, RIGHT
     }
     public Grid(int n, int m) {
-        grid = new Coordinate[n][m];
+        horizontalDiameter = n;
+        verticalDiameter = m;
+        grid = new Cell[n][m];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < m; j++) {
-                grid[i][j] = new Coordinate(i, j);
+                grid[i][j] = new Cell(new Coordinate(i, j));
             }
         }
     }
     public Coordinate getCoordinate(int x, int y) {
-        return grid[x][y];
+        return grid[x][y].getCoordinate();
     }
 
     //write a function, that, given a source coordinate and a rank (integer), returns the (accumulative) list of cells (coordinates) that surrounds the given source coordinate.
@@ -42,8 +47,6 @@ public class Grid {
 
     private Collection<Coordinate> getCellsInDirection(Coordinate source, int rank, Direction direction) {
         Collection<Coordinate> directionCells = new HashSet<>();
-        int horizontalDiameter = grid.length;
-        int verticalDiameter = grid[0].length;
         int rankDiameter = 2 * rank + 1;
         if (rankDiameter <= verticalDiameter && rankDiameter <= horizontalDiameter) {
             directionCells.addAll(getCellsInDirectionHelper(source, rank, direction));
@@ -86,7 +89,7 @@ public class Grid {
     }
     private Collection<Coordinate> getCellsInDirectionHelper(Coordinate source, int rank, Direction direction) {
         Coordinate from, to;
-        int hDiameter = grid.length, vDiameter = grid[0].length;
+        int hDiameter = horizontalDiameter, vDiameter = verticalDiameter;
         switch (direction) {
             case LEFT:
                 from = getCoordinate((source.getX() - rank + hDiameter) % hDiameter, (source.getY() - rank + vDiameter) % vDiameter);
@@ -119,21 +122,36 @@ public class Grid {
             int y = from.getY();
             int x = from.getX();
             while (y != to.getY()) {
-                lineCells.add(grid[x][y]);
-                y = (y + 1) % grid[0].length;
+                lineCells.add(getCoordinate(x, y));
+                y = (y + 1) % verticalDiameter;
             }
-            lineCells.add(grid[x][y]);
+            lineCells.add(getCoordinate(x, y));
             return lineCells;
         }
         else {
             int x = from.getX();
             int y = from.getY();
             while (x != to.getX()) {
-                lineCells.add(grid[x][y]);
-                x = (x + 1) % grid.length;
+                lineCells.add(getCoordinate(x, y));
+                x = (x + 1) % horizontalDiameter;
             }
-            lineCells.add(grid[x][y]);
+            lineCells.add(getCoordinate(x, y));
             return lineCells;
         }
+    }
+
+    public Coordinate getRandomAvailableCoordinate() {
+        List<Coordinate> availableCoordinates = new ArrayList<>();
+        for (int i = 0; i < horizontalDiameter; i++) {
+            for (int j = 0; j < verticalDiameter; j++) {
+                if (!grid[i][j].isOccupied()) {
+                    availableCoordinates.add(grid[i][j].getCoordinate());
+                }
+            }
+        }
+        if (availableCoordinates.isEmpty()) {
+            throw new IllegalStateException("Grid is full");
+        }
+        return availableCoordinates.get((int) (Math.random() * availableCoordinates.size()));
     }
 }

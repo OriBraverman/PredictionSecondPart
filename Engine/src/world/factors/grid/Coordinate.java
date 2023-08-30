@@ -1,4 +1,4 @@
-package grid;
+package world.factors.grid;
 
 public final class Coordinate {
     private final int x;

@@ -44,8 +44,8 @@ public class CalculationAction extends AbstractAction {
     @Override
     public void invoke(Context context) {
         PropertyInstance propertyInstance = context.getPrimaryEntityInstance().getPropertyByName(resultProperty);
-        Expression expr1 = AbstractExpression.getExpressionByString(argument1, entityDefinition);
-        Expression expr2 = AbstractExpression.getExpressionByString(argument2, entityDefinition);
+        Expression expr1 = AbstractExpression.getExpressionByString(argument1, sourceEntityDefinition);
+        Expression expr2 = AbstractExpression.getExpressionByString(argument2, sourceEntityDefinition);
         float exp1Value = PropertyType.FLOAT.convert(context.getValueByExpression(expr1));
         float exp2Value = PropertyType.FLOAT.convert(context.getValueByExpression(expr2));
         if (propertyInstance.getType() == PropertyType.DECIMAL) {
@@ -95,12 +95,12 @@ public class CalculationAction extends AbstractAction {
 
     @Override
     public boolean isPropertyExistInEntity() {
-        return entityDefinition.getPropertyDefinitionByName(resultProperty) != null;
+        return sourceEntityDefinition.getPropertyDefinitionByName(resultProperty) != null;
     }
 
     public boolean isMathActionHasNumericArgs(List<EntityDefinition> entities, EnvVariableManagerImpl envVariableManagerImpl) {
-        Expression expr1 = AbstractExpression.getExpressionByString(argument1, entityDefinition);
-        Expression expr2 = AbstractExpression.getExpressionByString(argument2, entityDefinition);
+        Expression expr1 = AbstractExpression.getExpressionByString(argument1, sourceEntityDefinition);
+        Expression expr2 = AbstractExpression.getExpressionByString(argument2, sourceEntityDefinition);
         if (!(expr1.isNumericExpression(entities, envVariableManagerImpl))) {
             return false;
         }

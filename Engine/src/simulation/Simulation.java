@@ -68,7 +68,7 @@ public class Simulation implements Serializable {
     private void initEntityInstancesArray() {
         EntityDefinition entityDefinition = world.getEntities().get(0);
         for (int i = 0; i < entityDefinition.getPopulation(); i++) {
-            entityInstanceManager.create(entityDefinition);
+            entityInstanceManager.create(entityDefinition, world.getGrid());
         }
     }
 

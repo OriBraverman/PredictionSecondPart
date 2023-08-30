@@ -255,6 +255,12 @@ public class Engine implements Serializable {
     public boolean isXMLLoaded() {
         return this.world != null;
     }
+
+    public NewExecutionInputDTO getNewExecutionInputDTO() {
+        EnvVariablesDTO envVariablesDTO = getEnvVariablesDTO();
+        EntityDefinitionDTO[] entityDefinitionDTOS = getEntitiesDTO();
+        return new NewExecutionInputDTO(envVariablesDTO.getEnvVariables(), entityDefinitionDTOS);
+    }
 }
 
 

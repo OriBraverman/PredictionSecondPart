@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ActionType {
-    INCREASE, DECREASE, CALCULATION, CONDITION, SET, KILL;
+    INCREASE, DECREASE, CALCULATION, CONDITION, SET, KILL, PROXIMITY, REPLACE;
     private final static Map<String, ActionType> actionTypeMap = new HashMap<>();
 
     static {
@@ -16,6 +16,8 @@ public enum ActionType {
         actionTypeMap.put("condition", CONDITION);
         actionTypeMap.put("set", SET);
         actionTypeMap.put("kill", KILL);
+        actionTypeMap.put("proximity", PROXIMITY);
+        actionTypeMap.put("replace", REPLACE);
     }
 
     public static boolean isActionType(String functionType) {

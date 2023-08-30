@@ -1,20 +1,15 @@
 package gui.components.main.execution;
 
-import dtos.EnvVariableDefinitionDTO;
-import dtos.EnvVariableValueDTO;
-import dtos.EnvVariablesDTO;
-import dtos.EnvVariablesValuesDTO;
+import dtos.*;
 import gui.components.main.app.AppController;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.event.ActionEvent;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
-
 
 public class NewExecutionController {
     @FXML private Accordion envVariablesAccordion;
+    @FXML private Accordion entityPopulationAccordion;
     @FXML private Button clearSimulationButton;
     @FXML private Button startSimulationButton;
     private AppController appController;
@@ -25,16 +20,26 @@ public class NewExecutionController {
     @FXML public void initialize(){
     }
 
-    public void updateEnvVariablesInputVBox(EnvVariablesDTO envVariablesDTO) {
+
+    public void updateEnvVariablesInputVBox(NewExecutionInputDTO newExecutionInputDTO) {
         if (envVariablesAccordion.getPanes() != null) {
             envVariablesAccordion.getPanes().clear();
         }
-        for (EnvVariableDefinitionDTO envVariableDefinitionDTO : envVariablesDTO.getEnvVariables()) {
-            envVariablesAccordion.getPanes().add(createTitledPane(envVariableDefinitionDTO));
+        for (EnvVariableDefinitionDTO envVariableDefinitionDTO : newExecutionInputDTO.getEnvVariables()) {
+            envVariablesAccordion.getPanes().add(createEnvVarTitledPane(envVariableDefinitionDTO));
         }
     }
 
-    public TitledPane createTitledPane(EnvVariableDefinitionDTO envVariableDefinitionDTO) {
+    public void updateEntityPopulationInputVBox(NewExecutionInputDTO newExecutionInputDTO) {
+        if (entityPopulationAccordion.getPanes() != null) {
+            entityPopulationAccordion.getPanes().clear();
+        }
+        for (EntityDefinitionDTO entityDefinitionDTO : newExecutionInputDTO.getEntityDefinitions()) {
+            entityPopulationAccordion.getPanes().add(createEntitiesTitledPane(entityDefinitionDTO));
+        }
+    }
+
+    public TitledPane createEnvVarTitledPane(EnvVariableDefinitionDTO envVariableDefinitionDTO) {
         TitledPane titledPane = new TitledPane();
         titledPane.setText(envVariableDefinitionDTO.getName());
         AnchorPane anchorPane = new AnchorPane();
@@ -103,7 +108,9 @@ public class NewExecutionController {
         titledPane.setContent(anchorPane);
         return titledPane;
     }
-
+    public TitledPane createEntitiesTitledPane(EntityDefinitionDTO entityDefinitionDTO) {
+        return null;
+    }
     @FXML
     void startSimulationAction(ActionEvent event) {
         EnvVariableValueDTO[] envVariablesDTOS = new EnvVariableValueDTO[envVariablesAccordion.getPanes().size()];

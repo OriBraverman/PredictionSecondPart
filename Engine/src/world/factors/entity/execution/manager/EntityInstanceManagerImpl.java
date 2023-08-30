@@ -4,6 +4,7 @@ package world.factors.entity.execution.manager;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.entity.execution.EntityInstanceImpl;
+import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
 import world.factors.property.execution.PropertyInstanceImpl;
@@ -23,9 +24,9 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     }
 
     @Override
-    public EntityInstance create(EntityDefinition entityDefinition) {
+    public EntityInstance create(EntityDefinition entityDefinition, Grid grid) {
         count++;
-        EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, count);
+        EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, count, grid.getRandomAvailableCoordinate());
         instances.add(newEntityInstance);
 
         for (PropertyDefinition propertyDefinition : entityDefinition.getProps()) {

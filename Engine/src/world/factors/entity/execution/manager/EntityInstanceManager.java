@@ -3,12 +3,13 @@ package world.factors.entity.execution.manager;
 
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
+import world.factors.grid.Grid;
 
 import java.util.List;
 
 public interface EntityInstanceManager {
 
-    EntityInstance create(EntityDefinition entityDefinition);
+    EntityInstance create(EntityDefinition entityDefinition, Grid grid);
     List<EntityInstance> getInstances();
     EntityInstance getEntityInstanceByName(String entityName);
     void killEntity(int id);

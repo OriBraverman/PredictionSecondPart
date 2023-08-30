@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static world.factors.expression.api.AbstractExpression.getExpressionByString;
-/*
+
 public class XMLValidator {
     public static void validateFileExists(Path file) throws FileNotFoundException {
         if(!file.toFile().exists()) {
@@ -43,7 +43,7 @@ public class XMLValidator {
 
     //2
     public static void validateEnvironmentPropertyUniqueness(PRDWorld world) {
-        PRDEvironment environment = world.getPRDEvironment();
+        PRDEnvironment environment = world.getPRDEnvironment();
         for(int i=0; i<environment.getPRDEnvProperty().size(); i++) {
             String currName = environment.getPRDEnvProperty().get(i).getPRDName();
             for(int j=i+1; j<environment.getPRDEnvProperty().size(); j++) {
@@ -158,4 +158,3 @@ public class XMLValidator {
 
 
 }
-*/

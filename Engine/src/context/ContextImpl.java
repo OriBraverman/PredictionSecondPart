@@ -8,6 +8,7 @@ import world.factors.expression.api.Expression;
 import world.factors.expression.api.ExpressionType;
 import world.factors.function.api.Function;
 import world.factors.function.api.FunctionType;
+import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
 
@@ -21,11 +22,20 @@ import static world.factors.expression.api.AbstractExpression.isFunctionExpressi
 public class ContextImpl implements Context {
 
     private EntityInstance primaryEntityInstance;
+    private EntityInstance secondaryEntityInstance;
     private EntityInstanceManager entityInstanceManager;
     private ActiveEnvironment activeEnvironment;
+    private Grid grid;
 
     public ContextImpl(EntityInstance primaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment) {
         this.primaryEntityInstance = primaryEntityInstance;
+        this.entityInstanceManager = entityInstanceManager;
+        this.activeEnvironment = activeEnvironment;
+    }
+
+    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstance secondaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment) {
+        this.primaryEntityInstance = primaryEntityInstance;
+        this.secondaryEntityInstance = secondaryEntityInstance;
         this.entityInstanceManager = entityInstanceManager;
         this.activeEnvironment = activeEnvironment;
     }
@@ -36,8 +46,23 @@ public class ContextImpl implements Context {
     }
 
     @Override
+    public EntityInstance getSecondaryEntityInstance() {
+        return secondaryEntityInstance;
+    }
+
+    @Override
+    public Grid getGrid() {
+        return grid;
+    }
+
+    @Override
     public void removeEntity(EntityInstance entityInstance) {
         entityInstanceManager.killEntity(entityInstance.getId());
+    }
+
+    @Override
+    public void addEntity(EntityInstance secondaryEntityInstance, Grid grid) {
+        entityInstanceManager.create(secondaryEntityInstance.getEntityDefinition(), grid);
     }
 
     @Override

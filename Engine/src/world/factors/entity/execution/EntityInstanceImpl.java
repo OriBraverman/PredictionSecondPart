@@ -1,6 +1,7 @@
 package world.factors.entity.execution;
 
 import world.factors.entity.definition.EntityDefinition;
+import world.factors.grid.Coordinate;
 import world.factors.property.execution.PropertyInstance;
 
 import java.io.Serializable;
@@ -12,10 +13,12 @@ public class EntityInstanceImpl implements EntityInstance, Serializable {
     private final EntityDefinition entityDefinition;
     private final int id;
     private Map<String, PropertyInstance> properties;
+    private Coordinate coordinate;
 
-    public EntityInstanceImpl(EntityDefinition entityDefinition, int id) {
+    public EntityInstanceImpl(EntityDefinition entityDefinition, int id, Coordinate coordinate) {
         this.entityDefinition = entityDefinition;
         this.id = id;
+        this.coordinate = coordinate;
         properties = new HashMap<>();
     }
 
@@ -43,4 +46,8 @@ public class EntityInstanceImpl implements EntityInstance, Serializable {
         return entityDefinition;
     }
 
+    @Override
+    public Coordinate getCoordinate() {
+        return coordinate;
+    }
 }

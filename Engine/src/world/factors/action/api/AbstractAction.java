@@ -8,11 +8,11 @@ import java.io.Serializable;
 public abstract class AbstractAction implements Action, Serializable {
 
     protected final ActionType actionType;
-    protected final EntityDefinition entityDefinition;
+    protected final EntityDefinition sourceEntityDefinition;
 
-    protected AbstractAction(ActionType actionType, EntityDefinition entityDefinition) {
+    protected AbstractAction(ActionType actionType, EntityDefinition sourceEntityDefinition) {
         this.actionType = actionType;
-        this.entityDefinition = entityDefinition;
+        this.sourceEntityDefinition = sourceEntityDefinition;
     }
 
     @Override
@@ -22,6 +22,6 @@ public abstract class AbstractAction implements Action, Serializable {
 
     @Override
     public EntityDefinition getContextEntity() {
-        return entityDefinition;
+        return sourceEntityDefinition;
     }
 }

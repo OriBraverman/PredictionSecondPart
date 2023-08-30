@@ -12,6 +12,7 @@ import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.definition.EntityDefinitionImpl;
 import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
+import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.definition.api.Range;
 import world.factors.property.definition.impl.BooleanPropertyDefinition;
@@ -36,12 +37,14 @@ public class Convertor implements Serializable {
         List<EntityDefinition> entities = getEntities();
         List<Rule> rules = getRules(entities);
         Termination termination = getTermination();
-        return new World(environment, entities, rules, termination);
+        Grid grid = new Grid(generatedWorld.getPRDGrid().getRows(), generatedWorld.getPRDGrid().getColumns());
+        int threadCount = generatedWorld.getPRDThreadCount();
+        return new World(environment, entities, grid, rules, termination, threadCount);
     }
 
     private EnvVariablesManager getEnvironment() {
         EnvVariablesManager environment = new EnvVariableManagerImpl();
-        for (PRDEnvProperty envProp : generatedWorld.getPRDEvironment().getPRDEnvProperty()) {
+        for (PRDEnvProperty envProp : generatedWorld.getPRDEnvironment().getPRDEnvProperty()) {
             if (envProp.getType().equals("decimal")) {
                 if (!isConvertableToInteger(envProp.getPRDRange().getFrom()) || !isConvertableToInteger(envProp.getPRDRange().getTo())) {
                     throw new RuntimeException("Range of decimal environment property must be integer");
@@ -75,7 +78,7 @@ public class Convertor implements Serializable {
     }
 
     private EntityDefinition getEntity(PRDEntity entity) {
-        EntityDefinition entityDefinition = new EntityDefinitionImpl(entity.getName(), entity.getPRDPopulation());
+        EntityDefinition entityDefinition = new EntityDefinitionImpl(entity.getName());
         for (PRDProperty property: entity.getPRDProperties().getPRDProperty()) {
             if(property.getPRDValue().isRandomInitialize()){
                 entityDefinition.addProperty(getRandomProperty(property));
@@ -277,7 +280,7 @@ public class Convertor implements Serializable {
 
     private Termination getTermination() {
         Termination termination = new Termination();
-        List<Object> terminationList = generatedWorld.getPRDTermination().getPRDByTicksOrPRDBySecond();
+        List<Object> terminationList = generatedWorld.getPRDTermination().getPRDBySecondOrPRDByTicks();
         if (terminationList.size() > 2 || terminationList.size() == 0) {
             throw new RuntimeException("Termination must have exactly 1 or 2 termination types");
         }

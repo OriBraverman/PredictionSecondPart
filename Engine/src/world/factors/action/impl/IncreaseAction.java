@@ -80,11 +80,11 @@ public class IncreaseAction extends AbstractAction {
 
     @Override
     public boolean isPropertyExistInEntity() {
-        return entityDefinition.getPropertyDefinitionByName(property) != null;
+        return sourceEntityDefinition.getPropertyDefinitionByName(property) != null;
     }
 
     public boolean isMathActionHasNumericArgs(List<EntityDefinition> entities, EnvVariableManagerImpl envVariableManagerImpl) {
-        Expression expression = getExpressionByString(byExpression, entityDefinition);
+        Expression expression = getExpressionByString(byExpression, sourceEntityDefinition);
         if (!(expression.isNumericExpression(entities, envVariableManagerImpl))) {
             return false;
         }

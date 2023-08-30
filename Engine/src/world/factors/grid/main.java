@@ -1,4 +1,4 @@
-package grid;
+package world.factors.grid;
 
 import java.util.Collection;
 
