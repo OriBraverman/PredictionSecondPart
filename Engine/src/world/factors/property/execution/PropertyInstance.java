@@ -8,4 +8,5 @@ public interface PropertyInstance {
     Object getValue();
     void updateValue(Object val);
     PropertyType getType();
+    int getLastUpdatedTick();
 }

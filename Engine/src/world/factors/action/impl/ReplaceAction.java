@@ -22,6 +22,6 @@ public class ReplaceAction extends AbstractAction {
 
     @Override
     public boolean isPropertyExistInEntity() {
-        return false;
+        return true;
     }
 }

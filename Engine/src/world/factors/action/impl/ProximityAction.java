@@ -47,7 +47,7 @@ public class ProximityAction extends AbstractAction {
 
     @Override
     public boolean isPropertyExistInEntity() {
-        return false;
+        return true;
     }
 
     @Override

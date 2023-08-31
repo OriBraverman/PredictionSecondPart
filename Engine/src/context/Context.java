@@ -25,4 +25,6 @@ public interface Context {
     void setPropertyValue(String name, String property, String value);
     Grid getGrid();
     void replaceEntity(EntityDefinition createEntityDefinition, ReplaceType mode);
+
+    Object getNumberOfTicksPropertyHasentChanged(String propertyName);
 }

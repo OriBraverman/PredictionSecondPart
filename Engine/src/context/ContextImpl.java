@@ -28,18 +28,19 @@ public class ContextImpl implements Context {
     private EntityInstanceManager entityInstanceManager;
     private ActiveEnvironment activeEnvironment;
     private Grid grid;
+    private int currentTick;
 
-    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment) {
-        this.primaryEntityInstance = primaryEntityInstance;
-        this.entityInstanceManager = entityInstanceManager;
-        this.activeEnvironment = activeEnvironment;
+    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment, Grid grid, int currentTick) {
+        this(primaryEntityInstance, null, entityInstanceManager, activeEnvironment, grid, currentTick);
     }
 
-    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstance secondaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment) {
+    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstance secondaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment, Grid grid, int currentTick) {
         this.primaryEntityInstance = primaryEntityInstance;
         this.secondaryEntityInstance = secondaryEntityInstance;
         this.entityInstanceManager = entityInstanceManager;
         this.activeEnvironment = activeEnvironment;
+        this.grid = grid;
+        this.currentTick = currentTick;
     }
 
     @Override
@@ -137,5 +138,11 @@ public class ContextImpl implements Context {
             throw new IllegalArgumentException("property [" + property + "] type is not the same as evaluate type");
         }
         entityInstance.getPropertyByName(property).updateValue(evaluateValue);
+    }
+
+    @Override
+    public Object getNumberOfTicksPropertyHasentChanged(String propertyName) {
+        int lastUpdateTick = primaryEntityInstance.getPropertyByName(propertyName).getLastUpdatedTick();
+        return this.currentTick - lastUpdateTick;
     }
 }

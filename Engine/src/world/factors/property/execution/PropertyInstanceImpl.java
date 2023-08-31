@@ -35,4 +35,8 @@ public class PropertyInstanceImpl implements PropertyInstance, Serializable {
     public PropertyType getType() {
         return propertyDefinition.getType();
     }
+
+    public int getLastUpdatedTick() {
+        return lastUpdatedTick;
+    }
 }

@@ -89,7 +89,7 @@ public class Simulation implements Serializable {
                     List<EntityInstance> tempEntityInstances = new ArrayList<>(this.entityInstanceManager.getInstances());
                     for (EntityInstance entityInstance : tempEntityInstances) {
                         for (Action action: rule.getActionsToPerform()){
-                            action.invoke(new ContextImpl(entityInstance, entityInstanceManager, this.activeEnvironment));
+                            action.invoke(new ContextImpl(entityInstance, entityInstanceManager, this.activeEnvironment, this.world.getGrid(), currentTick));
                         }
                     }
                 }

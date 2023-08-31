@@ -34,10 +34,6 @@ public class MultipleCondition implements Condition, Serializable {
 
     @Override
     public boolean isPropertyExistInEntity() {
-        for (Condition condition : conditions) {
-            if (!condition.isPropertyExistInEntity())
-                return false;
-        }
         return true;
     }
 }

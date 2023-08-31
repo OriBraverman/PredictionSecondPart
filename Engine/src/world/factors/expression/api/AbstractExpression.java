@@ -27,10 +27,15 @@ public abstract class AbstractExpression implements Expression {
     public static Expression getExpressionByString(String expression, EntityDefinition entityDefinition) {
         if (isFunctionExpression(expression)) {
             return new UtilFunctionExpression(expression);
+        } else if (entityDefinition != null && entityDefinition.getPropertyDefinitionByName(expression) != null) {
+            // first type of PropertyNameExpression
+            return new PropertyNameExpression(expression);
         }
-        else if (expression.contains(".") && entityDefinition.getName().equals(getEntityName(expression))
+        else if (entityDefinition != null && expression.contains(".")
+                && entityDefinition.getName().equals(getEntityName(expression))
                 && entityDefinition.getPropertyDefinitionByName(getPropertyName(expression)) != null) {
-            return new PropertyNameExpression(expression, getEntityName(expression), getPropertyName(expression));
+            // second type of PropertyNameExpression
+            return new PropertyNameExpression(getEntityName(expression), getPropertyName(expression));
         }
         else {
             return new FreeValueExpression(expression);

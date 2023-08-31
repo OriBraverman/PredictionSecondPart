@@ -39,7 +39,7 @@ public class ConditionAction extends AbstractAction {
 
     @Override
     public boolean isPropertyExistInEntity() {
-        if (!condition.isPropertyExistInEntity())
+        if (!condition.isPropertyExistInEntity()) //always true
             return false;
         for (AbstractAction thenAction : thenActions) {
             if (!thenAction.isPropertyExistInEntity())

@@ -65,9 +65,7 @@ public class SingleCondition implements Condition, Serializable {
     }
 
     @Override
-    public boolean isPropertyExistInEntity() {/*
-        if (entityDefinition.getPropertyDefinitionByName(propertyDefinition.getName()) == null)
-            return false;*/
+    public boolean isPropertyExistInEntity() {
         return true;
     }
 }

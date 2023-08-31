@@ -11,19 +11,17 @@ import world.factors.property.execution.PropertyInstance;
 import java.util.List;
 
 public class EvaluateFunction extends AbstractFunction {
-    private final Expression propertyNameExpression;
-
-    public EvaluateFunction(List<Expression> expressions, int numArgs, Expression propertyNameExpression) {
-        super(FunctionType.EVALUATE, expressions, numArgs);
-        this.propertyNameExpression = propertyNameExpression;
+    public EvaluateFunction(List<Expression> expressions) {
+        super(FunctionType.EVALUATE, expressions, 1);
     }
 
     @Override
     public Object execute(Context context) {
-        if (!(this.propertyNameExpression instanceof PropertyNameExpression)) {
+        Expression propertyNameExpression = this.expressions.get(0);
+        if (!(propertyNameExpression instanceof PropertyNameExpression)) {
             throw new IllegalArgumentException("evaluate function must have property name expression");
         }
-        return this.propertyNameExpression.evaluate(context);
+        return propertyNameExpression.evaluate(context);
     }
 
     @Override
