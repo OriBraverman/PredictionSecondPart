@@ -3,6 +3,7 @@ package world.factors.grid;
 public class Cell {
     private final Coordinate coordinate;
     private boolean isOccupied;
+    //todo: entity
 
     public Cell(Coordinate coordinate) {
         this.coordinate = coordinate;

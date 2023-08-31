@@ -6,27 +6,52 @@ import world.factors.action.api.Action;
 import world.factors.action.api.ActionType;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.expression.api.Expression;
+import world.factors.grid.Coordinate;
 
+import java.util.Collection;
 import java.util.List;
 
 public class ProximityAction extends AbstractAction {
     private final EntityDefinition targetEntityDefinition;
     private final Expression of;
     private List<Action> actions;
+    private List<AbstractAction> thenActions;
 
-    public ProximityAction(EntityDefinition sourceEntityDefinition, EntityDefinition targetEntityDefinition, Expression of, List<Action> actions){
+    public ProximityAction(EntityDefinition sourceEntityDefinition, EntityDefinition targetEntityDefinition, Expression of, List<AbstractAction> thenActions){
         super(ActionType.PROXIMITY, sourceEntityDefinition);
         this.targetEntityDefinition = targetEntityDefinition;
         this.of = of;
-        this.actions = actions;
+        this.thenActions = thenActions;
     }
 
     @Override
     public void invoke(Context context) {
+
+        if (shouldActivateActions(context)) {
+
+            for (AbstractAction thenAction : thenActions) {
+                thenAction.invoke(context);
+            }
+        }
+    }
+
+    private boolean shouldActivateActions(Context context){
+        boolean matchesDefintions = context.getPrimaryEntityInstance().getEntityDefinition().getName().equals(sourceEntityDefinition.getName())
+                && context.getSecondaryEntityInstance().getEntityDefinition().getName().equals(targetEntityDefinition.getName());
+        int rank = (int)context.getValueByExpression(this.of);
+        Collection<Coordinate> envCells = context.getGrid().findEnvironmentCells(context.getPrimaryEntityInstance().getCoordinate(), rank);
+        boolean areClose = envCells.contains(context.getSecondaryEntityInstance().getCoordinate());
+
+        return matchesDefintions && areClose;
     }
 
     @Override
     public boolean isPropertyExistInEntity() {
         return false;
+    }
+
+    @Override
+    public boolean isEntityExistInWorld(List<EntityDefinition> entities) {
+        return super.isEntityExistInWorld(entities) && entities.contains(targetEntityDefinition);
     }
 }

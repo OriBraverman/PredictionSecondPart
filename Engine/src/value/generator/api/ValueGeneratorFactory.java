@@ -25,6 +25,9 @@ public interface ValueGeneratorFactory {
     }
 
     static ValueGenerator<Float> createRandomFloat(Range range) {
+        if (range == null) {
+            range = new Range(Float.MIN_VALUE, Float.MAX_VALUE);
+        }
         if (!(range.getFrom() instanceof Float) || !(range.getTo() instanceof Float)) {
             throw new IllegalArgumentException("Range must be of type Float");
         }

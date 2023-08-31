@@ -1,5 +1,7 @@
 package context;
 
+import world.factors.action.impl.ReplaceType;
+import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.entity.execution.manager.EntityInstanceManager;
 import world.factors.environment.execution.api.ActiveEnvironment;
@@ -61,8 +63,16 @@ public class ContextImpl implements Context {
     }
 
     @Override
-    public void addEntity(EntityInstance secondaryEntityInstance, Grid grid) {
-        entityInstanceManager.create(secondaryEntityInstance.getEntityDefinition(), grid);
+    public void replaceEntity(EntityDefinition createEntityDefinition, ReplaceType mode) {
+        switch (mode) {
+            case SCRATCH:
+                entityInstanceManager.killEntity(primaryEntityInstance.getId());
+                entityInstanceManager.create(createEntityDefinition, grid);
+                break;
+            case DERIVED:
+                entityInstanceManager.replaceDerived(primaryEntityInstance, createEntityDefinition);
+                break;
+        }
     }
 
     @Override
@@ -91,48 +101,6 @@ public class ContextImpl implements Context {
             return false;
         }
         return true;
-    }
-/*
-    @Override
-    public Function getFunctionByExpression(String functionExpression) {
-        // this function receives only function expression
-        // the function expression structure is: functionName(arg1,arg2,arg3,...)
-        // so we need to extract the function name and the arguments
-        List<String> elements = splitExpressionString(functionExpression);
-        List<Expression> args = new ArrayList<>();
-        for (int i = 1; i < elements.size(); i++) {
-            args.add(getExpressionByString(elements.get(i)));
-        }
-        switch(FunctionType.getFunctionType(elements.get(0))) {
-            case ENVIRONMENT:
-                if (elements.size() != 2) {
-                throw new IllegalArgumentException("environment function must have only one argument");
-                }
-                if (activeEnvironment.getProperty(elements.get(1)) == null) {
-                   throw new IllegalArgumentException("environment function argument must be a valid environment property");
-                }
-                return new EnvironmentFunction(args);
-            case RANDOM:
-                if (elements.size() != 2) {
-                    throw new IllegalArgumentException("random function must have only one argument");
-                }
-                return new RandomFunction(args);
-            default:
-                throw new IllegalArgumentException("function [" + elements.get(0) + "] is not exist");
-        }
-    }
-
- */
-    public static List<String> splitExpressionString(String expression) {
-        List<String> elements = new ArrayList<>();
-        Pattern pattern = Pattern.compile("\\w+\\([^()]*\\)");
-        Matcher matcher = pattern.matcher(expression);
-
-        while (matcher.find()) {
-            elements.add(matcher.group());
-        }
-
-        return elements;
     }
 
     @Override

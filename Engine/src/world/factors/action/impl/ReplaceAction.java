@@ -6,15 +6,18 @@ import world.factors.action.api.ActionType;
 import world.factors.entity.definition.EntityDefinition;
 
 public class ReplaceAction extends AbstractAction {
+    private EntityDefinition createEntityDefinition;
+    private ReplaceType mode;
 
-    public ReplaceAction(EntityDefinition entityDefinition) {
-        super(ActionType.REPLACE, entityDefinition);
+    public ReplaceAction(EntityDefinition killEntityDefinition, EntityDefinition createEntityDefinition, ReplaceType mode) {
+        super(ActionType.REPLACE, killEntityDefinition);
+        this.createEntityDefinition = createEntityDefinition;
+        this.mode = mode;
     }
 
     @Override
     public void invoke(Context context) {
-        context.removeEntity(context.getPrimaryEntityInstance());
-        context.addEntity(context.getSecondaryEntityInstance(), context.getGrid());
+        context.replaceEntity(createEntityDefinition, mode);
     }
 
     @Override

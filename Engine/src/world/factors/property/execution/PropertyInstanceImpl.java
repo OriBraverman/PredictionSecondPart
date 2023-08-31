@@ -9,6 +9,7 @@ public class PropertyInstanceImpl implements PropertyInstance, Serializable {
 
     private PropertyDefinition propertyDefinition;
     private Object value;
+    private int lastUpdatedTick;
 
     public PropertyInstanceImpl(PropertyDefinition propertyDefinition, Object value) {
         this.propertyDefinition = propertyDefinition;

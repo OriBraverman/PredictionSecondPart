@@ -1,9 +1,11 @@
 package world.factors.action.api;
 
 
+import world.World;
 import world.factors.entity.definition.EntityDefinition;
 
 import java.io.Serializable;
+import java.util.List;
 
 public abstract class AbstractAction implements Action, Serializable {
 
@@ -23,5 +25,10 @@ public abstract class AbstractAction implements Action, Serializable {
     @Override
     public EntityDefinition getContextEntity() {
         return sourceEntityDefinition;
+    }
+
+    @Override
+    public boolean isEntityExistInWorld(List<EntityDefinition> entities) {
+        return entities.contains(sourceEntityDefinition);
     }
 }

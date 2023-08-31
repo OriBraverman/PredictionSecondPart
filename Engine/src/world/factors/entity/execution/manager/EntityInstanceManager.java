@@ -15,4 +15,5 @@ public interface EntityInstanceManager {
     void killEntity(int id);
     boolean isEntityAlive(int id);
     int getEntityCountByName(String entityName);
+    void replaceDerived(EntityInstance entityInstance, EntityDefinition entityDefinition);
 }

@@ -10,28 +10,28 @@ import java.io.Serializable;
 
 public class SingleCondition implements Condition, Serializable {
     private final EntityDefinition entityDefinition;
-    private final PropertyDefinition propertyDefinition;
+    private final String propertyExpression;
     private final OperatorType operator;
-    private final String value;
+    private final String valueExpression;
 
-    public SingleCondition(EntityDefinition entityDefinition, PropertyDefinition propertyDefinition, OperatorType operator, String value)
+    public SingleCondition(EntityDefinition entityDefinition, String propertyExpression, OperatorType operator, String valueExpression)
     {
         this.entityDefinition = entityDefinition;
-        this.propertyDefinition = propertyDefinition;
+        this.propertyExpression = propertyExpression;
         this.operator = operator;
-        this.value = value;
+        this.valueExpression = valueExpression;
     }
 
     public EntityDefinition getEntityDefinition() {
         return entityDefinition;
     }
 
-    public PropertyDefinition getPropertyDefinition() {
-        return propertyDefinition;
+    public String getPropertyExpression() {
+        return propertyExpression;
     }
 
-    public String getValue() {
-        return value;
+    public String getvalueExpression() {
+        return valueExpression;
     }
 
     public OperatorType getOperator() {
@@ -40,33 +40,34 @@ public class SingleCondition implements Condition, Serializable {
 
     @Override
     public boolean assertCondition(Context context) {
-        Object propertyValue = context.getPropertyInstanceByPropertyDefinition(this.propertyDefinition).getValue();
-        Expression expression = AbstractExpression.getExpressionByString(this.value, this.entityDefinition);
-        Object value = context.getValueByExpression(expression);
+        Expression propertyExpression = AbstractExpression.getExpressionByString(this.propertyExpression, this.entityDefinition);
+        Object propertyValue = context.getValueByExpression(propertyExpression);
+        Expression byExpression = AbstractExpression.getExpressionByString(this.valueExpression, this.entityDefinition);
+        Object byValue = context.getValueByExpression(byExpression);
         // check if the property value is the same type as the value
-        if (propertyValue.getClass() != value.getClass())
+        if (propertyValue.getClass() != byValue.getClass())
             return false;
         switch (this.operator){
             case EQUALS:
-                return propertyValue.equals(value);
+                return propertyValue.equals(byValue);
             case NOT_EQUALS:
-                return !propertyValue.equals(value);
+                return !propertyValue.equals(byValue);
             case BIGGER_THAN:
-                if (propertyValue instanceof Number && value instanceof Number)
-                    return ((Number) propertyValue).doubleValue() > ((Number) value).doubleValue();
+                if (propertyValue instanceof Number && byValue instanceof Number)
+                    return ((Number) propertyValue).doubleValue() > ((Number) byValue).doubleValue();
                 break;
             case LOWER_THAN:
-                if (propertyValue instanceof Number && value instanceof Number)
-                    return ((Number) propertyValue).doubleValue() < ((Number) value).doubleValue();
+                if (propertyValue instanceof Number && byValue instanceof Number)
+                    return ((Number) propertyValue).doubleValue() < ((Number) byValue).doubleValue();
                 break;
         }
         return false;
     }
 
     @Override
-    public boolean isPropertyExistInEntity() {
+    public boolean isPropertyExistInEntity() {/*
         if (entityDefinition.getPropertyDefinitionByName(propertyDefinition.getName()) == null)
-            return false;
+            return false;*/
         return true;
     }
 }

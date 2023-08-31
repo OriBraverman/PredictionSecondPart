@@ -37,6 +37,24 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
         return newEntityInstance;
     }
 
+    @Override
+    public void replaceDerived(EntityInstance entityInstance, EntityDefinition entityDefinition) {
+        EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, entityInstance.getId(), entityInstance.getCoordinate());
+        instances.remove(entityInstance);
+        instances.add(newEntityInstance);
+
+        for (PropertyDefinition propertyDefinition : entityDefinition.getProps()) {
+            if (entityInstance.getPropertyByName(propertyDefinition.getName()) != null) {
+                Object value = entityInstance.getPropertyByName(propertyDefinition.getName()).getValue();
+                PropertyInstance newPropertyInstance = new PropertyInstanceImpl(propertyDefinition, value);
+                newEntityInstance.addPropertyInstance(newPropertyInstance);
+            } else {
+                Object value = propertyDefinition.generateValue();
+                PropertyInstance newPropertyInstance = new PropertyInstanceImpl(propertyDefinition, value);
+                newEntityInstance.addPropertyInstance(newPropertyInstance);
+            }
+        }
+    }
 
     @Override
     public List<EntityInstance> getInstances() {

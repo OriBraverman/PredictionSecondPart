@@ -3,9 +3,10 @@ import java.io.Serializable;
 import java.sql.Time;
 
 public class Termination implements Serializable {
+    private boolean isByUser = false;
     private int secondsCount = -1;
     private int ticksCount = -1;
-    //private boolean interactive; //TODO: check type
+    private boolean terminatedByUser = false;
 
 
     public int getSecondsCount() {
@@ -24,8 +25,26 @@ public class Termination implements Serializable {
         this.ticksCount = ticksCount;
     }
 
+    public void setByUser(boolean byUser) {
+        isByUser = byUser;
+    }
+
+    public void setTerminatedByUser(boolean terminatedByUser) {
+        this.terminatedByUser = terminatedByUser;
+    }
+
+    public boolean isByUser() {
+        return isByUser;
+    }
+
+    public boolean isTerminatedByUser() {
+        return terminatedByUser;
+    }
+
     public boolean isTerminated(int currentTick, long seconds) {
-        if (isTerminatedBySecondsCount(seconds) || isTerminatedByTicksCount(currentTick)) {
+        if (isByUser) {
+            return terminatedByUser;
+        } else if (isTerminatedBySecondsCount(seconds) || isTerminatedByTicksCount(currentTick)) {
             return true;
         }
         return false;

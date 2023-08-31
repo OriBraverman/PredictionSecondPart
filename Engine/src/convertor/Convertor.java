@@ -12,6 +12,8 @@ import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.definition.EntityDefinitionImpl;
 import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
+import world.factors.expression.api.AbstractExpression;
+import world.factors.expression.impl.FreeValueExpression;
 import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.definition.api.Range;
@@ -52,8 +54,12 @@ public class Convertor implements Serializable {
                 Range<Integer> range = new Range((int)envProp.getPRDRange().getTo(), (int)envProp.getPRDRange().getFrom());
                 environment.addEnvironmentVariable(new IntegerPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomInteger(range), range));
             } else if (envProp.getType().equals("float")) {
-                Range<Float> range = new Range((float)envProp.getPRDRange().getTo(), (float)envProp.getPRDRange().getFrom());
-                environment.addEnvironmentVariable(new FloatPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomFloat(range), range));
+                if (envProp.getPRDRange() == null) {
+                    environment.addEnvironmentVariable(new FloatPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomFloat(null)));
+                } else {
+                    Range<Float> range = new Range((float)envProp.getPRDRange().getTo(), (float)envProp.getPRDRange().getFrom());
+                    environment.addEnvironmentVariable(new FloatPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomFloat(range), range));
+                }
             } else if (envProp.getType().equals("boolean")) {
                 environment.addEnvironmentVariable(new BooleanPropertyDefinition(envProp.getPRDName(), ValueGeneratorFactory.createRandomBoolean()));
             } else if (envProp.getType().equals("string")) {
@@ -163,23 +169,39 @@ public class Convertor implements Serializable {
 
     private Action getAction(PRDAction action, List<EntityDefinition> entities) {
         ActionType actionType = ActionType.getActionType(action.getType());
-        EntityDefinition entityDefinition = getEntityDefinition(action.getEntity(), entities);
         switch (actionType) {
             case INCREASE:
-                return getIncreaseAction(action, entityDefinition);
+                return getIncreaseAction(action, getEntityDefinition(action.getEntity(), entities));
             case DECREASE:
-                return getDecreaseAction(action, entityDefinition);
+                return getDecreaseAction(action, getEntityDefinition(action.getEntity(), entities));
             case CALCULATION:
-                return getCalculationAction(action, entityDefinition);
+                return getCalculationAction(action, getEntityDefinition(action.getEntity(), entities));
             case CONDITION:
-                return getConditionAction(action, entityDefinition, entities);
+                return getConditionAction(action, getEntityDefinition(action.getEntity(), entities), entities);
             case SET:
-                return getSetAction(action, entityDefinition);
+                return getSetAction(action, getEntityDefinition(action.getEntity(), entities));
             case KILL:
-                return getKillAction(action, entityDefinition);
+                return getKillAction(action, getEntityDefinition(action.getEntity(), entities));
+            case REPLACE:
+                return getReplaceAction(action, getEntityDefinition(action.getKill(), entities), getEntityDefinition(action.getCreate(), entities));
+            case PROXIMITY:
+                PRDAction.PRDBetween between = action.getPRDBetween();
+                return getProximityAction(action, getEntityDefinition(between.getSourceEntity(), entities), getEntityDefinition(between.getTargetEntity(), entities), entities);
             default:
                 throw new RuntimeException("Unknown action type: " + actionType);
         }
+    }
+
+    private Action getProximityAction(PRDAction action, EntityDefinition sourceEntityDefinition, EntityDefinition targetEntityDefinition, List<EntityDefinition> entities) {
+        List<AbstractAction> actions = null;
+        if (action.getPRDActions() != null) {
+            actions = getActions(action.getPRDActions().getPRDAction(), entities);
+        }
+        return new ProximityAction(sourceEntityDefinition, targetEntityDefinition, AbstractExpression.getExpressionByString(action.getPRDEnvDepth().getOf(), null), actions);
+    }
+
+    private Action getReplaceAction(PRDAction action, EntityDefinition killEntityDefinition, EntityDefinition createEntityDefinition) {
+        return new ReplaceAction(killEntityDefinition, createEntityDefinition, ReplaceType.getReplaceType(action.getMode()));
     }
 
     private Action getKillAction(PRDAction action, EntityDefinition entityDefinition) {
@@ -215,7 +237,7 @@ public class Convertor implements Serializable {
         String singularity = prdCondition.getSingularity();
         if (singularity.equals("single")) {
             EntityDefinition entityDefinition = getEntityDefinition(prdCondition.getEntity(), entities);
-            PropertyDefinition property = getEntityPropertyDefinition(prdCondition.getProperty(), entityDefinition.getProps());
+            String property = prdCondition.getProperty();
             OperatorType operatorType = OperatorType.getOperatorType(prdCondition.getOperator());
             String value = prdCondition.getValue();
             return new SingleCondition(entityDefinition, property, operatorType, value);
@@ -281,7 +303,13 @@ public class Convertor implements Serializable {
     private Termination getTermination() {
         Termination termination = new Termination();
         List<Object> terminationList = generatedWorld.getPRDTermination().getPRDBySecondOrPRDByTicks();
-        if (terminationList.size() > 2 || terminationList.size() == 0) {
+        Object byUser = generatedWorld.getPRDTermination().getPRDByUser();
+        if (byUser != null && terminationList.size() > 0) {
+            throw new RuntimeException("ByUser and BySecond/ByTicks cannot be together");
+        } else if (byUser != null) {
+            termination.setByUser(true);
+            return termination;
+        } else if (terminationList.size() > 2 || terminationList.size() == 0) {
             throw new RuntimeException("Termination must have exactly 1 or 2 termination types");
         }
         for (Object terminationObject: terminationList) {

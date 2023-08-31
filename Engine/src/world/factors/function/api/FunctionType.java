@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum FunctionType {
-    ENVIRONMENT, RANDOM;
+    ENVIRONMENT, RANDOM, EVALUATE, PERCENT, TICKS;
 
     //create a map of function types to string names
 
@@ -13,6 +13,9 @@ public enum FunctionType {
     static {
         functionTypeMap.put("environment", ENVIRONMENT);
         functionTypeMap.put("random", RANDOM);
+        functionTypeMap.put("evaluate", EVALUATE);
+        functionTypeMap.put("percent", PERCENT);
+        functionTypeMap.put("ticks", TICKS);
     }
 
     public static boolean isFunctionType(String functionType) {

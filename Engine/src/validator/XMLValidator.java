@@ -38,7 +38,6 @@ public class XMLValidator {
     public static void validateXMLContent(PRDWorld world) {
         validateEnvironmentPropertyUniqueness(world);
         validateAllEntitiesPropertyUniqueness(world);
-        validateAllActionsReferToExistingEntities(world);
     }
 
     //2
@@ -89,24 +88,14 @@ public class XMLValidator {
         }
     }
     //4
-    public static void validateAllActionsReferToExistingEntities(PRDWorld world) {
-        for(PRDRule rule: world.getPRDRules().getPRDRule()) {
-            for(PRDAction action: rule.getPRDActions().getPRDAction()) {
-                if(!isEntityExist(world, action.getEntity())) {
+    public static void validateAllActionsReferToExistingEntities(World world) {
+        for (Rule rule : world.getRules()) {
+            for (Action action : rule.getActionsToPerform()) {
+                if (!action.isEntityExistInWorld(world.getEntities())) {
                     throw new IllegalArgumentException("4. Action refers to non-existing entity");
                 }
             }
         }
-    }
-
-    private static boolean isEntityExist(PRDWorld world, String entityName) {
-        PRDEntities entities = world.getPRDEntities();
-        for(PRDEntity entity: entities.getPRDEntity()) {
-            if(entity.getName().equals(entityName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     //5

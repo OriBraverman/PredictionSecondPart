@@ -28,8 +28,9 @@ public abstract class AbstractExpression implements Expression {
         if (isFunctionExpression(expression)) {
             return new UtilFunctionExpression(expression);
         }
-        else if (entityDefinition.getPropertyDefinitionByName(expression) != null) {
-            return new PropertyNameExpression(expression);
+        else if (expression.contains(".") && entityDefinition.getName().equals(getEntityName(expression))
+                && entityDefinition.getPropertyDefinitionByName(getPropertyName(expression)) != null) {
+            return new PropertyNameExpression(expression, getEntityName(expression), getPropertyName(expression));
         }
         else {
             return new FreeValueExpression(expression);
@@ -50,5 +51,13 @@ public abstract class AbstractExpression implements Expression {
     public FunctionType getFunctionTypeByExpression(String expression) {
         String functionName = expression.substring(0, expression.indexOf("("));
         return FunctionType.getFunctionType(functionName);
+    }
+
+    private static String getEntityName(String expression) {
+        return expression.substring(0, expression.indexOf("."));
+    }
+
+    private static String getPropertyName(String expression) {
+        return expression.substring(expression.indexOf(".") + 1);
     }
 }
