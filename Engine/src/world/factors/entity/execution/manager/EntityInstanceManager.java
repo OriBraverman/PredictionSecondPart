@@ -16,4 +16,5 @@ public interface EntityInstanceManager {
     boolean isEntityAlive(int id);
     int getEntityCountByName(String entityName);
     void replaceDerived(EntityInstance entityInstance, EntityDefinition entityDefinition);
+    void moveEntity(EntityInstance entityInstance, Grid grid);
 }

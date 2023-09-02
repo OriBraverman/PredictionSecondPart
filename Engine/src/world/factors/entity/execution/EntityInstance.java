@@ -13,4 +13,5 @@ public interface EntityInstance {
     void addPropertyInstance(PropertyInstance propertyInstance);
     EntityDefinition getEntityDefinition();
     Coordinate getCoordinate();
+    void setCoordinate(Coordinate coordinate);
 }

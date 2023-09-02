@@ -103,4 +103,17 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
         }
         return count;
     }
+
+    @Override
+    public void moveEntity(EntityInstance entityInstance, Grid grid) {
+        if (grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP) != null) {
+            entityInstance.setCoordinate(grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP));
+        } else if (grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.DOWN) != null) {
+            entityInstance.setCoordinate(grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.DOWN));
+        } else if (grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.RIGHT) != null) {
+            entityInstance.setCoordinate(grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.RIGHT));
+        } else if (grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.LEFT) != null) {
+            entityInstance.setCoordinate(grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.LEFT));
+        }
+    }
 }

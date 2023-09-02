@@ -10,7 +10,7 @@ public class Grid {
     private Cell[][] grid;
     private int horizontalDiameter;
     private int verticalDiameter;
-    enum Direction {
+    public enum Direction {
         UP, DOWN, LEFT, RIGHT
     }
     public Grid(int n, int m) {
@@ -25,6 +25,35 @@ public class Grid {
     }
     public Coordinate getCoordinate(int x, int y) {
         return grid[x][y].getCoordinate();
+    }
+
+    public boolean isCellFree(Coordinate coordinate) {
+        return !grid[coordinate.getX()][coordinate.getY()].isOccupied();
+    }
+
+    public Coordinate moveEntity(Coordinate source, Direction direction) {
+        Coordinate destination = getCoordinateInDirection(source, direction);
+        if (isCellFree(destination)) {
+            grid[source.getX()][source.getY()].setOccupied(false);
+            grid[destination.getX()][destination.getY()].setOccupied(true);
+            return destination;
+        }
+        return null;
+    }
+
+    private Coordinate getCoordinateInDirection(Coordinate source, Direction direction) {
+        switch (direction) {
+            case UP:
+                return getCoordinate(source.getX(), (source.getY() - 1 + verticalDiameter) % verticalDiameter);
+            case DOWN:
+                return getCoordinate(source.getX(), (source.getY() + 1 + verticalDiameter) % verticalDiameter);
+            case LEFT:
+                return getCoordinate((source.getX() - 1 + horizontalDiameter) % horizontalDiameter, source.getY());
+            case RIGHT:
+                return getCoordinate((source.getX() + 1 + horizontalDiameter) % horizontalDiameter, source.getY());
+            default:
+                return source;
+        }
     }
 
     //write a function, that, given a source coordinate and a rank (integer), returns the (accumulative) list of cells (coordinates) that surrounds the given source coordinate.
