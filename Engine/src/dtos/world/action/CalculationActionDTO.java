@@ -1,9 +1,9 @@
 package dtos.world.action;
 
 import dtos.world.EntityDefinitionDTO;
-import dtos.world.action.ActionDTO;
+import dtos.world.action.AbstructActionDTO;
 
-public class CalculationActionDTO extends ActionDTO {
+public class CalculationActionDTO extends AbstructActionDTO {
     private final String resultPropName;
     private final String calculationExpression;
 

@@ -14,9 +14,9 @@ public class WorldDetailsItem extends TreeItem<String> {
         super("Simulation Details:");
         this.worldDTO = worldDTO;
         envVariables = new EnvVariablesTreeItem(worldDTO.getEnvironment());
-        entities = new EntityTreeItem(worldDTO.getEntities());
-        rules = new RuleTreeItem(worldDTO.getRules());
-        terminationConditions = new TerminationConditionTreeItem(worldDTO.getTermination());
+        entities = new EntitiesTreeItem(worldDTO.getEntities());
+        rules = new RulesTreeItem(worldDTO.getRules());
+        terminationConditions = new TerminationTreeItem(worldDTO.getTermination());
         setExpanded(true);
         this.getChildren().addAll(envVariables, entities, rules, terminationConditions);
     }

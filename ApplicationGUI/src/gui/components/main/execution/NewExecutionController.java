@@ -2,6 +2,7 @@ package gui.components.main.execution;
 
 import dtos.*;
 import dtos.world.EntityDefinitionDTO;
+import dtos.world.PropertyDefinitionDTO;
 import gui.components.main.app.AppController;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -26,8 +27,8 @@ public class NewExecutionController {
         if (envVariablesAccordion.getPanes() != null) {
             envVariablesAccordion.getPanes().clear();
         }
-        for (EnvVariableDefinitionDTO envVariableDefinitionDTO : newExecutionInputDTO.getEnvVariables()) {
-            envVariablesAccordion.getPanes().add(createEnvVarTitledPane(envVariableDefinitionDTO));
+        for (PropertyDefinitionDTO propertyDefinitionDTO : newExecutionInputDTO.getEnvVariables()) {
+            envVariablesAccordion.getPanes().add(createEnvVarTitledPane(propertyDefinitionDTO));
         }
     }
 
@@ -40,9 +41,9 @@ public class NewExecutionController {
         }
     }
 
-    public TitledPane createEnvVarTitledPane(EnvVariableDefinitionDTO envVariableDefinitionDTO) {
+    public TitledPane createEnvVarTitledPane(PropertyDefinitionDTO propertyDefinitionDTO) {
         TitledPane titledPane = new TitledPane();
-        titledPane.setText(envVariableDefinitionDTO.getName());
+        titledPane.setText(propertyDefinitionDTO.getName());
         AnchorPane anchorPane = new AnchorPane();
         anchorPane.setPrefSize(401.0, 232.0);
 
@@ -61,7 +62,7 @@ public class NewExecutionController {
         nameLabel.setLayoutX(68.0);
         nameLabel.setLayoutY(52.0);
 
-        Label nameLabel2 = new Label(envVariableDefinitionDTO.getName());
+        Label nameLabel2 = new Label(propertyDefinitionDTO.getName());
         nameLabel2.setLayoutX(137.0);
         nameLabel2.setLayoutY(52.0);
 
@@ -69,11 +70,11 @@ public class NewExecutionController {
         typeLabel.setLayoutX(72.0);
         typeLabel.setLayoutY(85.0);
 
-        Label typeValueLabel = new Label(envVariableDefinitionDTO.getType().toString());
+        Label typeValueLabel = new Label(propertyDefinitionDTO.getType().toString());
         typeValueLabel.setLayoutX(137.0);
         typeValueLabel.setLayoutY(85.0);
 
-        if (envVariableDefinitionDTO.getFromRange() != null) {
+        if (propertyDefinitionDTO.getFromRange() != null) {
             Label rangeLabel = new Label("Range:");
             rangeLabel.setLayoutX(72.0);
             rangeLabel.setLayoutY(116.0);
@@ -82,7 +83,7 @@ public class NewExecutionController {
             fromLabel.setLayoutX(137.0);
             fromLabel.setLayoutY(116.0);
 
-            Label fromValueLabel = new Label(envVariableDefinitionDTO.getFromRange().toString());
+            Label fromValueLabel = new Label(propertyDefinitionDTO.getFromRange().toString());
             fromValueLabel.setLayoutX(187.0);
             fromValueLabel.setLayoutY(116.0);
 
@@ -90,7 +91,7 @@ public class NewExecutionController {
             toLabel.setLayoutX(240.0);
             toLabel.setLayoutY(116.0);
 
-            Label toValueLabel = new Label(envVariableDefinitionDTO.getToRange().toString());
+            Label toValueLabel = new Label(propertyDefinitionDTO.getToRange().toString());
             toValueLabel.setLayoutX(286.0);
             toValueLabel.setLayoutY(116.0);
 

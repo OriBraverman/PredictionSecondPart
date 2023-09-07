@@ -1,7 +1,7 @@
 package gui.components.main.details.tree;
 
-import javafx.scene.Parent;
+import javafx.scene.control.TreeItem;
 
 public interface OpenableItem {
-    Parent getFullView();
+    TreeItem<String> getFullView();
 }

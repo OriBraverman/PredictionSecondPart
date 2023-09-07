@@ -68,4 +68,14 @@ public class SingleCondition implements Condition, Serializable {
     public boolean isPropertyExistInEntity() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "SingleCondition{" +
+                "entityDefinition=" + entityDefinition +
+                ", propertyExpression='" + propertyExpression + '\'' +
+                ", operator=" + operator +
+                ", valueExpression='" + valueExpression + '\'' +
+                '}';
+    }
 }

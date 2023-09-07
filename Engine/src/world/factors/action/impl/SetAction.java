@@ -25,4 +25,12 @@ public class SetAction extends AbstractAction {
     public boolean isPropertyExistInEntity() {
         return sourceEntityDefinition.getPropertyDefinitionByName(property) != null;
     }
+
+    public String getProperty() {
+        return property;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

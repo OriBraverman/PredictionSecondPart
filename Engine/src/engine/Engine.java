@@ -3,7 +3,7 @@ package engine;
 import convertor.Convertor;
 import dtos.*;
 import dtos.world.*;
-import dtos.world.action.ActionDTO;
+import dtos.world.action.*;
 import resources.schema.generatedWorld.PRDWorld;
 
 import static java.util.Arrays.stream;
@@ -12,7 +12,10 @@ import static validator.XMLValidator.*;
 import simulation.Simulation;
 import simulation.SimulationManager;
 import world.World;
+import world.factors.action.api.AbstractAction;
 import world.factors.action.api.Action;
+import world.factors.action.api.ActionType;
+import world.factors.action.impl.*;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
@@ -116,6 +119,7 @@ public class Engine implements Serializable {
         Collection<PropertyDefinition> envVariables = this.world.getEnvironment().getEnvVariables();
         List<PropertyDefinitionDTO> propertyDefinitionDTOS = new ArrayList<>();
         envVariables.forEach(propertyDefinition -> propertyDefinitionDTOS.add(getPropertyDefinitionDTO(propertyDefinition)));
+        return propertyDefinitionDTOS;
     }
 
     private TerminationDTO getTerminationDTO() {
@@ -133,13 +137,71 @@ public class Engine implements Serializable {
         String name = rule.getName();
         ActivationDTO activationDTO = new ActivationDTO(rule.getActivation().getTicks(), rule.getActivation().getProbabilty());
         int numberOfActions = rule.getActionsToPerform().size();
-        List<ActionDTO> actions = new ArrayList<>();
-        rule.getActionsToPerform().forEach(action -> actions.add(new ActionDTO(action.getActionType().toString(), getEntityDefinitionDTO(action))));
+        List<AbstructActionDTO> actions = new ArrayList<>();
+        rule.getActionsToPerform().forEach(action -> actions.add(getAbstructActionDTO(action)));
         return new RuleDTO(name, activationDTO, numberOfActions, actions);
+    }
+
+    private AbstructActionDTO getAbstructActionDTO(Action action) {
+        String propName, value;
+        List<AbstructActionDTO> thenActions;
+        switch (action.getActionType()) {
+            case INCREASE:
+                IncreaseAction increaseAction = (IncreaseAction) action;
+                propName = increaseAction.getProperty().toString();
+                value = increaseAction.getByExpression().toString();
+                return new IncreaseActionDTO(getEntityDefinitionDTO(action), propName, value);
+            case DECREASE:
+                DecreaseAction decreaseAction = (DecreaseAction) action;
+                propName = decreaseAction.getProperty().toString();
+                value = decreaseAction.getByExpression().toString();
+                return new DecreaseActionDTO(getEntityDefinitionDTO(action), propName, value);
+            case CALCULATION:
+                CalculationAction calculationAction = (CalculationAction) action;
+                String resultProperty = calculationAction.getResultProperty().toString();
+                String calculationExpression = calculationAction.getCalculationExpression();
+                return new CalculationActionDTO(getEntityDefinitionDTO(action), resultProperty, calculationExpression);
+            case CONDITION:
+                ConditionAction conditionAction = (ConditionAction) action;
+                String conditionExpression = conditionAction.getCondition();
+                thenActions = getAbstructActionsDTO(conditionAction.getThenActions());
+                List<AbstructActionDTO> elseActions = getAbstructActionsDTO(conditionAction.getElseActions().isEmpty() ? null : conditionAction.getElseActions());
+                return new ConditionActionDTO(getEntityDefinitionDTO(action), conditionExpression, thenActions, elseActions);
+            case KILL:
+                return new KillActionDTO(getEntityDefinitionDTO(action));
+            case REPLACE:
+                ReplaceAction replaceAction = (ReplaceAction) action;
+                EntityDefinitionDTO createEntityDefinitionDTO = getEntityDefinitionDTO(replaceAction.getCreateEntityDefinition());
+                String mode = replaceAction.getMode().toString();
+                return new ReplaceActionDTO(getEntityDefinitionDTO(action), createEntityDefinitionDTO, mode);
+            case PROXIMITY:
+                ProximityAction proximityAction = (ProximityAction) action;
+                EntityDefinitionDTO targetEntityDefinitionDTO = getEntityDefinitionDTO(proximityAction.getTargetEntityDefinition());
+                String ofValue = proximityAction.getStringOf();
+                thenActions = getAbstructActionsDTO(proximityAction.getThenActions());
+                return new ProximityActionDTO(getEntityDefinitionDTO(action), targetEntityDefinitionDTO, ofValue, thenActions);
+            case SET:
+                SetAction setAction = (SetAction) action;
+                String propertyName = setAction.getProperty();
+                value = setAction.getValue();
+                return new SetActionDTO(getEntityDefinitionDTO(action), propertyName, value);
+            default:
+                return null;
+        }
+    }
+
+    private List<AbstructActionDTO> getAbstructActionsDTO(List<AbstractAction> thenActions) {
+        List<AbstructActionDTO> abstructActionDTOS = new ArrayList<>();
+        thenActions.forEach(action -> abstructActionDTOS.add(getAbstructActionDTO(action)));
+        return abstructActionDTOS;
     }
 
     private EntityDefinitionDTO getEntityDefinitionDTO(Action action) {
         EntityDefinition entityDefinition = action.getPrimaryEntityDefinition();
+        return getEntityDefinitionDTO(entityDefinition);
+    }
+
+    private EntityDefinitionDTO getEntityDefinitionDTO(EntityDefinition entityDefinition) {
         String name = entityDefinition.getName();
         int population = entityDefinition.getPopulation();
         List<PropertyDefinitionDTO> entityPropertyDefinitionDTOS = new ArrayList<>();

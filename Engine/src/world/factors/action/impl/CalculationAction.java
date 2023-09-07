@@ -22,7 +22,19 @@ public class CalculationAction extends AbstractAction {
     private final String argument2;
     private final CalculationOperator operator;
     public enum CalculationOperator {
-        MULTIPLY, DIVIDE
+        MULTIPLY, DIVIDE;
+
+        @Override
+        public String toString() {
+            switch (this) {
+                case MULTIPLY:
+                    return "*";
+                case DIVIDE:
+                    return "/";
+                default:
+                    throw new IllegalArgumentException();
+            }
+        }
     }
 
     public String getArgument1() {
@@ -31,6 +43,14 @@ public class CalculationAction extends AbstractAction {
 
     public String getArgument2() {
         return argument2;
+    }
+
+    public String getResultProperty() {
+        return resultProperty;
+    }
+
+    public String getCalculationExpression() {
+        return argument1 + " " + operator.toString() + " " + argument2;
     }
 
     public CalculationAction(EntityDefinition entityDefinition, String resultProperty, String argument1, String argument2, CalculationOperator operator) {

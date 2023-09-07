@@ -1,7 +1,7 @@
 package dtos.world;
 
 import dtos.ActivationDTO;
-import dtos.world.action.ActionDTO;
+import dtos.world.action.AbstructActionDTO;
 
 import java.util.List;
 
@@ -9,9 +9,9 @@ public class RuleDTO {
     private String name;
     private ActivationDTO activation;
     private int numberOfActions;
-    private List<ActionDTO> actions;
+    private List<AbstructActionDTO> actions;
 
-    public RuleDTO(String name, ActivationDTO activation, int numberOfActions, List<ActionDTO> actions) {
+    public RuleDTO(String name, ActivationDTO activation, int numberOfActions, List<AbstructActionDTO> actions) {
         this.name = name;
         this.activation = activation;
         this.numberOfActions = numberOfActions;
@@ -30,7 +30,7 @@ public class RuleDTO {
         return numberOfActions;
     }
 
-    public List<ActionDTO> getActions() {
+    public List<AbstructActionDTO> getActions() {
         return actions;
     }
 }

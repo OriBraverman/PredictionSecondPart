@@ -66,4 +66,12 @@ public abstract class AbstractExpression implements Expression {
     private static String getPropertyName(String expression) {
         return expression.substring(expression.indexOf(".") + 1);
     }
+
+    @Override
+    public String toString() {
+        return "AbstractExpression{" +
+                "expressionType=" + expressionType +
+                ", expression='" + expression + '\'' +
+                '}';
+    }
 }

@@ -24,4 +24,12 @@ public class ReplaceAction extends AbstractAction {
     public boolean isPropertyExistInEntity() {
         return true;
     }
+
+    public EntityDefinition getCreateEntityDefinition() {
+        return createEntityDefinition;
+    }
+
+    public ReplaceType getMode() {
+        return mode;
+    }
 }

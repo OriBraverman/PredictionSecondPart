@@ -36,4 +36,12 @@ public class MultipleCondition implements Condition, Serializable {
     public boolean isPropertyExistInEntity() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "MultipleCondition{" +
+                "logical=" + logical +
+                ", conditions=" + conditions +
+                '}';
+    }
 }

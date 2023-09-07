@@ -3,16 +3,16 @@ package dtos.world;
 public class PropertyDefinitionDTO {
     private final String name;
     private final String type;
-    private final String from;
-    private final String to;
+    private final String fromRange;
+    private final String toRange;
     private final String defaultVal;
     private final boolean randomInit;
 
-    public PropertyDefinitionDTO(String name, String type, String from, String to, String defaultVal, boolean randomInit) {
+    public PropertyDefinitionDTO(String name, String type, String fromRange, String toRange, String defaultVal, boolean randomInit) {
         this.name = name;
         this.type = type;
-        this.from = from;
-        this.to = to;
+        this.fromRange = fromRange;
+        this.toRange = toRange;
         this.defaultVal = defaultVal;
         this.randomInit = randomInit;
     }
@@ -25,14 +25,13 @@ public class PropertyDefinitionDTO {
         return type;
     }
 
-    public String getFrom() {
-        return from;
+    public String getFromRange() {
+        return fromRange;
     }
 
-    public String getTo() {
-        return to;
+    public String getToRange() {
+        return toRange;
     }
-
 
     public String getDefaultVal() {
         return defaultVal;

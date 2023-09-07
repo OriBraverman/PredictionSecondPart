@@ -94,4 +94,16 @@ public class ConditionAction extends AbstractAction {
         }
         return true;
     }
+
+    public String getCondition() {
+        return condition.toString();
+    }
+
+    public List<AbstractAction> getThenActions() {
+        return thenActions;
+    }
+
+    public List<AbstractAction> getElseActions() {
+        return elseActions;
+    }
 }

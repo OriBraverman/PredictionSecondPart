@@ -55,7 +55,7 @@ public class AppController {
                 engine.loadXML(selectedFile.toPath());
                 uploadComponentController.setFileChosenStringProperty(selectedFile.toString());
                 uploadComponentController.isXMLLoadedProperty().set(true);
-                detailsComponentController.updateDetailsTreeView(engine.getSimulationDetailsDTO());
+                detailsComponentController.updateDetailsTreeView(engine.getWorldDTO());
                 newExecutionComponentController.updateEnvVariablesInputVBox(engine.getNewExecutionInputDTO());
                 resultsComponentController.resetExecutionList();
                 isXMLLoaded.set(true);

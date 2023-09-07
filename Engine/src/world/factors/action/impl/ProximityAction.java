@@ -53,4 +53,16 @@ public class ProximityAction extends AbstractAction {
     public boolean isEntityExistInWorld(List<EntityDefinition> entities) {
         return super.isEntityExistInWorld(entities) && entities.contains(targetEntityDefinition);
     }
+
+    public EntityDefinition getTargetEntityDefinition() {
+        return targetEntityDefinition;
+    }
+
+    public String getStringOf() {
+        return of.toString();
+    }
+
+    public List<AbstractAction> getThenActions() {
+        return thenActions;
+    }
 }

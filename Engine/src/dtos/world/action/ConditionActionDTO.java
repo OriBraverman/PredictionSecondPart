@@ -4,13 +4,13 @@ import dtos.world.EntityDefinitionDTO;
 
 import java.util.List;
 
-public class ConditionActionDTO extends ActionDTO {
+public class ConditionActionDTO extends AbstructActionDTO {
     private final String conditionExpression;
-    private final List<ActionDTO> thenActions;
-    private final List<ActionDTO> elseActions;
+    private final List<AbstructActionDTO> thenActions;
+    private final List<AbstructActionDTO> elseActions;
 
-    public ConditionActionDTO(String type, EntityDefinitionDTO primatyEntity, String conditionExpression, List<ActionDTO> thenActions, List<ActionDTO> elseActions) {
-        super(type, primatyEntity);
+    public ConditionActionDTO(EntityDefinitionDTO primatyEntity, String conditionExpression, List<AbstructActionDTO> thenActions, List<AbstructActionDTO> elseActions) {
+        super("Condition", primatyEntity);
         this.conditionExpression = conditionExpression;
         this.thenActions = thenActions;
         this.elseActions = elseActions;
@@ -20,11 +20,11 @@ public class ConditionActionDTO extends ActionDTO {
         return conditionExpression;
     }
 
-    public List<ActionDTO> getThenActions() {
+    public List<AbstructActionDTO> getThenActions() {
         return thenActions;
     }
 
-    public List<ActionDTO> getElseActions() {
+    public List<AbstructActionDTO> getElseActions() {
         return elseActions;
     }
 }
