@@ -2,6 +2,8 @@ package engine;
 
 import convertor.Convertor;
 import dtos.*;
+import dtos.world.*;
+import dtos.world.action.ActionDTO;
 import resources.schema.generatedWorld.PRDWorld;
 
 import static java.util.Arrays.stream;
@@ -10,13 +12,13 @@ import static validator.XMLValidator.*;
 import simulation.Simulation;
 import simulation.SimulationManager;
 import world.World;
+import world.factors.action.api.Action;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.property.definition.api.NumericPropertyDefinition;
 import world.factors.property.definition.api.PropertyDefinition;
-import world.factors.property.definition.api.PropertyType;
 import world.factors.property.definition.impl.FloatPropertyDefinition;
 import world.factors.property.definition.impl.IntegerPropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
@@ -31,12 +33,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 
 
 public class Engine implements Serializable {
@@ -104,24 +101,31 @@ public class Engine implements Serializable {
         return new SimulationResultDTO(simulation.getId(), simulation.isTerminatedBySecondsCount(), simulation.isTerminatedByTicksCount());
     }
 
-    public SimulationDetailsDTO getSimulationDetailsDTO() {
-        EntityDefinitionDTO[] entityDefinitionDTOS = getEntitiesDTO();
-        RuleDTO[] ruleDTOS = getRulesDTO();
-        EnvVariablesDTO envVariablesDTO = getEnvVariablesDTO();
-        TerminationDTO terminationDTO = getTerminationDTO();
-        return new SimulationDetailsDTO(entityDefinitionDTOS, ruleDTOS, envVariablesDTO.getEnvVariables(), terminationDTO);
+    public WorldDTO getWorldDTO() {
+        List<PropertyDefinitionDTO> environment = getEnvironmentDTO();
+        List<EntityDefinitionDTO> entities = getEntitiesDTO();
+        List<RuleDTO> rules = getRulesDTO();
+        TerminationDTO termination = getTerminationDTO();
+        int gridWidth = this.world.getGrid().getWidth();
+        int gridHeight = this.world.getGrid().getHeight();
+        int threadCount = this.world.getThreadCount();
+        return new WorldDTO(environment, entities, rules, termination, gridWidth, gridHeight, threadCount);
+    }
+
+    private List<PropertyDefinitionDTO> getEnvironmentDTO() {
+        Collection<PropertyDefinition> envVariables = this.world.getEnvironment().getEnvVariables();
+        List<PropertyDefinitionDTO> propertyDefinitionDTOS = new ArrayList<>();
+        envVariables.forEach(propertyDefinition -> propertyDefinitionDTOS.add(getPropertyDefinitionDTO(propertyDefinition)));
     }
 
     private TerminationDTO getTerminationDTO() {
         return new TerminationDTO(this.world.getTermination().getTicksCount(), this.world.getTermination().getSecondsCount());
     }
 
-    private RuleDTO[] getRulesDTO() {
+    private List<RuleDTO> getRulesDTO() {
         List<Rule> rules = this.world.getRules();
-        RuleDTO[] ruleDTOS = new RuleDTO[rules.size()];
-        for (int i = 0; i < rules.size(); i++) {
-            ruleDTOS[i] = getRuleDTO(rules.get(i));
-        }
+        List<RuleDTO> ruleDTOS = new ArrayList<>();
+        rules.forEach(rule -> ruleDTOS.add(getRuleDTO(rule)));
         return ruleDTOS;
     }
 
@@ -129,69 +133,55 @@ public class Engine implements Serializable {
         String name = rule.getName();
         ActivationDTO activationDTO = new ActivationDTO(rule.getActivation().getTicks(), rule.getActivation().getProbabilty());
         int numberOfActions = rule.getActionsToPerform().size();
-        String[] actionNames = rule.getActionsToPerform()
-                .stream()
-                .map(action -> action.getActionType().toString())
-                .toArray(String[]::new);
-        return new RuleDTO(name, activationDTO, numberOfActions, actionNames);
+        List<ActionDTO> actions = new ArrayList<>();
+        rule.getActionsToPerform().forEach(action -> actions.add(new ActionDTO(action.getActionType().toString(), getEntityDefinitionDTO(action))));
+        return new RuleDTO(name, activationDTO, numberOfActions, actions);
     }
 
-    private EntityDefinitionDTO[] getEntitiesDTO() {
-        List<EntityDefinition> entities = this.world.getEntities();
-        EntityDefinitionDTO[] entityDefinitionDTOS = new EntityDefinitionDTO[entities.size()];
-        for (int i = 0; i < entities.size(); i++) {
-            entityDefinitionDTOS[i] = getEntityDTO(entities.get(i));
+    private EntityDefinitionDTO getEntityDefinitionDTO(Action action) {
+        EntityDefinition entityDefinition = action.getPrimaryEntityDefinition();
+        String name = entityDefinition.getName();
+        int population = entityDefinition.getPopulation();
+        List<PropertyDefinitionDTO> entityPropertyDefinitionDTOS = new ArrayList<>();
+        entityDefinition.getProps().forEach(propertyDefinition -> entityPropertyDefinitionDTOS.add(getPropertyDefinitionDTO(propertyDefinition)));
+        return new EntityDefinitionDTO(name, population, entityPropertyDefinitionDTOS);
+    }
+
+    private PropertyDefinitionDTO getPropertyDefinitionDTO(PropertyDefinition propertyDefinition) {
+        String name = propertyDefinition.getName();
+        String type = propertyDefinition.getType().toString();
+        boolean randomInit = propertyDefinition.isRandomInit();
+        if (propertyDefinition instanceof NumericPropertyDefinition) {
+            NumericPropertyDefinition property = (NumericPropertyDefinition) propertyDefinition;
+            String fromRange = property.getRange().getFrom().toString();
+            String toRange = property.getRange().getTo().toString();
+            if (!randomInit)
+                return new PropertyDefinitionDTO(name, type, fromRange, toRange, property.generateValue().toString(), randomInit);
+            return new PropertyDefinitionDTO(name, type, fromRange, toRange, null, randomInit);
         }
+        if (!randomInit)
+            return new PropertyDefinitionDTO(name, type, null, null, propertyDefinition.generateValue().toString(), randomInit);
+        return new PropertyDefinitionDTO(name, type, null, null, null, randomInit);
+    }
+
+    private List<EntityDefinitionDTO> getEntitiesDTO() {
+        List<EntityDefinition> entities = this.world.getEntities();
+        List<EntityDefinitionDTO> entityDefinitionDTOS = new ArrayList<>();
+        entities.forEach(entityDefinition -> entityDefinitionDTOS.add(getEntityDTO(entityDefinition)));
         return entityDefinitionDTOS;
     }
 
     private EntityDefinitionDTO getEntityDTO(EntityDefinition entityDefinition) {
         String name = entityDefinition.getName();
         int population = entityDefinition.getPopulation();
-        EntityPropertyDefinitionDTO[] entityPropertyDefinitionDTOS = getEntityPropertyDefinitionDTOS(entityDefinition.getProps());
+        List<PropertyDefinitionDTO> entityPropertyDefinitionDTOS = getEntityPropertyDefinitionDTOS(entityDefinition.getProps());
         return new EntityDefinitionDTO(name, population, entityPropertyDefinitionDTOS);
     }
 
-    private EntityPropertyDefinitionDTO[] getEntityPropertyDefinitionDTOS(List<PropertyDefinition> properties) {
-        EntityPropertyDefinitionDTO[] entityPropertyDefinitionDTOS = new EntityPropertyDefinitionDTO[properties.size()];
-        for (int i = 0; i < properties.size(); i++) {
-            entityPropertyDefinitionDTOS[i] = getEntityPropertyDefinitionDTO(properties.get(i));
-        }
+    private List<PropertyDefinitionDTO> getEntityPropertyDefinitionDTOS(List<PropertyDefinition> properties) {
+        List<PropertyDefinitionDTO> entityPropertyDefinitionDTOS = new ArrayList<>();
+        properties.forEach(propertyDefinition -> entityPropertyDefinitionDTOS.add(getPropertyDefinitionDTO(propertyDefinition)));
         return entityPropertyDefinitionDTOS;
-    }
-
-    private EntityPropertyDefinitionDTO getEntityPropertyDefinitionDTO(PropertyDefinition property) {
-        String name = property.getName();
-        String type = property.getType().toString();
-        String valueGenerated = property.generateValue().toString();
-        if (property.isNumeric()) {
-            NumericPropertyDefinition property1 = (NumericPropertyDefinition) property;
-            String fromRange = property1.getRange().getFrom().toString();
-            String toRange = property1.getRange().getTo().toString();
-            return new EntityPropertyDefinitionDTO(name, type, toRange, fromRange, valueGenerated);
-        }
-        return new EntityPropertyDefinitionDTO(name, type, valueGenerated);
-    }
-
-    public EnvVariablesDTO getEnvVariablesDTO() {
-        Collection<PropertyDefinition> envVariables = this.world.getEnvironment().getEnvVariables();
-        EnvVariableDefinitionDTO[] envVariableDefinitionDTOS = new EnvVariableDefinitionDTO[envVariables.size()];
-        for (int i = 0; i < envVariables.size(); i++) {
-            envVariableDefinitionDTOS[i] = getEnvVariableDefinitionDTO((PropertyDefinition) envVariables.toArray()[i]);        }
-        return new EnvVariablesDTO(envVariableDefinitionDTOS);
-    }
-
-    private EnvVariableDefinitionDTO getEnvVariableDefinitionDTO(PropertyDefinition propertyDefinition) {
-        String name = propertyDefinition.getName();
-        String type = propertyDefinition.getType().toString();
-        if (propertyDefinition instanceof NumericPropertyDefinition) {
-            NumericPropertyDefinition property = (NumericPropertyDefinition) propertyDefinition;
-            String fromRange = property.getRange().getFrom().toString();
-            String toRange = property.getRange().getTo().toString();
-            return new EnvVariableDefinitionDTO(name, type, fromRange, toRange);
-        }
-        return new EnvVariableDefinitionDTO(name, type);
-
     }
 
     public boolean validateEnvVariableValue(EnvVariableValueDTO envVariableValueDTO) {
@@ -258,9 +248,9 @@ public class Engine implements Serializable {
     }
 
     public NewExecutionInputDTO getNewExecutionInputDTO() {
-        EnvVariablesDTO envVariablesDTO = getEnvVariablesDTO();
-        EntityDefinitionDTO[] entityDefinitionDTOS = getEntitiesDTO();
-        return new NewExecutionInputDTO(envVariablesDTO.getEnvVariables(), entityDefinitionDTOS);
+        List<PropertyDefinitionDTO> envVariables = getEnvironmentDTO();
+        List<EntityDefinitionDTO> entityDefinitionDTOS = getEntitiesDTO();
+        return new NewExecutionInputDTO(envVariables, entityDefinitionDTOS);
     }
 }
 

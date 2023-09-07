@@ -1,6 +1,7 @@
 package gui.components.main.execution;
 
 import dtos.*;
+import dtos.world.EntityDefinitionDTO;
 import gui.components.main.app.AppController;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

@@ -1,6 +1,7 @@
 package gui.components.main.results;
 
 import dtos.*;
+import dtos.world.EntityDefinitionDTO;
 import gui.components.main.app.AppController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -59,7 +60,7 @@ public class ResultsController {
     }
 
     private void updateSimulationHistograms(int id) {
-        if (executionResult.getChildren() != null) {
+        /*if (executionResult.getChildren() != null) {
             executionResult.getChildren().clear();
         }
         SimulationDetailsDTO simulationDetailsDTO = appController.getSimulationDetailsDTO();
@@ -85,6 +86,6 @@ public class ResultsController {
                 barChart.getData().add(series);
                 executionResult.getChildren().add(barChart);
             }
-        }
+        }*/
     }
 }

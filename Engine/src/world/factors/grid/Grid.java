@@ -41,6 +41,14 @@ public class Grid {
         return null;
     }
 
+    public int getWidth() {
+        return horizontalDiameter;
+    }
+
+    public int getHeight() {
+        return verticalDiameter;
+    }
+
     private Coordinate getCoordinateInDirection(Coordinate source, Direction direction) {
         switch (direction) {
             case UP:

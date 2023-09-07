@@ -16,4 +16,9 @@ public class FixedValueGenerator<T> implements ValueGenerator<T>, Serializable {
     public T generateValue() {
         return fixedValue;
     }
+
+    @Override
+    public boolean isRandomInit() {
+        return false;
+    }
 }

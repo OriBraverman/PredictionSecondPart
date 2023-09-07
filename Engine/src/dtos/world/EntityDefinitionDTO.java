@@ -1,11 +1,15 @@
-package dtos;
+package dtos.world;
+
+import dtos.EntityPropertyDefinitionDTO;
+
+import java.util.List;
 
 public class EntityDefinitionDTO {
     private String name;
     private int population;
-    private EntityPropertyDefinitionDTO[] properties;
+    private List<PropertyDefinitionDTO> properties;
 
-    public EntityDefinitionDTO(String name, int population, EntityPropertyDefinitionDTO[] properties) {
+    public EntityDefinitionDTO(String name, int population, List<PropertyDefinitionDTO> properties) {
         this.name = name;
         this.population = population;
         this.properties = properties;
@@ -19,7 +23,7 @@ public class EntityDefinitionDTO {
         return population;
     }
 
-    public EntityPropertyDefinitionDTO[] getProperties() {
+    public List<PropertyDefinitionDTO> getProperties() {
         return properties;
     }
 }

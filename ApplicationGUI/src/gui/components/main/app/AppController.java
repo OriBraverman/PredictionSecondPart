@@ -1,6 +1,7 @@
 package gui.components.main.app;
 
 import dtos.*;
+import dtos.world.WorldDTO;
 import engine.Engine;
 import gui.components.main.details.DetailsController;
 import gui.components.main.execution.NewExecutionController;
@@ -83,8 +84,8 @@ public class AppController {
         return engine.getSimulationResultByAmountDTO(simulationID);
     }
 
-    public SimulationDetailsDTO getSimulationDetailsDTO() {
-        return engine.getSimulationDetailsDTO();
+    public WorldDTO getWorldDTO() {
+        return engine.getWorldDTO();
     }
 
     public HistogramDTO getHistogramDTO(int simulationID, String entityName, String propertyName) {

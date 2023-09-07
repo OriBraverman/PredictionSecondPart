@@ -1,7 +1,6 @@
 package world.factors.action.api;
 
 
-import world.World;
 import world.factors.entity.definition.EntityDefinition;
 
 import java.io.Serializable;
@@ -15,6 +14,11 @@ public abstract class AbstractAction implements Action, Serializable {
     protected AbstractAction(ActionType actionType, EntityDefinition sourceEntityDefinition) {
         this.actionType = actionType;
         this.sourceEntityDefinition = sourceEntityDefinition;
+    }
+
+    @Override
+    public EntityDefinition getPrimaryEntityDefinition() {
+        return sourceEntityDefinition;
     }
 
     @Override

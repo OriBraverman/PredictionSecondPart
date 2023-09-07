@@ -11,4 +11,9 @@ public abstract class AbstractRandomValueGenerator<T> implements ValueGenerator<
     protected AbstractRandomValueGenerator() {
         random = new Random();
     }
+
+    @Override
+    public boolean isRandomInit() {
+        return true;
+    }
 }

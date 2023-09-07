@@ -9,6 +9,9 @@ import java.util.List;
 
 public interface Action {
     void invoke(Context context);
+
+    EntityDefinition getPrimaryEntityDefinition();
+
     ActionType getActionType();
     EntityDefinition getContextEntity();
     boolean isPropertyExistInEntity();

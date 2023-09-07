@@ -1,4 +1,4 @@
-package dtos;
+package dtos.world;
 
 public class TerminationDTO {
     private int secondsCount = -1;

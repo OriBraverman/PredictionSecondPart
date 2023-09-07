@@ -14,7 +14,6 @@ import java.util.List;
 public class ProximityAction extends AbstractAction {
     private final EntityDefinition targetEntityDefinition;
     private final Expression of;
-    private List<Action> actions;
     private List<AbstractAction> thenActions;
 
     public ProximityAction(EntityDefinition sourceEntityDefinition, EntityDefinition targetEntityDefinition, Expression of, List<AbstractAction> thenActions){

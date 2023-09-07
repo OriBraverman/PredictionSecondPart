@@ -40,7 +40,8 @@ public abstract class AbstractExpression implements Expression {
         else {
             return new FreeValueExpression(expression);
         }
-    }
+    }// todo: add envVariableExpression
+    // todo: add
     public static boolean isFunctionExpression(String expression) {
         if (expression.charAt(expression.length() - 1) != ')') {
             return false;

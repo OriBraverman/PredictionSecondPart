@@ -29,4 +29,9 @@ public abstract class AbstractPropertyDefinition<T> implements PropertyDefinitio
     public Object generateValue() {
         return valueGenerator.generateValue();
     }
+
+    @Override
+    public boolean isRandomInit() {
+        return valueGenerator.isRandomInit();
+    }
 }

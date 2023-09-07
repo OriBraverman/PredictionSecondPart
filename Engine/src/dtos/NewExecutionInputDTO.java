@@ -1,19 +1,23 @@
 package dtos;
 
-public class NewExecutionInputDTO {
-    EnvVariableDefinitionDTO[] envVariables;
-    EntityDefinitionDTO[] entityDefinitions;
+import dtos.world.EntityDefinitionDTO;
 
-    public NewExecutionInputDTO(EnvVariableDefinitionDTO[] envVariables, EntityDefinitionDTO[] entityDefinitions) {
+import java.util.List;
+
+public class NewExecutionInputDTO {
+    List<EnvVariableDefinitionDTO> envVariables;
+    List<EntityDefinitionDTO> entityDefinitions;
+
+    public NewExecutionInputDTO(List<EnvVariableDefinitionDTO> envVariables, List<EntityDefinitionDTO> entityDefinitions) {
         this.envVariables = envVariables;
         this.entityDefinitions = entityDefinitions;
     }
 
-    public EnvVariableDefinitionDTO[] getEnvVariables() {
+    public List<EnvVariableDefinitionDTO> getEnvVariables() {
         return envVariables;
     }
 
-    public EntityDefinitionDTO[] getEntityDefinitions() {
+    public List<EntityDefinitionDTO> getEntityDefinitions() {
         return entityDefinitions;
     }
 }

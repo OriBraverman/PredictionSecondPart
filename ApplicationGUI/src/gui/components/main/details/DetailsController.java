@@ -1,13 +1,20 @@
 package gui.components.main.details;
 
 import dtos.*;
+import dtos.world.EntityDefinitionDTO;
+import dtos.world.RuleDTO;
+import dtos.world.TerminationDTO;
+import dtos.world.WorldDTO;
 import gui.components.main.app.AppController;
+import gui.components.main.details.tree.OpenableItem;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
+import javafx.scene.Parent;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.AnchorPane;
-import world.factors.property.definition.api.PropertyDefinition;
 
 public class DetailsController {
     @FXML private AnchorPane detailsComponent;
@@ -26,7 +33,7 @@ public class DetailsController {
         this.appController = appController;
     }
 
-    public void updateDetailsTreeView(SimulationDetailsDTO simulationDetailsDTO) {
+    public void updateDetailsTreeView(WorldDTO worldDTO) {
         TreeItem<String> root = detailsTreeView.getRoot();
         if (root == null) {
             detailsTreeView.setRoot(new TreeItem<>("Simulation Details:"));
@@ -34,40 +41,31 @@ public class DetailsController {
             root.getChildren().clear();
         }
         root = detailsTreeView.getRoot();
-        root.getChildren().add(new TreeItem<>("Entities"));
-        for (EntityDefinitionDTO entityDefinitionDTO : simulationDetailsDTO.getEntities()) {
-            makeButton(entityDefinitionDTO, root.getChildren().get(0));
-        }
-        root.getChildren().add(new TreeItem<>("Rules"));
-        for (RuleDTO rule : simulationDetailsDTO.getRules()) {
-            makeButton(rule, root.getChildren().get(1));
-        }
-        root.getChildren().add(new TreeItem<>("Environment Properties"));
-        for (EnvVariableDefinitionDTO envVariable : simulationDetailsDTO.getEnvVariables()) {
-            makeButton(envVariable, root.getChildren().get(2));
-        }
-        root.getChildren().add(new TreeItem<>("Termination Conditions"));
-        TerminationDTO termination = simulationDetailsDTO.getTermination();
-        makeButton(termination, root.getChildren().get(3));
-    }
+        detailsTreeView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        detailsTreeView.setCellFactory(param -> new TreeCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty)
+                    setText(null);
+                else
+                    setText(item);
 
-    private void makeButton(Object object, TreeItem<String> root) {
-        TreeItem<String> item = new TreeItem<>("");
-
-        Button button = new Button(getObjectString(object));
-        button.setOnAction(event -> {
-            if (object instanceof EntityDefinitionDTO) {
-                updateEntityComponent((EntityDefinitionDTO) object);
-            } else if (object instanceof RuleDTO) {
-                updateRuleComponent((RuleDTO) object);
-            } else if (object instanceof EnvVariableDefinitionDTO) {
-                updateEnvVariableComponent((EnvVariableDefinitionDTO) object);
-            } else if (object instanceof TerminationDTO) {
-                updateTerminationComponent((TerminationDTO) object);
+                selectedProperty().addListener(e -> {
+                    if (((ReadOnlyBooleanProperty)e).getValue()) {
+                        if (getTreeItem() instanceof OpenableItem) {
+                            OpenableItem openableItem = (OpenableItem) getTreeItem();
+                            Parent root = openableItem.getFullView();
+                            if (root instanceof TreeView) {
+                                TreeView<String> treeView = (TreeView<String>) root;
+                                treeView.setRoot(null);
+                                treeView.setRoot(openableItem.getFullInfo());
+                            }
+                        }
+                    }
+                });
             }
         });
-        item.setGraphic(button);
-        root.getChildren().add(item);
     }
 
     private String getObjectString(Object object) {
@@ -127,26 +125,18 @@ public class DetailsController {
         }
     }
 
-    private void updateEntityComponent(EntityDefinitionDTO entityDefinitionDTO) {
+    private void updateEntityPropertyComponent(EntityPropertyDefinitionDTO entityProperty) {
         TreeItem<String> root = fullInfoTree.getRoot();
-        fullInfoTree.setRoot(new TreeItem<>("Entity Details:"));
+        fullInfoTree.setRoot(new TreeItem<>("Entity Property Details:"));
         if (root != null) {
             root.getChildren().clear();
         }
         root = fullInfoTree.getRoot();
-        root.getChildren().add(new TreeItem<>("Name: " + entityDefinitionDTO.getName()));
-        root.getChildren().add(new TreeItem<>("Population: " + entityDefinitionDTO.getPopulation()));
-        root.getChildren().add(new TreeItem<>("Properties: "));
-        EntityPropertyDefinitionDTO[] properties = entityDefinitionDTO.getProperties();
-        for (int i = 0; i < properties.length; i++) {
-            root.getChildren().get(2).getChildren().add(new TreeItem<>(properties[i].getName()));
-            root.getChildren().get(2).getChildren().get(i).getChildren().add(new TreeItem<>("Type: " + properties[i].getType()));
-            if (properties[i].getFromRange() != null) {
-                root.getChildren().get(2).getChildren().get(i).getChildren().add(new TreeItem<>("From Range: " + properties[i].getFromRange()));
-                root.getChildren().get(2).getChildren().get(i).getChildren().add(new TreeItem<>("To Range: " + properties[i].getToRange()));
-            }
-            root.getChildren().get(2).getChildren().get(i).getChildren().add(new TreeItem<>("Value Generated: " + properties[i].getValueGenerated()));
-
+        root.getChildren().add(new TreeItem<>("Name: " + entityProperty.getName()));
+        root.getChildren().add(new TreeItem<>("Type: " + entityProperty.getType()));
+        if (entityProperty.getFromRange() != null) {
+            root.getChildren().add(new TreeItem<>("From Range: " + entityProperty.getFromRange()));
+            root.getChildren().add(new TreeItem<>("To Range: " + entityProperty.getToRange()));
         }
     }
 }
