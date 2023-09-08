@@ -14,7 +14,7 @@ public class EntityDefinitionImpl implements EntityDefinition, Serializable {
 
     public EntityDefinitionImpl(String name) {
         this.name = name;
-        this.population = -1;
+        this.population = 0;
         properties = new ArrayList<>();
     }
 

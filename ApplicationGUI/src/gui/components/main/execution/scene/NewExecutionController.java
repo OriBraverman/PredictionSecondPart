@@ -1,17 +1,23 @@
-package gui.components.main.execution;
+package gui.components.main.execution.scene;
 
 import dtos.*;
 import dtos.world.EntityDefinitionDTO;
 import dtos.world.PropertyDefinitionDTO;
 import gui.components.main.app.AppController;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.event.ActionEvent;
+import javafx.scene.layout.HBox;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class NewExecutionController {
     @FXML private Accordion envVariablesAccordion;
-    @FXML private Accordion entityPopulationAccordion;
+    @FXML private ListView entityPopulationListView;
     @FXML private Button clearSimulationButton;
     @FXML private Button startSimulationButton;
     private AppController appController;
@@ -20,6 +26,7 @@ public class NewExecutionController {
     }
 
     @FXML public void initialize(){
+        entityPopulationListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
 
 
@@ -33,12 +40,40 @@ public class NewExecutionController {
     }
 
     public void updateEntityPopulationInputVBox(NewExecutionInputDTO newExecutionInputDTO) {
-        if (entityPopulationAccordion.getPanes() != null) {
-            entityPopulationAccordion.getPanes().clear();
+        if (entityPopulationListView.getItems() != null) {
+            entityPopulationListView.getItems().clear();
         }
-        for (EntityDefinitionDTO entityDefinitionDTO : newExecutionInputDTO.getEntityDefinitions()) {
-            entityPopulationAccordion.getPanes().add(createEntitiesTitledPane(entityDefinitionDTO));
-        }
+        newExecutionInputDTO.getEntityDefinitions().forEach(entityDefinitionDTO -> {
+            // each list item is in the format: Entity: <entity name> [checkbox] [text field](optional)
+            HBox itemContainer = new HBox(); // Container for CheckBox and TextField
+
+            CheckBox checkBox = new CheckBox("");
+            itemContainer.getChildren().add(checkBox);
+
+            Label entityLabel = new Label("Entity: ");
+            itemContainer.getChildren().add(entityLabel);
+
+            Label entityNameLabel = new Label(entityDefinitionDTO.getName());
+            itemContainer.getChildren().add(entityNameLabel);
+
+            Label spaceLabel = new Label(" ");
+            itemContainer.getChildren().add(spaceLabel);
+
+            // Create a TextField for each CheckBox
+            TextField textField = new TextField();
+            textField.setDisable(true); // Initially, the TextField is disabled
+            textField.setVisible(false); // Initially, the TextField is not visible
+            itemContainer.getChildren().add(textField);
+
+            // Add listener to the CheckBox to enable and show/hide the TextField
+            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                textField.setDisable(!newValue); // Enable/disable TextField
+                textField.setVisible(newValue);     // Show/hide TextField
+            });
+
+            // Add the itemContainer (HBox) to the ListView
+            entityPopulationListView.getItems().add(itemContainer);
+        });
     }
 
     public TitledPane createEnvVarTitledPane(PropertyDefinitionDTO propertyDefinitionDTO) {
@@ -110,11 +145,45 @@ public class NewExecutionController {
         titledPane.setContent(anchorPane);
         return titledPane;
     }
-    public TitledPane createEntitiesTitledPane(EntityDefinitionDTO entityDefinitionDTO) {
-        return null;
-    }
+
     @FXML
     void startSimulationAction(ActionEvent event) {
+        EnvVariablesValuesDTO envVariablesValuesDTO = getEnvVariablesDTOS();
+        EntitiesPopulationDTO entityPopulationDTO = getEntityPopulationDTOS();
+        if (envVariablesValuesDTO == null || entityPopulationDTO == null) {
+            return;
+        }
+        appController.activateSimulation(envVariablesValuesDTO, entityPopulationDTO);
+    }
+
+    private EntitiesPopulationDTO getEntityPopulationDTOS() {
+        List<EntityPopulationDTO> entityPopulationDTOS = new ArrayList<>();
+        for (Object item : entityPopulationListView.getItems()) {
+            HBox itemContainer = (HBox) item;
+            String entityName = ((Label) itemContainer.getChildren().get(2)).getText();
+            CheckBox checkBox = (CheckBox) itemContainer.getChildren().get(0);
+            if (checkBox.isSelected()) {
+                TextField textField = (TextField) itemContainer.getChildren().get(4);
+                entityPopulationDTOS.add(new EntityPopulationDTO(entityName, textField.getText(), true));
+            } else {
+                entityPopulationDTOS.add(new EntityPopulationDTO(checkBox.getText(), "", false));
+            }
+        }
+        EntitiesPopulationDTO entitiesPopulationDTO = new EntitiesPopulationDTO(entityPopulationDTOS);
+        try {
+            appController.validateEntitiesPopulation(entitiesPopulationDTO);
+        } catch (IllegalArgumentException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Invalid value");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+            return null;
+        }
+        return new EntitiesPopulationDTO(entityPopulationDTOS);
+    }
+
+    private EnvVariablesValuesDTO getEnvVariablesDTOS() {
         EnvVariableValueDTO[] envVariablesDTOS = new EnvVariableValueDTO[envVariablesAccordion.getPanes().size()];
         for (int i = 0; i < envVariablesAccordion.getPanes().size(); i++) {
             TitledPane titledPane = envVariablesAccordion.getPanes().get(i);
@@ -124,21 +193,22 @@ public class NewExecutionController {
             if (checkBox.isSelected()) {
                 TextField textField = (TextField) anchorPane.getChildren().get(2);
                 envVariableValueDTO = new EnvVariableValueDTO(titledPane.getText(), textField.getText(), true);
-                if (!appController.validateEnvVariableValue(envVariableValueDTO)) {
+                try {
+                    appController.validateEnvVariableValue(envVariableValueDTO);
+                } catch (IllegalArgumentException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Error");
                     alert.setHeaderText("Invalid value");
-                    alert.setContentText("Please enter a valid value for " + titledPane.getText());
+                    alert.setContentText(e.getMessage());
                     alert.showAndWait();
-                    return;
+                    return null;
                 }
             } else {
                 envVariableValueDTO = new EnvVariableValueDTO(titledPane.getText(), "", false);
             }
             envVariablesDTOS[i] = envVariableValueDTO;
         }
-    EnvVariablesValuesDTO envVariablesValuesDTO = new EnvVariablesValuesDTO(envVariablesDTOS);
-    appController.activateSimulation(envVariablesValuesDTO);
+        return new EnvVariablesValuesDTO(envVariablesDTOS);
     }
 
     @FXML
@@ -148,6 +218,13 @@ public class NewExecutionController {
             CheckBox checkBox = (CheckBox) anchorPane.getChildren().get(0);
             checkBox.setSelected(false);
             TextField textField = (TextField) anchorPane.getChildren().get(2);
+            textField.setText("");
+        }
+        for (Object item : entityPopulationListView.getItems()) {
+            HBox itemContainer = (HBox) item;
+            CheckBox checkBox = (CheckBox) itemContainer.getChildren().get(0);
+            checkBox.setSelected(false);
+            TextField textField = (TextField) itemContainer.getChildren().get(1);
             textField.setText("");
         }
     }

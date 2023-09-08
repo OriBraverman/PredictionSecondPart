@@ -6,8 +6,8 @@ import dtos.world.PropertyDefinitionDTO;
 import java.util.List;
 
 public class NewExecutionInputDTO {
-    List<PropertyDefinitionDTO> envVariables;
-    List<EntityDefinitionDTO> entityDefinitions;
+    private final List<PropertyDefinitionDTO> envVariables;
+    private final List<EntityDefinitionDTO> entityDefinitions;
 
     public NewExecutionInputDTO(List<PropertyDefinitionDTO> envVariables, List<EntityDefinitionDTO> entityDefinitions) {
         this.envVariables = envVariables;

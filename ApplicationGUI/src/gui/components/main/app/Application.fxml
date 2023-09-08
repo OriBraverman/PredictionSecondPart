@@ -35,12 +35,12 @@
               <tabs>
                 <Tab text="Details">
                   <content>
-                      <fx:include fx:id="detailsComponent" source="../details/details.fxml" />
+                      <fx:include fx:id="detailsComponent" source="../details/scene/details.fxml" />
                   </content>
                 </Tab>
                 <Tab text="New Execution">
                   <content>
-                      <fx:include fx:id="newExecutionComponent" source="../execution/execution.fxml" />
+                      <fx:include fx:id="newExecutionComponent" source="../execution/scene/execution.fxml" />
                   </content>
                 </Tab>
                   <Tab text="Results">

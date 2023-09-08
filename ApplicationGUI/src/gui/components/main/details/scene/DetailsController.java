@@ -1,4 +1,4 @@
-package gui.components.main.details;
+package gui.components.main.details.scene;
 
 import dtos.*;
 import dtos.world.EntityDefinitionDTO;

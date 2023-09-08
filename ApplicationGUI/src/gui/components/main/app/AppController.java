@@ -3,20 +3,19 @@ package gui.components.main.app;
 import dtos.*;
 import dtos.world.WorldDTO;
 import engine.Engine;
-import gui.components.main.details.DetailsController;
-import gui.components.main.execution.NewExecutionController;
+import gui.components.main.details.scene.DetailsController;
+import gui.components.main.execution.scene.NewExecutionController;
 import gui.components.main.results.ResultsController;
 import gui.components.main.upload.UploadController;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 
 public class AppController {
 
@@ -57,6 +56,7 @@ public class AppController {
                 uploadComponentController.isXMLLoadedProperty().set(true);
                 detailsComponentController.updateDetailsTreeView(engine.getWorldDTO());
                 newExecutionComponentController.updateEnvVariablesInputVBox(engine.getNewExecutionInputDTO());
+                newExecutionComponentController.updateEntityPopulationInputVBox(engine.getNewExecutionInputDTO());
                 resultsComponentController.resetExecutionList();
                 isXMLLoaded.set(true);
                 isSimulationExecuted.set(false);
@@ -65,13 +65,14 @@ public class AppController {
             }
     }
 
-    public boolean validateEnvVariableValue(EnvVariableValueDTO envVariableValueDTO) {
-        return  engine.validateEnvVariableValue(envVariableValueDTO);
+    public void validateEnvVariableValue(EnvVariableValueDTO envVariableValueDTO) throws IllegalArgumentException {
+        engine.validateEnvVariableValue(envVariableValueDTO);
     }
 
-    public void activateSimulation(EnvVariablesValuesDTO envVariablesValuesDTO) {
+    public void activateSimulation(EnvVariablesValuesDTO envVariablesValuesDTO, EntitiesPopulationDTO entityPopulationDTO) {
         isSimulationExecuted.set(true);
         engine.updateActiveEnvironmentAndInformUser(envVariablesValuesDTO);
+        engine.updateActiveEntityPopulation(entityPopulationDTO);
         SimulationResultDTO simulationResultDTO = engine.activateSimulation();
         resultsComponentController.updateExecutionList(simulationResultDTO);
     }
@@ -91,4 +92,9 @@ public class AppController {
     public HistogramDTO getHistogramDTO(int simulationID, String entityName, String propertyName) {
         return engine.getHistogramDTO(simulationID, entityName, propertyName);
     }
+
+    public void validateEntitiesPopulation(EntitiesPopulationDTO entityPopulationDTOS) throws IllegalArgumentException{
+        engine.validateEntitiesPopulation(entityPopulationDTOS);
+    }
+
 }

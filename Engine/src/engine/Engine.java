@@ -7,6 +7,7 @@ import dtos.world.action.*;
 import resources.schema.generatedWorld.PRDWorld;
 
 import static java.util.Arrays.stream;
+import static validator.StringValidator.validateStringIsInteger;
 import static validator.XMLValidator.*;
 
 import simulation.Simulation;
@@ -249,16 +250,22 @@ public class Engine implements Serializable {
         return entityPropertyDefinitionDTOS;
     }
 
-    public boolean validateEnvVariableValue(EnvVariableValueDTO envVariableValueDTO) {
+    public void validateEnvVariableValue(EnvVariableValueDTO envVariableValueDTO) {
         PropertyDefinition propertyDefinition = this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName());
         if (propertyDefinition instanceof IntegerPropertyDefinition) {
             IntegerPropertyDefinition property = (IntegerPropertyDefinition) propertyDefinition;
-            return property.isInRange(envVariableValueDTO.getValue());
+            if(!property.isInRange(envVariableValueDTO.getValue())) {
+                throw new IllegalArgumentException("Property " + envVariableValueDTO.getName() + " is not in range");
+            }
         } else if (propertyDefinition instanceof FloatPropertyDefinition) {
             FloatPropertyDefinition property = (FloatPropertyDefinition) propertyDefinition;
-            return property.isInRange(envVariableValueDTO.getValue());
+            if(!property.isInRange(envVariableValueDTO.getValue())) {
+                throw new IllegalArgumentException("Property " + envVariableValueDTO.getName() + " is not in range");
+            }
         }
-        return propertyDefinition.getType().isMyType(envVariableValueDTO.getValue());
+        if (!propertyDefinition.getType().isMyType(envVariableValueDTO.getValue())) {
+            throw new IllegalArgumentException("Invalid value for env variable: " + envVariableValueDTO.getName());
+        }
     }
 
     public SimulationIDListDTO getSimulationListDTO() {
@@ -316,6 +323,38 @@ public class Engine implements Serializable {
         List<PropertyDefinitionDTO> envVariables = getEnvironmentDTO();
         List<EntityDefinitionDTO> entityDefinitionDTOS = getEntitiesDTO();
         return new NewExecutionInputDTO(envVariables, entityDefinitionDTOS);
+    }
+
+    public void updateActiveEntityPopulation(EntitiesPopulationDTO entityPopulationDTO) {
+        for (EntityPopulationDTO entityPopulation : entityPopulationDTO.getEntitiesPopulation()) {
+            String value;
+            if (entityPopulation.hasValue()) {
+                value = entityPopulation.getValue();
+                world.getEntityByName(entityPopulation.getName()).setPopulation(Integer.parseInt(value));
+            }
+        }
+    }
+
+    public void validateEntitiesPopulation(EntitiesPopulationDTO entitiesPopulationDTO) {
+        int MaxPopulation = this.world.getGrid().getHeight() * this.world.getGrid().getWidth();
+        int totalPopulation = 0;
+        for (EntityPopulationDTO entityPopulation : entitiesPopulationDTO.getEntitiesPopulation()) {
+            EntityDefinition entityDefinition = this.world.getEntityByName(entityPopulation.getName());
+            if (entityPopulation.hasValue()) {
+                String value = entityPopulation.getValue();
+                if (!validateStringIsInteger(value)) {
+                    throw new IllegalArgumentException("Invalid value type for entity: " + entityPopulation.getName());
+                }
+                int population = Integer.parseInt(value);
+                if (population < 0) {
+                    throw new IllegalArgumentException("A negative value for entity: " + entityPopulation.getName());
+                }
+                totalPopulation += Integer.parseInt(value);
+            }
+        }
+        if (totalPopulation > MaxPopulation) {
+            throw new IllegalArgumentException("Total population(" + totalPopulation + ") is bigger than the maximum population(" + MaxPopulation + ")");
+        }
     }
 }
 
