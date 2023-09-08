@@ -71,11 +71,10 @@ public class SingleCondition implements Condition, Serializable {
 
     @Override
     public String toString() {
-        return "SingleCondition{" +
-                "entityDefinition=" + entityDefinition +
-                ", propertyExpression='" + propertyExpression + '\'' +
-                ", operator=" + operator +
-                ", valueExpression='" + valueExpression + '\'' +
-                '}';
+        return "SingleCondition: " +
+                "Entity: " + entityDefinition.getName() + " " +
+                "Property: " + propertyExpression + " " +
+                "Operator: " + operator + " " +
+                "Value: " + valueExpression;
     }
 }

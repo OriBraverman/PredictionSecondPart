@@ -15,6 +15,7 @@ public class ActivationTreeItem extends TreeItem<String> implements OpenableItem
         TreeItem<String> root = new TreeItem<>("Activation Details:");
         root.getChildren().add(new TreeItem<>("Ticks: " + activationDTO.getTicks()));
         root.getChildren().add(new TreeItem<>("Probability: " + activationDTO.getProbability()));
+        root.setExpanded(true);
         return root;
     }
 }

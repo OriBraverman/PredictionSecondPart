@@ -123,7 +123,10 @@ public class Engine implements Serializable {
     }
 
     private TerminationDTO getTerminationDTO() {
-        return new TerminationDTO(this.world.getTermination().getTicksCount(), this.world.getTermination().getSecondsCount());
+        boolean isByUser = this.world.getTermination().isByUser();
+        int secondsCount = this.world.getTermination().getSecondsCount();
+        int ticksCount = this.world.getTermination().getTicksCount();
+        return new TerminationDTO(isByUser, secondsCount, ticksCount);
     }
 
     private List<RuleDTO> getRulesDTO() {

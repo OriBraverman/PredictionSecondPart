@@ -7,7 +7,6 @@ public class PropertyItem extends TreeItem<String> implements OpenableItem{
     private PropertyDefinitionDTO propertyDefinitionDTO;
     public PropertyItem(PropertyDefinitionDTO envVariable) {
         super(envVariable.getName());
-        setExpanded(true);
         this.propertyDefinitionDTO = envVariable;
     }
 
@@ -20,6 +19,7 @@ public class PropertyItem extends TreeItem<String> implements OpenableItem{
             root.getChildren().add(new TreeItem<>("From Range: " + propertyDefinitionDTO.getFromRange()));
             root.getChildren().add(new TreeItem<>("To Range: " + propertyDefinitionDTO.getToRange()));
         }
+        root.setExpanded(true);
         return root;
     }
 }

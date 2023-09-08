@@ -39,9 +39,13 @@ public class MultipleCondition implements Condition, Serializable {
 
     @Override
     public String toString() {
-        return "MultipleCondition{" +
-                "logical=" + logical +
-                ", conditions=" + conditions +
-                '}';
+        // Form: (condition1) logical (condition2) logical (condition3)
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < conditions.size(); i++) {
+            sb.append("(").append(conditions.get(i)).append(")");
+            if (i != conditions.size() - 1)
+                sb.append(" ").append(logical).append(" ");
+        }
+        return sb.toString();
     }
 }

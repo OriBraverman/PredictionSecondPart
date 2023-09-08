@@ -14,6 +14,17 @@ public class TerminationTreeItem extends TreeItem<String> implements OpenableIte
     @Override
     public TreeItem<String> getFullView() {
         TreeItem<String> root = new TreeItem<>("Termination Details:");
+        if (termination.isByUser()) {
+            root.getChildren().add(new TreeItem<>("Terminated By User"));
+        } else {
+            if (termination.getSecondsCount() != -1) {
+                root.getChildren().add(new TreeItem<>("Terminated By Seconds Count: " + termination.getSecondsCount()));
+            }
+            if (termination.getTicksCount() != -1) {
+                root.getChildren().add(new TreeItem<>("Terminated By Ticks Count: " + termination.getTicksCount()));
+            }
+        }
+        root.setExpanded(true);
         return root;
     }
 }
