@@ -1,25 +1,26 @@
 package world.factors.function.impl;
 
 import context.Context;
-import world.factors.expression.api.Expression;
-import world.factors.expression.impl.PropertyNameExpression;
 import world.factors.function.api.AbstractFunction;
 import world.factors.function.api.FunctionType;
+import world.factors.functionArgument.api.FunctionArgument;
+import world.factors.functionArgument.impl.EntityPropertyFunctionArgument;
 
 import java.util.List;
 
 public class TicksFunction extends AbstractFunction {
-    public TicksFunction(List<Expression> expressions) {
-        super(FunctionType.TICKS, expressions, 1);
+    public TicksFunction(List<FunctionArgument> functionArguments) {
+        super(FunctionType.TICKS, functionArguments, 1);
     }
 
     @Override
     public Object execute(Context context) {
-        if (!(this.expressions.get(0) instanceof PropertyNameExpression)) {
-            throw new IllegalArgumentException("evaluate function must have property name expression");
+        try {
+            EntityPropertyFunctionArgument entityPropertyFunctionArgument = (EntityPropertyFunctionArgument) this.functionArguments.get(0);
+            return context.getNumberOfTicksPropertyHasentChanged(entityPropertyFunctionArgument.getFunctionArgument());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("ticks function: " + e.getMessage());
         }
-        PropertyNameExpression propertyNameExpression = (PropertyNameExpression) this.expressions.get(0);
-        return context.getNumberOfTicksPropertyHasentChanged(propertyNameExpression.getStringExpression());
     }
 
     @Override

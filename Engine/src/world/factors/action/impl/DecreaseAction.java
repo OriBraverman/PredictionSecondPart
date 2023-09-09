@@ -78,11 +78,11 @@ public class DecreaseAction extends AbstractAction {
 
     @Override
     public boolean isPropertyExistInEntity() {
-        return sourceEntityDefinition.getPropertyDefinitionByName(property) != null;
+        return primaryEntityDefinition.getPropertyDefinitionByName(property) != null;
     }
 
     public boolean isMathActionHasNumericArgs(List<EntityDefinition> entities, EnvVariableManagerImpl envVariableManager) {
-        Expression expression = getExpressionByString(byExpression, sourceEntityDefinition);
+        Expression expression = getExpressionByString(byExpression, primaryEntityDefinition);
         return expression.isNumericExpression(entities, envVariableManager);
     }
 }

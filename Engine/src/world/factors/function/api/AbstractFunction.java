@@ -1,18 +1,17 @@
 package world.factors.function.api;
 
-import world.factors.expression.api.AbstractExpression;
-import world.factors.expression.api.Expression;
+import world.factors.functionArgument.api.FunctionArgument;
 
 import java.util.List;
 
 public abstract class AbstractFunction implements Function {
     protected final FunctionType functionType;
-    protected final List<Expression> expressions;
+    protected final List<FunctionArgument> functionArguments;
     protected final int numArgs;
 
-    public AbstractFunction(FunctionType functionType, List<Expression> expressions, int numArgs) {
+    public AbstractFunction(FunctionType functionType, List<FunctionArgument> functionArguments, int numArgs) {
         this.functionType = functionType;
-        this.expressions = expressions;
+        this.functionArguments = functionArguments;
         this.numArgs = numArgs;
     }
 

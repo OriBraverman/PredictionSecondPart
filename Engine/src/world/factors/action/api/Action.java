@@ -13,7 +13,6 @@ public interface Action {
     EntityDefinition getPrimaryEntityDefinition();
 
     ActionType getActionType();
-    EntityDefinition getContextEntity();
     boolean isPropertyExistInEntity();
     boolean isEntityExistInWorld(List<EntityDefinition> entities);
 }

@@ -12,24 +12,12 @@ import world.factors.property.definition.api.PropertyType;
 import java.util.List;
 
 public class PropertyNameExpression extends AbstractExpression {
-    String entityName;
     public PropertyNameExpression(String expression) {
-        this(expression, null);
-    }
-    public PropertyNameExpression(String propertyName, String entityName) {
-        super(propertyName, ExpressionType.PROPERTY_NAME);
-        this.entityName = entityName;
-    }
-
-    public String getEntityName() {
-        return entityName;
+        super(expression, ExpressionType.PROPERTY_NAME);
     }
 
     @Override
     public PropertyDefinition evaluate(Context context) {
-        if (entityName != null && !context.getPrimaryEntityInstance().getEntityDefinition().getName().equals(entityName)) {
-            throw new IllegalArgumentException("entity [" + entityName + "] is not the primary entity");
-        }
         EntityInstance entityInstance = context.getPrimaryEntityInstance();
         if (entityInstance.getPropertyByName(expression) != null) {
             return entityInstance.getPropertyByName(expression).getPropertyDefinition();

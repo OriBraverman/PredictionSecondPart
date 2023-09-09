@@ -8,8 +8,11 @@ import world.factors.expression.api.Expression;
 import world.factors.expression.api.ExpressionType;
 import world.factors.function.api.Function;
 import world.factors.function.api.FunctionType;
-import world.factors.function.impl.EnvironmentFunction;
-import world.factors.function.impl.RandomFunction;
+import world.factors.function.impl.*;
+import world.factors.functionArgument.api.FunctionArgument;
+import world.factors.functionArgument.impl.EntityPropertyFunctionArgument;
+import world.factors.functionArgument.impl.EnvPropertyFunctionArgument;
+import world.factors.functionArgument.impl.ExpressionFunctionArgument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,25 +26,63 @@ public class UtilFunctionExpression extends AbstractExpression {
 
     @Override
     public Function evaluate(Context context) {
+        return getFunctionByExpression(expression, context.getPrimaryEntityInstance().getEntityDefinition());
+    }
+
+    public Function getFunctionByExpression(String expression, EntityDefinition entityDefinition) {
         // this function receives only function expression
         // the function expression structure is: functionName(arg1,arg2,arg3,...)
         // so we need to extract the function name and the arguments
         List<String> elements = splitExpressionString(this.expression);
+        ArrayList<FunctionArgument> functionArguments = new ArrayList<>();
         List<Expression> args = new ArrayList<>();
         for (int i = 1; i < elements.size(); i++) {
-            args.add(getExpressionByString(elements.get(i), context.getPrimaryEntityInstance().getEntityDefinition()));
+            args.add(getExpressionByString(elements.get(i), entityDefinition));
         }
         switch(FunctionType.getFunctionType(elements.get(0))) {
             case ENVIRONMENT:
                 if (elements.size() != 2) {
                     throw new IllegalArgumentException("environment function must have only one argument");
                 }
-                return new EnvironmentFunction(args);
+                functionArguments.add(new EnvPropertyFunctionArgument(args.get(0).getStringExpression()));
+                return new EnvironmentFunction(functionArguments);
             case RANDOM:
                 if (elements.size() != 2) {
                     throw new IllegalArgumentException("random function must have only one argument");
                 }
-                return new RandomFunction(args);
+                functionArguments.add(new ExpressionFunctionArgument(args.get(0).getStringExpression(), args.get(0)));
+                return new RandomFunction(functionArguments);
+            case TICKS:
+                if (elements.size() != 2) {
+                    throw new IllegalArgumentException("ticks function must have only one argument");
+                }
+                if (expression.contains(".")) {
+                    String entityName = expression.substring(0, expression.indexOf("."));
+                    String propertyName = expression.substring(expression.indexOf(".") + 1);
+                    functionArguments.add(new EntityPropertyFunctionArgument(expression, entityName, propertyName));
+                    return new TicksFunction(functionArguments);
+                } else {
+                    throw new IllegalArgumentException("ticks function must have entity.property argument");
+                }
+            case EVALUATE:
+                if (elements.size() != 2) {
+                    throw new IllegalArgumentException("ticks function must have only one argument");
+                }
+                if (expression.contains(".")) {
+                    String entityName = expression.substring(0, expression.indexOf("."));
+                    String propertyName = expression.substring(expression.indexOf(".") + 1);
+                    functionArguments.add(new EntityPropertyFunctionArgument(expression, entityName, propertyName));
+                    return new EvaluateFunction(functionArguments);
+                } else {
+                    throw new IllegalArgumentException("evaluate function must have entity.property argument");
+                }
+            case PERCENT:
+                if (elements.size() != 3) {
+                    throw new IllegalArgumentException("percent function must have only two arguments");
+                }
+                functionArguments.add(new ExpressionFunctionArgument(args.get(0).getStringExpression(), args.get(0)));
+                functionArguments.add(new ExpressionFunctionArgument(args.get(1).getStringExpression(), args.get(1)));
+                return new PercentFunction(functionArguments);
             default:
                 throw new IllegalArgumentException("function [" + elements.get(0) + "] is not exist");
         }
@@ -52,30 +93,7 @@ public class UtilFunctionExpression extends AbstractExpression {
         Function function = getFunctionByExpression(expression, entityDefinitions.get(0));
         return function.isNumericFunction(envVariableManagerImpl);
     }
-    private Function getFunctionByExpression(String functionExpression, EntityDefinition entityDefinition) {
-        // this function receives only function expression
-        // the function expression structure is: functionName(arg1,arg2,arg3,...)
-        // so we need to extract the function name and the arguments
-        List<String> elements = splitExpressionString(functionExpression);
-        List<Expression> args = new ArrayList<>();
-        for (int i = 1; i < elements.size(); i++) {
-            args.add(getExpressionByString(elements.get(i), entityDefinition));
-        }
-        switch(FunctionType.getFunctionType(elements.get(0))) {
-            case ENVIRONMENT:
-                if (elements.size() != 2) {
-                    throw new IllegalArgumentException("environment function must have only one argument");
-                }
-                return new EnvironmentFunction(args);
-            case RANDOM:
-                if (elements.size() != 2) {
-                    throw new IllegalArgumentException("random function must have only one argument");
-                }
-                return new RandomFunction(args);
-            default:
-                throw new IllegalArgumentException("function [" + elements.get(0) + "] is not exist");
-        }
-    }
+
     private static List<String> splitExpressionString(String expression) {
         // this function receives only function expression
         // the function expression structure is: functionName(arg1,arg2,arg3,...)

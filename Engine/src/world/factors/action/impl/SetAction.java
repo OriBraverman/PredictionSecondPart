@@ -18,12 +18,12 @@ public class SetAction extends AbstractAction {
 
     @Override
     public void invoke(Context context) {
-        context.setPropertyValue(this.sourceEntityDefinition.getName(), this.property, this.value);
+        context.setPropertyValue(this.primaryEntityDefinition.getName(), this.property, this.value);
     }
 
     @Override
     public boolean isPropertyExistInEntity() {
-        return sourceEntityDefinition.getPropertyDefinitionByName(property) != null;
+        return primaryEntityDefinition.getPropertyDefinitionByName(property) != null;
     }
 
     public String getProperty() {

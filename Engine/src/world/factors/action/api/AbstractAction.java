@@ -9,16 +9,24 @@ import java.util.List;
 public abstract class AbstractAction implements Action, Serializable {
 
     protected final ActionType actionType;
-    protected final EntityDefinition sourceEntityDefinition;
+    protected final EntityDefinition primaryEntityDefinition;
+    protected final SecondaryEntity secondaryEntity;
 
-    protected AbstractAction(ActionType actionType, EntityDefinition sourceEntityDefinition) {
+    public AbstractAction(ActionType actionType, EntityDefinition primaryEntityDefinition) {
         this.actionType = actionType;
-        this.sourceEntityDefinition = sourceEntityDefinition;
+        this.primaryEntityDefinition = primaryEntityDefinition;
+        this.secondaryEntity = new SecondaryEntity();
+    }
+
+    protected AbstractAction(ActionType actionType, EntityDefinition primaryEntityDefinition, SecondaryEntity secondaryEntity) {
+        this.actionType = actionType;
+        this.primaryEntityDefinition = primaryEntityDefinition;
+        this.secondaryEntity = secondaryEntity;
     }
 
     @Override
     public EntityDefinition getPrimaryEntityDefinition() {
-        return sourceEntityDefinition;
+        return primaryEntityDefinition;
     }
 
     @Override
@@ -26,13 +34,13 @@ public abstract class AbstractAction implements Action, Serializable {
         return actionType;
     }
 
-    @Override
-    public EntityDefinition getContextEntity() {
-        return sourceEntityDefinition;
-    }
 
     @Override
     public boolean isEntityExistInWorld(List<EntityDefinition> entities) {
-        return entities.contains(sourceEntityDefinition);
+        if (entities.contains(primaryEntityDefinition)
+            || (secondaryEntity != null && entities.contains(secondaryEntity.getSecondaryEntityDefinition()))) {
+            return true;
+        }
+        return false;
     }
 }

@@ -35,7 +35,7 @@ public class ProximityAction extends AbstractAction {
     }
 
     private boolean shouldActivateActions(Context context){
-        boolean matchesDefintions = context.getPrimaryEntityInstance().getEntityDefinition().getName().equals(sourceEntityDefinition.getName())
+        boolean matchesDefintions = context.getPrimaryEntityInstance().getEntityDefinition().getName().equals(primaryEntityDefinition.getName())
                 && context.getSecondaryEntityInstance().getEntityDefinition().getName().equals(targetEntityDefinition.getName());
         int rank = (int)context.getValueByExpression(this.of);
         Collection<Coordinate> envCells = context.getGrid().findEnvironmentCells(context.getPrimaryEntityInstance().getCoordinate(), rank);

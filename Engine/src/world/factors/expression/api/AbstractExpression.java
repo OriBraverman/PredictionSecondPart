@@ -28,16 +28,8 @@ public abstract class AbstractExpression implements Expression {
         if (isFunctionExpression(expression)) {
             return new UtilFunctionExpression(expression);
         } else if (entityDefinition != null && entityDefinition.getPropertyDefinitionByName(expression) != null) {
-            // first type of PropertyNameExpression
             return new PropertyNameExpression(expression);
-        }
-        else if (entityDefinition != null && expression.contains(".")
-                && entityDefinition.getName().equals(getEntityName(expression))
-                && entityDefinition.getPropertyDefinitionByName(getPropertyName(expression)) != null) {
-            // second type of PropertyNameExpression
-            return new PropertyNameExpression(getEntityName(expression), getPropertyName(expression));
-        }
-        else {
+        } else {
             return new FreeValueExpression(expression);
         }
     }// todo: add envVariableExpression

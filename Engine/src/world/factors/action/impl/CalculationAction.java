@@ -23,7 +23,6 @@ public class CalculationAction extends AbstractAction {
     private final CalculationOperator operator;
     public enum CalculationOperator {
         MULTIPLY, DIVIDE;
-
         @Override
         public String toString() {
             switch (this) {
@@ -37,22 +36,6 @@ public class CalculationAction extends AbstractAction {
         }
     }
 
-    public String getArgument1() {
-        return argument1;
-    }
-
-    public String getArgument2() {
-        return argument2;
-    }
-
-    public String getResultProperty() {
-        return resultProperty;
-    }
-
-    public String getCalculationExpression() {
-        return argument1 + " " + operator.toString() + " " + argument2;
-    }
-
     public CalculationAction(EntityDefinition entityDefinition, String resultProperty, String argument1, String argument2, CalculationOperator operator) {
         super(ActionType.CALCULATION, entityDefinition);
         this.resultProperty = resultProperty;
@@ -64,8 +47,8 @@ public class CalculationAction extends AbstractAction {
     @Override
     public void invoke(Context context) {
         PropertyInstance propertyInstance = context.getPrimaryEntityInstance().getPropertyByName(resultProperty);
-        Expression expr1 = AbstractExpression.getExpressionByString(argument1, sourceEntityDefinition);
-        Expression expr2 = AbstractExpression.getExpressionByString(argument2, sourceEntityDefinition);
+        Expression expr1 = AbstractExpression.getExpressionByString(argument1, primaryEntityDefinition);
+        Expression expr2 = AbstractExpression.getExpressionByString(argument2, primaryEntityDefinition);
         float exp1Value = PropertyType.FLOAT.convert(context.getValueByExpression(expr1));
         float exp2Value = PropertyType.FLOAT.convert(context.getValueByExpression(expr2));
         if (propertyInstance.getType() == PropertyType.DECIMAL) {
@@ -115,12 +98,12 @@ public class CalculationAction extends AbstractAction {
 
     @Override
     public boolean isPropertyExistInEntity() {
-        return sourceEntityDefinition.getPropertyDefinitionByName(resultProperty) != null;
+        return primaryEntityDefinition.getPropertyDefinitionByName(resultProperty) != null;
     }
 
     public boolean isMathActionHasNumericArgs(List<EntityDefinition> entities, EnvVariableManagerImpl envVariableManagerImpl) {
-        Expression expr1 = AbstractExpression.getExpressionByString(argument1, sourceEntityDefinition);
-        Expression expr2 = AbstractExpression.getExpressionByString(argument2, sourceEntityDefinition);
+        Expression expr1 = AbstractExpression.getExpressionByString(argument1, primaryEntityDefinition);
+        Expression expr2 = AbstractExpression.getExpressionByString(argument2, primaryEntityDefinition);
         if (!(expr1.isNumericExpression(entities, envVariableManagerImpl))) {
             return false;
         }
@@ -128,5 +111,21 @@ public class CalculationAction extends AbstractAction {
             return false;
         }
         return true;
+    }
+
+    public String getArgument1() {
+        return argument1;
+    }
+
+    public String getArgument2() {
+        return argument2;
+    }
+
+    public String getResultProperty() {
+        return resultProperty;
+    }
+
+    public String getCalculationExpression() {
+        return argument1 + " " + operator.toString() + " " + argument2;
     }
 }
