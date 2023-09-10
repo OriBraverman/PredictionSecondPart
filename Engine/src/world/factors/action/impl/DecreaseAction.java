@@ -3,6 +3,7 @@ package world.factors.action.impl;
 import world.factors.action.api.AbstractAction;
 import world.factors.action.api.ActionType;
 
+import world.factors.action.api.SecondaryEntity;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.expression.api.Expression;
@@ -24,6 +25,12 @@ public class DecreaseAction extends AbstractAction {
 
     public DecreaseAction(EntityDefinition entityDefinition, String property, String byExpression) {
         super(ActionType.DECREASE, entityDefinition);
+        this.property = property;
+        this.byExpression = byExpression;
+    }
+
+    public DecreaseAction(EntityDefinition primaryEntityDefinition, SecondaryEntity secondaryEntity, String property, String byExpression) {
+        super(ActionType.DECREASE, primaryEntityDefinition, secondaryEntity);
         this.property = property;
         this.byExpression = byExpression;
     }

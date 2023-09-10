@@ -6,6 +6,7 @@ import world.World;
 import world.factors.action.api.AbstractAction;
 import world.factors.action.api.Action;
 import world.factors.action.api.ActionType;
+import world.factors.action.api.SecondaryEntity;
 import world.factors.action.impl.*;
 import world.factors.condition.*;
 import world.factors.entity.definition.EntityDefinition;
@@ -13,7 +14,6 @@ import world.factors.entity.definition.EntityDefinitionImpl;
 import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.expression.api.AbstractExpression;
-import world.factors.expression.impl.FreeValueExpression;
 import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.definition.api.Range;
@@ -169,39 +169,50 @@ public class Convertor implements Serializable {
 
     private Action getAction(PRDAction action, List<EntityDefinition> entities) {
         ActionType actionType = ActionType.getActionType(action.getType());
+        SecondaryEntity secondaryEntity = null;
+        if (action.getPRDSecondaryEntity() != null) {
+            String secondaryEntityName = action.getPRDSecondaryEntity().getEntity();
+            EntityDefinition secondaryEntityDefinition = getEntityDefinition(secondaryEntityName, entities);
+            String selectionCount = action.getPRDSecondaryEntity().getPRDSelection().getCount();
+            Condition selectionCondition = null;
+            if (action.getPRDSecondaryEntity().getPRDSelection().getPRDCondition() != null) {
+                selectionCondition = getCondition(action.getPRDSecondaryEntity().getPRDSelection().getPRDCondition(), entities);
+            }
+            secondaryEntity = new SecondaryEntity(secondaryEntityDefinition, selectionCount, selectionCondition);
+        }
         switch (actionType) {
             case INCREASE:
-                return getIncreaseAction(action, getEntityDefinition(action.getEntity(), entities));
+                return getIncreaseAction(action, getEntityDefinition(action.getEntity(), entities), secondaryEntity);
             case DECREASE:
-                return getDecreaseAction(action, getEntityDefinition(action.getEntity(), entities));
+                return getDecreaseAction(action, getEntityDefinition(action.getEntity(), entities), secondaryEntity);
             case CALCULATION:
-                return getCalculationAction(action, getEntityDefinition(action.getEntity(), entities));
+                return getCalculationAction(action, getEntityDefinition(action.getEntity(), entities), secondaryEntity);
             case CONDITION:
-                return getConditionAction(action, getEntityDefinition(action.getEntity(), entities), entities);
+                return getConditionAction(action, getEntityDefinition(action.getEntity(), entities), entities, secondaryEntity);
             case SET:
-                return getSetAction(action, getEntityDefinition(action.getEntity(), entities));
+                return getSetAction(action, getEntityDefinition(action.getEntity(), entities), secondaryEntity);
             case KILL:
                 return getKillAction(action, getEntityDefinition(action.getEntity(), entities));
             case REPLACE:
-                return getReplaceAction(action, getEntityDefinition(action.getKill(), entities), getEntityDefinition(action.getCreate(), entities));
+                return getReplaceAction(action, getEntityDefinition(action.getKill(), entities), getEntityDefinition(action.getCreate(), entities), secondaryEntity);
             case PROXIMITY:
                 PRDAction.PRDBetween between = action.getPRDBetween();
-                return getProximityAction(action, getEntityDefinition(between.getSourceEntity(), entities), getEntityDefinition(between.getTargetEntity(), entities), entities);
+                return getProximityAction(action, getEntityDefinition(between.getSourceEntity(), entities), getEntityDefinition(between.getTargetEntity(), entities), entities, secondaryEntity);
             default:
                 throw new RuntimeException("Unknown action type: " + actionType);
         }
     }
 
-    private Action getProximityAction(PRDAction action, EntityDefinition sourceEntityDefinition, EntityDefinition targetEntityDefinition, List<EntityDefinition> entities) {
+    private Action getProximityAction(PRDAction action, EntityDefinition primaryEntityDefinition, EntityDefinition targetEntityDefinition, List<EntityDefinition> entities, SecondaryEntity secondaryEntity) {
         List<AbstractAction> actions = null;
         if (action.getPRDActions() != null) {
             actions = getActions(action.getPRDActions().getPRDAction(), entities);
         }
-        return new ProximityAction(sourceEntityDefinition, targetEntityDefinition, AbstractExpression.getExpressionByString(action.getPRDEnvDepth().getOf(), null), actions);
+        return new ProximityAction(primaryEntityDefinition, secondaryEntity, targetEntityDefinition, AbstractExpression.getExpressionByString(action.getPRDEnvDepth().getOf(), null), actions);
     }
 
-    private Action getReplaceAction(PRDAction action, EntityDefinition killEntityDefinition, EntityDefinition createEntityDefinition) {
-        return new ReplaceAction(killEntityDefinition, createEntityDefinition, ReplaceType.getReplaceType(action.getMode()));
+    private Action getReplaceAction(PRDAction action, EntityDefinition killEntityDefinition, EntityDefinition createEntityDefinition, SecondaryEntity secondaryEntity) {
+        return new ReplaceAction(killEntityDefinition, secondaryEntity, createEntityDefinition, ReplaceType.getReplaceType(action.getMode()));
     }
 
     private Action getKillAction(PRDAction action, EntityDefinition entityDefinition) {
@@ -209,20 +220,20 @@ public class Convertor implements Serializable {
     }
 
 
-    private Action getSetAction(PRDAction action, EntityDefinition entityDefinition) {
+    private Action getSetAction(PRDAction action, EntityDefinition entityDefinition, SecondaryEntity secondaryEntity) {
         String property = action.getProperty();
         String value = action.getValue();
-        return new SetAction(entityDefinition, property, value);
+        return new SetAction(entityDefinition, secondaryEntity, property, value);
     }
 
-    private Action getConditionAction(PRDAction action, EntityDefinition entityDefinition, List<EntityDefinition> entities) {
+    private Action getConditionAction(PRDAction action, EntityDefinition entityDefinition, List<EntityDefinition> entities, SecondaryEntity secondaryEntity) {
         Condition condition = getCondition(action.getPRDCondition(), entities);
         List<AbstractAction> thenActions = getActions(action.getPRDThen().getPRDAction(), entities);
         List<AbstractAction> elseActions = null;
         if (action.getPRDElse() != null) {
             elseActions = getActions(action.getPRDElse().getPRDAction(), entities);
         }
-        return new ConditionAction(entityDefinition, condition, thenActions, elseActions);
+        return new ConditionAction(entityDefinition, secondaryEntity, condition, thenActions, elseActions);
     }
 
     private List<AbstractAction> getActions(List<PRDAction> prdAction, List<EntityDefinition> entities) {
@@ -264,23 +275,23 @@ public class Convertor implements Serializable {
         return filteredProps.get(0);
     }
 
-    private Action getCalculationAction(PRDAction action, EntityDefinition entityDefinition) {
+    private Action getCalculationAction(PRDAction action, EntityDefinition entityDefinition, SecondaryEntity secondaryEntity) {
         String resultProperty = action.getResultProp();
         if (action.getPRDMultiply() != null) {
             String argument1 = action.getPRDMultiply().getArg1();
             String argument2 = action.getPRDMultiply().getArg2();
-            return new CalculationAction(entityDefinition, resultProperty, argument1, argument2, CalculationAction.CalculationOperator.MULTIPLY);
+            return new CalculationAction(entityDefinition, secondaryEntity, resultProperty, argument1, argument2, CalculationAction.CalculationOperator.MULTIPLY);
         } else /*if (action.getPRDDivide() != null)*/ {
             String argument1 = action.getPRDDivide().getArg1();
             String argument2 = action.getPRDDivide().getArg2();
-            return new CalculationAction(entityDefinition, resultProperty, argument1, argument2, CalculationAction.CalculationOperator.DIVIDE);
+            return new CalculationAction(entityDefinition, secondaryEntity, resultProperty, argument1, argument2, CalculationAction.CalculationOperator.DIVIDE);
         }
     }
 
-    private Action getDecreaseAction(PRDAction action, EntityDefinition entityDefinition) {
+    private Action getDecreaseAction(PRDAction action, EntityDefinition entityDefinition, SecondaryEntity secondaryEntity) {
         String property = action.getProperty();
         String byExpression = action.getBy();
-        return new DecreaseAction(entityDefinition, property, byExpression);
+        return new DecreaseAction(entityDefinition, secondaryEntity, property, byExpression);
     }
 
     private EntityDefinition getEntityDefinition(String entity, List<EntityDefinition> entities) {
@@ -294,10 +305,10 @@ public class Convertor implements Serializable {
         return filteredEntities.get(0);
     }
 
-    private Action getIncreaseAction(PRDAction action, EntityDefinition entityDefinition) {
+    private Action getIncreaseAction(PRDAction action, EntityDefinition entityDefinition, SecondaryEntity secondaryEntity) {
         String property = action.getProperty();
         String byExpression = action.getBy();
-        return new IncreaseAction(entityDefinition, property, byExpression);
+        return new IncreaseAction(entityDefinition, secondaryEntity, property, byExpression);
     }
 
     private Termination getTermination() {

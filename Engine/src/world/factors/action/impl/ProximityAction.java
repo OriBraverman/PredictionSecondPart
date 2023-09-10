@@ -4,6 +4,7 @@ import context.Context;
 import world.factors.action.api.AbstractAction;
 import world.factors.action.api.Action;
 import world.factors.action.api.ActionType;
+import world.factors.action.api.SecondaryEntity;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.expression.api.Expression;
 import world.factors.grid.Coordinate;
@@ -16,8 +17,15 @@ public class ProximityAction extends AbstractAction {
     private final Expression of;
     private List<AbstractAction> thenActions;
 
-    public ProximityAction(EntityDefinition sourceEntityDefinition, EntityDefinition targetEntityDefinition, Expression of, List<AbstractAction> thenActions){
-        super(ActionType.PROXIMITY, sourceEntityDefinition);
+    public ProximityAction(EntityDefinition primaryEntityDefinition, EntityDefinition targetEntityDefinition, Expression of, List<AbstractAction> thenActions){
+        super(ActionType.PROXIMITY, primaryEntityDefinition);
+        this.targetEntityDefinition = targetEntityDefinition;
+        this.of = of;
+        this.thenActions = thenActions;
+    }
+
+    public ProximityAction(EntityDefinition primaryEntityDefinition, SecondaryEntity secondaryEntity, EntityDefinition targetEntityDefinition, Expression of, List<AbstractAction> thenActions) {
+        super(ActionType.PROXIMITY, primaryEntityDefinition, secondaryEntity);
         this.targetEntityDefinition = targetEntityDefinition;
         this.of = of;
         this.thenActions = thenActions;

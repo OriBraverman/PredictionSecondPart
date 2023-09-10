@@ -3,6 +3,7 @@ package world.factors.action.impl;
 import context.Context;
 import world.factors.action.api.AbstractAction;
 import world.factors.action.api.ActionType;
+import world.factors.action.api.SecondaryEntity;
 import world.factors.condition.Condition;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
@@ -16,6 +17,13 @@ public class ConditionAction extends AbstractAction {
 
     public ConditionAction(EntityDefinition entityDefinition, Condition condition, List<AbstractAction> thenActions, List<AbstractAction> elseActions) {
         super(ActionType.CONDITION, entityDefinition);
+        this.condition = condition;
+        this.thenActions = thenActions;
+        this.elseActions = elseActions;
+    }
+
+    public ConditionAction(EntityDefinition primaryEntityDefinition, SecondaryEntity secondaryEntity, Condition condition, List<AbstractAction> thenActions, List<AbstractAction> elseActions) {
+        super(ActionType.CONDITION, primaryEntityDefinition, secondaryEntity);
         this.condition = condition;
         this.thenActions = thenActions;
         this.elseActions = elseActions;

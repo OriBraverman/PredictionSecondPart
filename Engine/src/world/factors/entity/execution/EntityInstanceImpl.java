@@ -13,6 +13,7 @@ public class EntityInstanceImpl implements EntityInstance, Serializable {
     private final EntityDefinition entityDefinition;
     private final int id;
     private Map<String, PropertyInstance> properties;
+    private Map<PropertyInstance, Integer> propertiesLastUpdatedTick;
     private Coordinate coordinate;
 
     public EntityInstanceImpl(EntityDefinition entityDefinition, int id, Coordinate coordinate) {
@@ -20,6 +21,7 @@ public class EntityInstanceImpl implements EntityInstance, Serializable {
         this.id = id;
         this.coordinate = coordinate;
         properties = new HashMap<>();
+        propertiesLastUpdatedTick = new HashMap<>();
     }
 
     @Override

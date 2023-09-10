@@ -4,6 +4,7 @@ import context.Context;
 import world.World;
 import world.factors.action.api.AbstractAction;
 import world.factors.action.api.ActionType;
+import world.factors.action.api.SecondaryEntity;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.expression.api.AbstractExpression;
@@ -38,6 +39,14 @@ public class CalculationAction extends AbstractAction {
 
     public CalculationAction(EntityDefinition entityDefinition, String resultProperty, String argument1, String argument2, CalculationOperator operator) {
         super(ActionType.CALCULATION, entityDefinition);
+        this.resultProperty = resultProperty;
+        this.argument1 = argument1;
+        this.argument2 = argument2;
+        this.operator = operator;
+    }
+
+    public CalculationAction(EntityDefinition primaryEntityDefinition, SecondaryEntity secondaryEntity, String resultProperty, String argument1, String argument2, CalculationOperator operator) {
+        super(ActionType.CALCULATION, primaryEntityDefinition, secondaryEntity);
         this.resultProperty = resultProperty;
         this.argument1 = argument1;
         this.argument2 = argument2;
