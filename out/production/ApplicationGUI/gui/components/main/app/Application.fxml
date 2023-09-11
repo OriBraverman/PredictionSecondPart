@@ -45,7 +45,7 @@
                 </Tab>
                   <Tab text="Results">
                     <content>
-                        <fx:include fx:id="resultsComponent" source="../results/results.fxml" />
+                        <fx:include fx:id="resultsComponent" source="../results/scene/results.fxml" />
                     </content>
                   </Tab>
               </tabs>

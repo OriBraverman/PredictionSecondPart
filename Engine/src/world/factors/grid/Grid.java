@@ -189,6 +189,8 @@ public class Grid {
         if (availableCoordinates.isEmpty()) {
             throw new IllegalStateException("Grid is full");
         }
-        return availableCoordinates.get((int) (Math.random() * availableCoordinates.size()));
+        Coordinate coordinate = availableCoordinates.get((int) (Math.random() * availableCoordinates.size()));
+        grid[coordinate.getX()][coordinate.getY()].setOccupied(true);
+        return coordinate;
     }
 }

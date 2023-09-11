@@ -13,29 +13,24 @@ import java.util.Collection;
 import java.util.List;
 
 public class ProximityAction extends AbstractAction {
-    private final EntityDefinition targetEntityDefinition;
     private final Expression of;
     private List<AbstractAction> thenActions;
 
-    public ProximityAction(EntityDefinition primaryEntityDefinition, EntityDefinition targetEntityDefinition, Expression of, List<AbstractAction> thenActions){
+    public ProximityAction(EntityDefinition primaryEntityDefinition, Expression of, List<AbstractAction> thenActions){
         super(ActionType.PROXIMITY, primaryEntityDefinition);
-        this.targetEntityDefinition = targetEntityDefinition;
         this.of = of;
         this.thenActions = thenActions;
     }
 
-    public ProximityAction(EntityDefinition primaryEntityDefinition, SecondaryEntity secondaryEntity, EntityDefinition targetEntityDefinition, Expression of, List<AbstractAction> thenActions) {
+    public ProximityAction(EntityDefinition primaryEntityDefinition, SecondaryEntity secondaryEntity, Expression of, List<AbstractAction> thenActions) {
         super(ActionType.PROXIMITY, primaryEntityDefinition, secondaryEntity);
-        this.targetEntityDefinition = targetEntityDefinition;
         this.of = of;
         this.thenActions = thenActions;
     }
 
     @Override
     public void invoke(Context context) {
-
         if (shouldActivateActions(context)) {
-
             for (AbstractAction thenAction : thenActions) {
                 thenAction.invoke(context);
             }
@@ -44,7 +39,7 @@ public class ProximityAction extends AbstractAction {
 
     private boolean shouldActivateActions(Context context){
         boolean matchesDefintions = context.getPrimaryEntityInstance().getEntityDefinition().getName().equals(primaryEntityDefinition.getName())
-                && context.getSecondaryEntityInstance().getEntityDefinition().getName().equals(targetEntityDefinition.getName());
+                && context.getSecondaryEntityInstance().getEntityDefinition().getName().equals(secondaryEntity.getSecondaryEntityDefinition().getName());
         int rank = (int)context.getValueByExpression(this.of);
         Collection<Coordinate> envCells = context.getGrid().findEnvironmentCells(context.getPrimaryEntityInstance().getCoordinate(), rank);
         boolean areClose = envCells.contains(context.getSecondaryEntityInstance().getCoordinate());
@@ -59,11 +54,7 @@ public class ProximityAction extends AbstractAction {
 
     @Override
     public boolean isEntityExistInWorld(List<EntityDefinition> entities) {
-        return super.isEntityExistInWorld(entities) && entities.contains(targetEntityDefinition);
-    }
-
-    public EntityDefinition getTargetEntityDefinition() {
-        return targetEntityDefinition;
+        return super.isEntityExistInWorld(entities);
     }
 
     public String getStringOf() {

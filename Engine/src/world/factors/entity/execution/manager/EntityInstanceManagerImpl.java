@@ -1,9 +1,13 @@
 package world.factors.entity.execution.manager;
 
 
+import context.ContextImpl;
+import world.factors.action.api.SecondaryEntity;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.entity.execution.EntityInstanceImpl;
+import world.factors.environment.execution.api.ActiveEnvironment;
+import world.factors.grid.Coordinate;
 import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
@@ -11,7 +15,12 @@ import world.factors.property.execution.PropertyInstanceImpl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static validator.StringValidator.validateStringIsInteger;
 
 public class EntityInstanceManagerImpl implements EntityInstanceManager, Serializable {
 
@@ -106,14 +115,69 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     @Override
     public void moveEntity(EntityInstance entityInstance, Grid grid) {
-        if (grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP) != null) {
-            entityInstance.setCoordinate(grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP));
-        } else if (grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.DOWN) != null) {
-            entityInstance.setCoordinate(grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.DOWN));
-        } else if (grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.RIGHT) != null) {
-            entityInstance.setCoordinate(grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.RIGHT));
-        } else if (grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.LEFT) != null) {
-            entityInstance.setCoordinate(grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.LEFT));
+        Coordinate newCoordinate;
+        if ((newCoordinate = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP)) != null) {
+            entityInstance.setCoordinate(newCoordinate);
+        } else if ((newCoordinate = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.DOWN)) != null) {
+            entityInstance.setCoordinate(newCoordinate);
+        } else if ((newCoordinate = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.RIGHT)) != null) {
+            entityInstance.setCoordinate(newCoordinate);
+        } else if ((newCoordinate = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.LEFT)) != null) {
+            entityInstance.setCoordinate(newCoordinate);
+        }
+    }
+
+    @Override
+    public void moveAllInstances(Grid grid) {
+        for (EntityInstance entityInstance : instances) {
+            moveEntity(entityInstance, grid);
+        }
+    }
+
+    @Override
+    public List<EntityInstance> getSelectedSeconderyEntites(SecondaryEntity secondaryEntity, ActiveEnvironment activeEnvironment, Grid grid, int currentTick) {
+        List<EntityInstance> secondaryEntityInstances = instances
+                .stream()
+                .filter(instance -> instance.getEntityDefinition().getName().equals(secondaryEntity.getSecondaryEntityDefinition().getName()))
+                .collect(Collectors.toList());
+        if (secondaryEntity.getSelectionCount() == "ALL") {
+            return secondaryEntityInstances;
+        } else if (validateStringIsInteger(secondaryEntity.getSelectionCount())) {
+            int count = Integer.parseInt(secondaryEntity.getSelectionCount());
+            //need to select all the secondary entities that are satisfy the condition if the condition is not null
+            List<EntityInstance> selectedSecondaryEntityInstances = null;
+            if (secondaryEntity.getSelectionCondition() != null) {
+                selectedSecondaryEntityInstances = instances
+                        .stream()
+                        .filter(instance -> secondaryEntity.getSelectionCondition().assertCondition(new ContextImpl(instance, this, activeEnvironment, grid, currentTick)))
+                        .collect(Collectors.toList());
+            }
+            if (count < 0) {
+                throw new IllegalArgumentException("secondary entity selection count is negative");
+            } else if (count >= secondaryEntityInstances.size()) {
+                return secondaryEntityInstances;
+            } else if (selectedSecondaryEntityInstances != null) {
+                List<EntityInstance> res = new ArrayList<>();
+                if (selectedSecondaryEntityInstances.size() == 0) {
+                    return res;
+                }
+                for (int i = 0; i < count; i++) {
+                    res.add(selectedSecondaryEntityInstances.get((int) (Math.random() * selectedSecondaryEntityInstances.size())));
+                }
+                return res;
+            } else {
+                List<EntityInstance> res = new ArrayList<>();
+                if (secondaryEntityInstances.size() == 0) {
+                    return res;
+                }
+                for (int i = 0; i < count; i++) {
+                    res.add(secondaryEntityInstances.get((int) (Math.random() * secondaryEntityInstances.size())));
+                }
+                return res;
+            }
+        } else {
+            throw new IllegalArgumentException("secondary entity selection count is not a number");
+
         }
     }
 }

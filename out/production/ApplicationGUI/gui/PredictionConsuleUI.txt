@@ -126,7 +126,7 @@ public class PredictionConsuleUI {
             System.out.println("Simulation ID: " + simulationIDDTO.getId() + "\n"
                     + "Simulation Start Time: " + simulationIDDTO.getStartTime() + "\n");
         }
-        System.out.println("Please enter the ID of the simulation you want to see:");
+        System.out.println("Please enter the ID of the simulationRunnerImpl you want to see:");
         Scanner scanner = new Scanner(System.in);
         int simulationID = inputManager.getInt();
         while (!engine.validateSimulationID(simulationID)) {

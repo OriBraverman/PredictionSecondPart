@@ -1,8 +1,12 @@
-package gui.components.main.results;
+package gui.components.main.results.scene;
 
 import dtos.*;
 import dtos.world.EntityDefinitionDTO;
+import dtos.world.PropertyDefinitionDTO;
+import dtos.world.WorldDTO;
 import gui.components.main.app.AppController;
+import gui.components.main.results.simulation.SimulationController;
+import gui.components.main.upload.UploadController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -10,14 +14,16 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 
 
 public class ResultsController {
     @FXML private ListView<String> executionList;
-    @FXML private Label entitiesCountDisplay;
-    @FXML private FlowPane executionResult;
-
+    @FXML private SimulationController simulationComponentController;
+    @FXML private AnchorPane simulationComponent;
+    //when the first simulation starts initiate thread that will every 200 ms update the results list & the current selected simulation result
+    private Thread updateResultThread;
     private AppController appController;
     public void initialize(){
         ObservableList<String> items = FXCollections.observableArrayList();
@@ -54,38 +60,12 @@ public class ResultsController {
             for (int i = 0; i < simulationResultByAmountDTO.getEntityInstanceResults().length; i++) {
                 entitiesCount += simulationResultByAmountDTO.getEntityInstanceResults()[i].getEndingPopulation();
             }
-            entitiesCountDisplay.setText(entitiesCount + "");
-            updateSimulationHistograms(id);
+            simulationComponentController.setEntitiesCountDisplay(entitiesCount + "");
+            simulationComponentController.updateSimulationHistograms(id);
         }
     }
+    public SimulationController getSimulationComponentController() {
+        return simulationComponentController;
 
-    private void updateSimulationHistograms(int id) {
-        /*if (executionResult.getChildren() != null) {
-            executionResult.getChildren().clear();
-        }
-        SimulationDetailsDTO simulationDetailsDTO = appController.getSimulationDetailsDTO();
-        for (EntityDefinitionDTO entityDefinitionDTO : simulationDetailsDTO.getEntities()) {
-            for (EntityPropertyDefinitionDTO entityPropertyDefinitionDTO : entityDefinitionDTO.getProperties()) {
-                HistogramDTO histogramDTO = appController.getHistogramDTO(id, entityDefinitionDTO.getName(), entityPropertyDefinitionDTO.getName());
-                // histogramDTO is a map of <Object, Integer> where the object can be:
-                // 1. String
-                // 2. Integer
-                // 3. Float
-                // 4. Boolean
-                // create a bar chart for the histogramDTO
-                BarChart<String, Number> barChart = new BarChart<>(new javafx.scene.chart.CategoryAxis(), new javafx.scene.chart.NumberAxis());
-                barChart.setTitle(entityDefinitionDTO.getName() + " - " + entityPropertyDefinitionDTO.getName());
-                javafx.scene.chart.CategoryAxis xAxis = (javafx.scene.chart.CategoryAxis) barChart.getXAxis();
-                xAxis.setLabel("Value of property");
-                javafx.scene.chart.NumberAxis yAxis = (javafx.scene.chart.NumberAxis) barChart.getYAxis();
-                yAxis.setLabel("Amount of entities");
-                javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
-                for (Object key : histogramDTO.getHistogram().keySet()) {
-                    series.getData().add(new javafx.scene.chart.XYChart.Data<>(key.toString(), histogramDTO.getHistogram().get(key)));
-                }
-                barChart.getData().add(series);
-                executionResult.getChildren().add(barChart);
-            }
-        }*/
     }
 }

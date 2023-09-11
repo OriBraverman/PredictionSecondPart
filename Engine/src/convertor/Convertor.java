@@ -208,7 +208,10 @@ public class Convertor implements Serializable {
         if (action.getPRDActions() != null) {
             actions = getActions(action.getPRDActions().getPRDAction(), entities);
         }
-        return new ProximityAction(primaryEntityDefinition, secondaryEntity, targetEntityDefinition, AbstractExpression.getExpressionByString(action.getPRDEnvDepth().getOf(), null), actions);
+        if (secondaryEntity == null) {
+            secondaryEntity = new SecondaryEntity(targetEntityDefinition, "ALL", null);
+        }
+        return new ProximityAction(primaryEntityDefinition, secondaryEntity, AbstractExpression.getExpressionByString(action.getPRDEnvDepth().getOf(), null), actions);
     }
 
     private Action getReplaceAction(PRDAction action, EntityDefinition killEntityDefinition, EntityDefinition createEntityDefinition, SecondaryEntity secondaryEntity) {

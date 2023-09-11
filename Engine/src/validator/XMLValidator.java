@@ -13,6 +13,7 @@ import world.factors.entity.definition.EntityDefinition;
 import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.expression.api.Expression;
+import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.rule.Rule;
 
@@ -144,6 +145,13 @@ public class XMLValidator {
             }
         }
     }
-
+    public static void validateGrid(Grid grid) {
+        int height = grid.getHeight();
+        int width = grid.getWidth();
+        // both between 10 and 100
+        if(height < 10 || height > 100 || width < 10 || width > 100) {
+            throw new IllegalArgumentException("Grid height and width must be between 10 and 100");
+        }
+    }
 
 }

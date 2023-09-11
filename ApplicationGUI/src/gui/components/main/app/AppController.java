@@ -5,7 +5,7 @@ import dtos.world.WorldDTO;
 import engine.Engine;
 import gui.components.main.details.scene.DetailsController;
 import gui.components.main.execution.scene.NewExecutionController;
-import gui.components.main.results.ResultsController;
+import gui.components.main.results.scene.ResultsController;
 import gui.components.main.upload.UploadController;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -15,7 +15,6 @@ import javafx.scene.layout.HBox;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
 
 public class AppController {
 
@@ -41,11 +40,12 @@ public class AppController {
         tabPane.getTabs().get(1).disableProperty().bind(isXMLLoaded.not());
         tabPane.getTabs().get(2).disableProperty().bind(isSimulationExecuted.not());
         if (uploadComponentController != null && detailsComponentController != null && newExecutionComponentController != null
-                && resultsComponentController != null) {
+                && resultsComponentController != null && resultsComponentController.getSimulationComponentController() != null) {
             uploadComponentController.setAppController(this);
             detailsComponentController.setAppController(this);
             newExecutionComponentController.setAppController(this);
             resultsComponentController.setAppController(this);
+            resultsComponentController.getSimulationComponentController().setAppController(this);
         }
     }
 

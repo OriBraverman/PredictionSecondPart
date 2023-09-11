@@ -10,12 +10,13 @@ import static java.util.Arrays.stream;
 import static validator.StringValidator.validateStringIsInteger;
 import static validator.XMLValidator.*;
 
-import simulation.Simulation;
-import simulation.SimulationManager;
+import simulation.SimulationExecutionDetails;
+import simulation.SimulationRunner;
+import simulation.SimulationRunnerImpl;
+import simulation.SimulationExecutionManager;
 import world.World;
 import world.factors.action.api.AbstractAction;
 import world.factors.action.api.Action;
-import world.factors.action.api.ActionType;
 import world.factors.action.impl.*;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
@@ -42,12 +43,12 @@ import java.util.*;
 
 public class Engine implements Serializable {
     private World world;
-    private SimulationManager simulationManager;
+    private SimulationExecutionManager simulationExecutionManager;
     private ActiveEnvironment activeEnvironment;
 
     public Engine() {
         this.world = null;
-        this.simulationManager = new SimulationManager();
+        this.simulationExecutionManager = null;
         this.activeEnvironment = null;
     }
 
@@ -75,12 +76,13 @@ public class Engine implements Serializable {
         Convertor convertor = new Convertor();
         convertor.setGeneratedWorld(generatedWorld);
         World tempWorld = convertor.convertPRDWorldToWorld();
+        validateGrid(tempWorld.getGrid());
         validateAllActionsReferToExistingEntities(tempWorld);
         validateAllActionsReferToExistingEntityProperties(tempWorld);
         validateMathActionHasNumericArgs(tempWorld.getRules(), tempWorld.getEntities(), (EnvVariableManagerImpl) tempWorld.getEnvironment());
         // if loaded successfully, clear the old engine and set the new one
         this.world = tempWorld;
-        this.simulationManager = new SimulationManager();
+        this.simulationExecutionManager = new SimulationExecutionManager(this.world.getThreadCount());
         this.activeEnvironment = null;
     }
 
@@ -100,9 +102,10 @@ public class Engine implements Serializable {
         return envVariablesValuesDTO;
     }
     public SimulationResultDTO activateSimulation() {
-        Simulation simulation = this.simulationManager.createSimulation(this.world, this.activeEnvironment);
-        simulation.run();
-        return new SimulationResultDTO(simulation.getId(), simulation.isTerminatedBySecondsCount(), simulation.isTerminatedByTicksCount());
+        int simulationId = this.simulationExecutionManager.createSimulation(this.world, this.activeEnvironment);
+        this.simulationExecutionManager.runSimulation(simulationId);
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationId);
+        return new SimulationResultDTO(simulationExecutionDetails.getId(), simulationExecutionDetails.isTerminatedBySecondsCount(), simulationExecutionDetails.isTerminatedByTicksCount());
     }
 
     public WorldDTO getWorldDTO() {
@@ -180,7 +183,7 @@ public class Engine implements Serializable {
                 return new ReplaceActionDTO(getEntityDefinitionDTO(action), createEntityDefinitionDTO, mode);
             case PROXIMITY:
                 ProximityAction proximityAction = (ProximityAction) action;
-                EntityDefinitionDTO targetEntityDefinitionDTO = getEntityDefinitionDTO(proximityAction.getTargetEntityDefinition());
+                EntityDefinitionDTO targetEntityDefinitionDTO = getEntityDefinitionDTO(proximityAction.getSecondaryEntity().getSecondaryEntityDefinition());
                 String ofValue = proximityAction.getStringOf();
                 thenActions = getAbstructActionsDTO(proximityAction.getThenActions());
                 return new ProximityActionDTO(getEntityDefinitionDTO(action), targetEntityDefinitionDTO, ofValue, thenActions);
@@ -269,26 +272,26 @@ public class Engine implements Serializable {
     }
 
     public SimulationIDListDTO getSimulationListDTO() {
-        SimulationIDDTO[] simulationIDDTOS = this.simulationManager.getSimulationIDDTOS();
+        SimulationIDDTO[] simulationIDDTOS = this.simulationExecutionManager.getSimulationIDDTOS();
         return new SimulationIDListDTO(simulationIDDTOS);
     }
 
     public boolean validateSimulationID(int userChoice) {
-        return this.simulationManager.isSimulationIDExists(userChoice);
+        return this.simulationExecutionManager.isSimulationIDExists(userChoice);
     }
 
     public SimulationResultByAmountDTO getSimulationResultByAmountDTO(int simulationID) {
-        Simulation simulation = this.simulationManager.getSimulationByID(simulationID);
-        return new SimulationResultByAmountDTO(simulation.getId(), getEntityResultsDTO(simulation));
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
+        return new SimulationResultByAmountDTO(simulationExecutionDetails.getId(), getEntityResultsDTO(simulationExecutionDetails));
     }
 
-    private EntityResultDTO[] getEntityResultsDTO(Simulation simulation) {
+    private EntityResultDTO[] getEntityResultsDTO(SimulationExecutionDetails simulationExecutionDetails) {
         //use stream
         EntityResultDTO[] entityResultDTOS = stream(this.world.getEntities().toArray())
                 .map(entityDefinition -> {
                     String name = ((EntityDefinition) entityDefinition).getName();
                     int startingPopulation = ((EntityDefinition) entityDefinition).getPopulation();
-                    int endingPopulation = simulation.getEntityInstanceManager().getEntityCountByName(name);
+                    int endingPopulation = simulationExecutionDetails.getEntityInstanceManager().getEntityCountByName(name);
                     return new EntityResultDTO(name, startingPopulation, endingPopulation);
                 })
                 .toArray(EntityResultDTO[]::new);
@@ -300,7 +303,7 @@ public class Engine implements Serializable {
         Map<Object, Integer> histogram = new HashMap<>();
         EntityDefinition entityDefinition = this.world.getEntityByName(entityName);
         PropertyDefinition propertyDefinition = entityDefinition.getPropertyDefinitionByName(propertyName);
-        for (EntityInstance entityInstance : this.simulationManager.getSimulationByID(simulationID).getEntityInstanceManager().getInstances()) {
+        for (EntityInstance entityInstance : this.simulationExecutionManager.getSimulationDetailsByID(simulationID).getEntityInstanceManager().getInstances()) {
             if (entityInstance.getEntityDefinition().getName().equals(entityName)) {
                 // we already know that the property is there
                 PropertyInstance propertyInstance = entityInstance.getPropertyByName(propertyName);

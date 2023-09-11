@@ -43,4 +43,8 @@ public abstract class AbstractAction implements Action, Serializable {
         }
         return false;
     }
+
+    public SecondaryEntity getSecondaryEntity() {
+        return secondaryEntity;
+    }
 }

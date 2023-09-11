@@ -56,9 +56,9 @@ public class UtilFunctionExpression extends AbstractExpression {
                 if (elements.size() != 2) {
                     throw new IllegalArgumentException("ticks function must have only one argument");
                 }
-                if (expression.contains(".")) {
-                    String entityName = expression.substring(0, expression.indexOf("."));
-                    String propertyName = expression.substring(expression.indexOf(".") + 1);
+                if (elements.get(1).contains(".")) {
+                    String entityName = elements.get(1).substring(0, elements.get(1).indexOf("."));
+                    String propertyName = elements.get(1).substring(elements.get(1).indexOf(".") + 1);
                     functionArguments.add(new EntityPropertyFunctionArgument(expression, entityName, propertyName));
                     return new TicksFunction(functionArguments);
                 } else {
@@ -68,9 +68,9 @@ public class UtilFunctionExpression extends AbstractExpression {
                 if (elements.size() != 2) {
                     throw new IllegalArgumentException("ticks function must have only one argument");
                 }
-                if (expression.contains(".")) {
-                    String entityName = expression.substring(0, expression.indexOf("."));
-                    String propertyName = expression.substring(expression.indexOf(".") + 1);
+                if (elements.get(1).contains(".")) {
+                    String entityName = elements.get(1).substring(0, elements.get(1).indexOf("."));
+                    String propertyName = elements.get(1).substring(elements.get(1).indexOf(".") + 1);
                     functionArguments.add(new EntityPropertyFunctionArgument(expression, entityName, propertyName));
                     return new EvaluateFunction(functionArguments);
                 } else {
