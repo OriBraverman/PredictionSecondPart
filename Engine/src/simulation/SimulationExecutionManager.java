@@ -1,6 +1,6 @@
 package simulation;
 
-import dtos.SimulationIDDTO;
+import dtos.SimulationIDListDTO;
 import world.World;
 import world.factors.environment.execution.api.ActiveEnvironment;
 
@@ -36,12 +36,10 @@ public class SimulationExecutionManager implements Serializable {
     }
 
 
-    public SimulationIDDTO[] getSimulationIDDTOS() {
-        List<SimulationIDDTO> simulationIDDTOS = new ArrayList<>();
-        for (SimulationExecutionDetails simulationExecutionDetails : simulationDetails.values()) {
-            simulationIDDTOS.add(new SimulationIDDTO(simulationExecutionDetails.getId(), simulationExecutionDetails.getFormattedStartTime()));
-        }
-        return simulationIDDTOS.toArray(new SimulationIDDTO[0]);
+    public SimulationIDListDTO getSimulationIDListDTO() {
+        List<Integer> simulationIDs = new ArrayList<>();
+        simulationIDs.addAll(simulationDetails.keySet());
+        return new SimulationIDListDTO(simulationIDs);
     }
 
     public boolean isSimulationIDExists(int userChoice) {

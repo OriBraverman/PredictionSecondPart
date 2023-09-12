@@ -42,17 +42,18 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
     }
     @Override
     public void run() {
-        Instant start = Instant.now();
+        this.simulationED.setStartTime(Instant.now());
         Date date = new Date();
         this.simulationED.setFormattedStartTime(this.dateFormat.format(date));
 
         initEntityInstancesArray();
         int currentTick = 0;
         Instant now = Instant.now();
-        Duration duration = Duration.between(start, now);
+        Duration duration = Duration.between(simulationED.getStartTime(), now);
         long seconds = duration.getSeconds();
         while (!this.simulationED.getWorld().getTermination().isTerminated(currentTick, seconds)) {
             currentTick++;
+            simulationED.setCurrentTick(currentTick);
             simulationED.getEntityInstanceManager().moveAllInstances(this.simulationED.getWorld().getGrid());
             int finalCurrentTick = currentTick;
             List<Action> actionableRules = simulationED.getWorld().getRules()
@@ -77,7 +78,7 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                 }
             }
             now = Instant.now();
-            duration = Duration.between(start, now);
+            duration = Duration.between(simulationED.getStartTime(), now);
             seconds = duration.getSeconds();
         }
         simulationED.setIsTerminatedBySecondsCount(simulationED.getWorld().getTermination().isTerminatedBySecondsCount(seconds));

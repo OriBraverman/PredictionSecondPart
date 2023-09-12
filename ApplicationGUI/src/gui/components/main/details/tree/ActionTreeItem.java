@@ -113,7 +113,7 @@ public class ActionTreeItem extends TreeItem<String> implements OpenableItem {
         TreeItem<String> thenAction = new TreeItem<>("Then Actions:");
         action.getThenActions().forEach(thenActionDTO -> thenAction.getChildren().add(getFullView(thenActionDTO)));
         thenAction.setExpanded(true);
-        if (action.getElseActions().size() > 0) {
+        if (action.getElseActions() != null && !action.getElseActions().isEmpty()) {
             TreeItem<String> elseAction = new TreeItem<>("Else Actions:");
             action.getElseActions().forEach(elseActionDTO -> elseAction.getChildren().add(getFullView(elseActionDTO)));
             elseAction.setExpanded(true);

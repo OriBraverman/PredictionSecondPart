@@ -103,6 +103,11 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     }
 
     @Override
+    public int getAliveEntityCount() {
+        return instances.size();
+    }
+
+    @Override
     public int getEntityCountByName(String entityName) {
         int count = 0;
         for (EntityInstance entityInstance : instances) {

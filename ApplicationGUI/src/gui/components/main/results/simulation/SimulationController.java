@@ -1,10 +1,13 @@
 package gui.components.main.results.simulation;
 
 import dtos.HistogramDTO;
+import dtos.SimulationExecutionDetailsDTO;
 import dtos.world.EntityDefinitionDTO;
 import dtos.world.PropertyDefinitionDTO;
 import dtos.world.WorldDTO;
 import gui.components.main.app.AppController;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -15,9 +18,23 @@ import javafx.scene.layout.FlowPane;
 public class SimulationController {
     @FXML private Label entitiesCountDisplay;
     @FXML private FlowPane executionResult;
+    @FXML private Label currentTickDisplay;
+    @FXML private Label timeSinceSimulationStartedDisplay;
     private AppController appController;
-    public void initialize(){
 
+    private SimpleIntegerProperty currentSimulationID;
+    private SimpleIntegerProperty entitiesCount;
+    private SimpleIntegerProperty currentTick;
+    private SimpleLongProperty timeSinceSimulationStarted;
+
+    public void initialize() {
+        currentSimulationID = new SimpleIntegerProperty();
+        entitiesCount = new SimpleIntegerProperty();
+        currentTick = new SimpleIntegerProperty();
+        timeSinceSimulationStarted = new SimpleLongProperty();
+        entitiesCountDisplay.textProperty().bind(entitiesCount.asString());
+        currentTickDisplay.textProperty().bind(currentTick.asString());
+        timeSinceSimulationStartedDisplay.textProperty().bind(timeSinceSimulationStarted.asString());
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -55,4 +72,11 @@ public class SimulationController {
         }
     }
 
+    public void updateSimulationComponent(SimulationExecutionDetailsDTO simulationExecutionDetailsDTO) {
+        currentSimulationID.set(simulationExecutionDetailsDTO.getId());
+        entitiesCount.set(simulationExecutionDetailsDTO.getNumberOfEntities());
+        currentTick.set(simulationExecutionDetailsDTO.getCurrentTick());
+        timeSinceSimulationStarted.set(simulationExecutionDetailsDTO.getDurationInSeconds());
+        updateSimulationHistograms(simulationExecutionDetailsDTO.getId());
+    }
 }

@@ -20,5 +20,6 @@ public interface EntityInstanceManager {
     void replaceDerived(EntityInstance entityInstance, EntityDefinition entityDefinition);
     void moveEntity(EntityInstance entityInstance, Grid grid);
     void moveAllInstances(Grid grid);
+    int getAliveEntityCount();
     List<EntityInstance> getSelectedSeconderyEntites(SecondaryEntity secondaryEntity, ActiveEnvironment activeEnvironment, Grid grid, int currentTick);
 }

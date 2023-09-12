@@ -1,19 +1,12 @@
 package dtos;
 
 public class SimulationIDDTO {
-    private final int id;
-    private final String startTime;
-
-    public SimulationIDDTO(int id, String startTime) {
-        this.id = id;
-        this.startTime = startTime;
+    private final int simulationId;
+    public SimulationIDDTO(int simulationId) {
+        this.simulationId = simulationId;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getStartTime() {
-        return startTime;
+    public int getSimulationId() {
+        return simulationId;
     }
 }

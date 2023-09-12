@@ -38,6 +38,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 
@@ -101,11 +103,10 @@ public class Engine implements Serializable {
         this.activeEnvironment = activeEnvironment;
         return envVariablesValuesDTO;
     }
-    public SimulationResultDTO activateSimulation() {
+    public SimulationIDDTO activateSimulation() {
         int simulationId = this.simulationExecutionManager.createSimulation(this.world, this.activeEnvironment);
         this.simulationExecutionManager.runSimulation(simulationId);
-        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationId);
-        return new SimulationResultDTO(simulationExecutionDetails.getId(), simulationExecutionDetails.isTerminatedBySecondsCount(), simulationExecutionDetails.isTerminatedByTicksCount());
+        return new SimulationIDDTO(simulationId);
     }
 
     public WorldDTO getWorldDTO() {
@@ -172,8 +173,12 @@ public class Engine implements Serializable {
                 ConditionAction conditionAction = (ConditionAction) action;
                 String conditionExpression = conditionAction.getCondition();
                 thenActions = getAbstructActionsDTO(conditionAction.getThenActions());
-                List<AbstructActionDTO> elseActions = getAbstructActionsDTO(conditionAction.getElseActions().isEmpty() ? null : conditionAction.getElseActions());
-                return new ConditionActionDTO(getEntityDefinitionDTO(action), conditionExpression, thenActions, elseActions);
+                if (conditionAction.getElseActions() != null) {
+                    List<AbstructActionDTO> elseActions = getAbstructActionsDTO(conditionAction.getElseActions());
+                    return new ConditionActionDTO(getEntityDefinitionDTO(action), conditionExpression, thenActions, elseActions);
+                } else {
+                    return new ConditionActionDTO(getEntityDefinitionDTO(action), conditionExpression, thenActions, null);
+                }
             case KILL:
                 return new KillActionDTO(getEntityDefinitionDTO(action));
             case REPLACE:
@@ -272,8 +277,7 @@ public class Engine implements Serializable {
     }
 
     public SimulationIDListDTO getSimulationListDTO() {
-        SimulationIDDTO[] simulationIDDTOS = this.simulationExecutionManager.getSimulationIDDTOS();
-        return new SimulationIDListDTO(simulationIDDTOS);
+        return this.simulationExecutionManager.getSimulationIDListDTO();
     }
 
     public boolean validateSimulationID(int userChoice) {
@@ -303,7 +307,11 @@ public class Engine implements Serializable {
         Map<Object, Integer> histogram = new HashMap<>();
         EntityDefinition entityDefinition = this.world.getEntityByName(entityName);
         PropertyDefinition propertyDefinition = entityDefinition.getPropertyDefinitionByName(propertyName);
-        for (EntityInstance entityInstance : this.simulationExecutionManager.getSimulationDetailsByID(simulationID).getEntityInstanceManager().getInstances()) {
+
+        // Create a copy of the list to avoid ConcurrentModificationException
+        List<EntityInstance> instancesCopy = new ArrayList<>(this.simulationExecutionManager.getSimulationDetailsByID(simulationID).getEntityInstanceManager().getInstances());
+
+        for (EntityInstance entityInstance : instancesCopy) {
             if (entityInstance.getEntityDefinition().getName().equals(entityName)) {
                 // we already know that the property is there
                 PropertyInstance propertyInstance = entityInstance.getPropertyByName(propertyName);
@@ -358,6 +366,22 @@ public class Engine implements Serializable {
         if (totalPopulation > MaxPopulation) {
             throw new IllegalArgumentException("Total population(" + totalPopulation + ") is bigger than the maximum population(" + MaxPopulation + ")");
         }
+    }
+
+    public SimulationExecutionDetailsDTO getSimulationExecutionDetailsDTO(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
+        boolean ticks = simulationExecutionDetails.isTerminatedByTicksCount();
+        boolean seconds = simulationExecutionDetails.isTerminatedBySecondsCount();
+        int entitiesCount = simulationExecutionDetails.getEntityInstanceManager().getAliveEntityCount();
+        int currentTick = simulationExecutionDetails.getCurrentTick();
+        Instant startTime = simulationExecutionDetails.getStartTime();
+        if (startTime == null) {
+            startTime = Instant.now();
+        }
+        Instant now = Instant.now();
+        Duration duration = Duration.between(startTime, now);
+        long secondsPassed = duration.getSeconds();
+        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, entitiesCount, currentTick, secondsPassed);
     }
 }
 

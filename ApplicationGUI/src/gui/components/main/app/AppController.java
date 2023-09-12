@@ -73,8 +73,10 @@ public class AppController {
         isSimulationExecuted.set(true);
         engine.updateActiveEnvironmentAndInformUser(envVariablesValuesDTO);
         engine.updateActiveEntityPopulation(entityPopulationDTO);
-        SimulationResultDTO simulationResultDTO = engine.activateSimulation();
-        resultsComponentController.updateExecutionList(simulationResultDTO);
+        SimulationIDDTO simulationIDDTO = engine.activateSimulation();
+        resultsComponentController.addSimulationToExecutionList(simulationIDDTO);
+        resultsComponentController.setIsActive(true);
+
     }
 
     public SimulationIDListDTO getSimulationListDTO() {
@@ -97,4 +99,7 @@ public class AppController {
         engine.validateEntitiesPopulation(entityPopulationDTOS);
     }
 
+    public SimulationExecutionDetailsDTO getSimulationExecutionDetailsDTO(int simulationID) {
+        return engine.getSimulationExecutionDetailsDTO(simulationID);
+    }
 }

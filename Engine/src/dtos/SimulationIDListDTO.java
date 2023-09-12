@@ -1,13 +1,15 @@
 package dtos;
 
-public class SimulationIDListDTO {
-    private final SimulationIDDTO[] simulationIDDTOS;
+import java.util.List;
 
-    public SimulationIDListDTO(SimulationIDDTO[] simulationIDDTOS) {
-        this.simulationIDDTOS = simulationIDDTOS;
+public class SimulationIDListDTO {
+    private final List<Integer> simulationsID;
+
+    public SimulationIDListDTO(List<Integer> simulationsID) {
+        this.simulationsID = simulationsID;
     }
 
-    public SimulationIDDTO[] getSimulationIDDTOS() {
-        return simulationIDDTOS;
+    public List<Integer> getSimulationsID() {
+        return simulationsID;
     }
 }
