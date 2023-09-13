@@ -104,9 +104,6 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     @Override
     public int getAliveEntityCount() {
-        if (instances.size() > 200) {
-            System.out.println("alive entity count: " + instances.size());
-        }
         return instances.size();
     }
 
