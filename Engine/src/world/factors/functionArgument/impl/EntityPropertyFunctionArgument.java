@@ -23,6 +23,13 @@ public class EntityPropertyFunctionArgument extends AbstructFunctionArgument {
         } else {
             throw new RuntimeException("Entity " + this.entityName + " not found");
         }
+    }
 
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public String getPropertyName() {
+        return propertyName;
     }
 }

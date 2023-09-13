@@ -12,6 +12,8 @@ import world.factors.grid.Coordinate;
 import java.util.Collection;
 import java.util.List;
 
+import static java.lang.Math.floor;
+
 public class ProximityAction extends AbstractAction {
     private final Expression of;
     private List<AbstractAction> thenActions;
@@ -40,7 +42,11 @@ public class ProximityAction extends AbstractAction {
     private boolean shouldActivateActions(Context context){
         boolean matchesDefintions = context.getPrimaryEntityInstance().getEntityDefinition().getName().equals(primaryEntityDefinition.getName())
                 && context.getSecondaryEntityInstance().getEntityDefinition().getName().equals(secondaryEntity.getSecondaryEntityDefinition().getName());
-        int rank = (int)context.getValueByExpression(this.of);
+        //context.getValueByExpression(this.of) is float like 1.65 so get the floor of it
+        if (!(context.getValueByExpression(this.of) instanceof Number)) {
+            throw new RuntimeException("ProximityAction: shouldActivateActions: of expression should be a number");
+        }
+        int rank = (int) floor((Float)context.getValueByExpression(this.of));
         Collection<Coordinate> envCells = context.getGrid().findEnvironmentCells(context.getPrimaryEntityInstance().getCoordinate(), rank);
         boolean areClose = envCells.contains(context.getSecondaryEntityInstance().getCoordinate());
 

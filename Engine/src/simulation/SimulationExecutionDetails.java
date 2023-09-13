@@ -15,9 +15,12 @@ public class SimulationExecutionDetails {
     private final EntityInstanceManager entityInstanceManager;
     private boolean isTerminatedBySecondsCount = false;
     private boolean isTerminatedByTicksCount = false;
+    private boolean isRunning = false;
+    private boolean isPaused = false;
     private Instant startTime;
     private String formattedStartTime;
     private int currentTick = 0;
+    private Thread simulationThread;
 
     public SimulationExecutionDetails(int id, ActiveEnvironment activeEnvironment, World world) {
         this.id = id;
@@ -68,5 +71,37 @@ public class SimulationExecutionDetails {
 
     public void setStartTime(Instant startTime) {
         this.startTime = startTime;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+
+    public void setTerminatedBySecondsCount(boolean terminatedBySecondsCount) {
+        isTerminatedBySecondsCount = terminatedBySecondsCount;
+    }
+
+    public void setTerminatedByTicksCount(boolean terminatedByTicksCount) {
+        isTerminatedByTicksCount = terminatedByTicksCount;
+    }
+
+    public void setRunning(boolean running) {
+        isRunning = running;
+    }
+
+    public void setPaused(boolean paused) {
+        isPaused = paused;
+    }
+
+    public Thread getSimulationThread() {
+        return simulationThread;
+    }
+
+    public void setSimulationThread(Thread simulationThread) {
+        this.simulationThread = simulationThread;
     }
 }

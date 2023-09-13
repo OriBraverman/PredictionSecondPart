@@ -372,6 +372,8 @@ public class Engine implements Serializable {
         SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
         boolean ticks = simulationExecutionDetails.isTerminatedByTicksCount();
         boolean seconds = simulationExecutionDetails.isTerminatedBySecondsCount();
+        boolean isRunning = simulationExecutionDetails.isRunning();
+        boolean isPaused = simulationExecutionDetails.isPaused();
         int entitiesCount = simulationExecutionDetails.getEntityInstanceManager().getAliveEntityCount();
         int currentTick = simulationExecutionDetails.getCurrentTick();
         Instant startTime = simulationExecutionDetails.getStartTime();
@@ -381,7 +383,19 @@ public class Engine implements Serializable {
         Instant now = Instant.now();
         Duration duration = Duration.between(startTime, now);
         long secondsPassed = duration.getSeconds();
-        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, entitiesCount, currentTick, secondsPassed);
+        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, isRunning, isPaused, entitiesCount, currentTick, secondsPassed);
+    }
+
+    public void stopSimulation(int simulationID) {
+        this.simulationExecutionManager.stopSimulation(simulationID);
+    }
+
+    public void pauseSimulation(int simulationID) {
+        this.simulationExecutionManager.pauseSimulation(simulationID);
+    }
+
+    public void resumeSimulation(int simulationID) {
+        this.simulationExecutionManager.resumeSimulation(simulationID);
     }
 }
 

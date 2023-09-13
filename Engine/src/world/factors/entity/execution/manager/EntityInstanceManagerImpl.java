@@ -53,11 +53,11 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
         instances.add(newEntityInstance);
 
         for (PropertyDefinition propertyDefinition : entityDefinition.getProps()) {
-            if (entityInstance.getPropertyByName(propertyDefinition.getName()) != null) {
+            try {
                 Object value = entityInstance.getPropertyByName(propertyDefinition.getName()).getValue();
                 PropertyInstance newPropertyInstance = new PropertyInstanceImpl(propertyDefinition, value);
                 newEntityInstance.addPropertyInstance(newPropertyInstance);
-            } else {
+            } catch (IllegalArgumentException e) {
                 Object value = propertyDefinition.generateValue();
                 PropertyInstance newPropertyInstance = new PropertyInstanceImpl(propertyDefinition, value);
                 newEntityInstance.addPropertyInstance(newPropertyInstance);

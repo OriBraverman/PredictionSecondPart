@@ -17,7 +17,7 @@ public class TicksFunction extends AbstractFunction {
     public Object execute(Context context) {
         try {
             EntityPropertyFunctionArgument entityPropertyFunctionArgument = (EntityPropertyFunctionArgument) this.functionArguments.get(0);
-            return context.getNumberOfTicksPropertyHasentChanged(entityPropertyFunctionArgument.getFunctionArgument());
+            return context.getNumberOfTicksPropertyHasentChanged(entityPropertyFunctionArgument.getPropertyName());
         } catch (Exception e) {
             throw new IllegalArgumentException("ticks function: " + e.getMessage());
         }

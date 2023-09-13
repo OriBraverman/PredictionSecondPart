@@ -102,4 +102,16 @@ public class AppController {
     public SimulationExecutionDetailsDTO getSimulationExecutionDetailsDTO(int simulationID) {
         return engine.getSimulationExecutionDetailsDTO(simulationID);
     }
+
+    public void stopSimulation(int simulationID) {
+        engine.stopSimulation(simulationID);
+    }
+
+    public void pauseSimulation(int simulationID) {
+        engine.pauseSimulation(simulationID);
+    }
+
+    public void resumeSimulation(int simulationID) {
+        engine.resumeSimulation(simulationID);
+    }
 }

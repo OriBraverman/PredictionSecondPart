@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="471.0" prefWidth="636.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.results.simulation.SimulationController">
+<AnchorPane fx:id="simulationView" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="471.0" prefWidth="636.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.results.simulation.SimulationController">
     <children>
         <GridPane layoutX="69.0" layoutY="16.0" prefHeight="188.0" prefWidth="522.0">
             <columnConstraints>
@@ -28,12 +28,12 @@
             <children>
                 <Label text="entites count:" GridPane.rowIndex="1" />
                 <Label fx:id="entitiesCountDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Button mnemonicParsing="false" text="Rerun!" GridPane.rowIndex="4" />
+                <Button fx:id="rerunSimulationButton" mnemonicParsing="false" onAction="#rerunSimulationButtonAction" text="Rerun!" GridPane.rowIndex="4" />
             <Label text="current tick:" GridPane.rowIndex="2" />
             <Label fx:id="currentTickDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" text="pause" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <Button mnemonicParsing="false" text="resume" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" text="stop" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Button fx:id="pauseSimulationButton" mnemonicParsing="false" onAction="#pauseSimulationButtonAction" text="pause" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Button fx:id="resumeSimulationButton" mnemonicParsing="false" onAction="#resumeSimulationButtonAction" text="resume" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <Button fx:id="stopSimulationButton" mnemonicParsing="false" onAction="#stopSimulationButtonAction" text="stop" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             <Label text="time since simulation started:" GridPane.rowIndex="3" />
             <Label fx:id="timeSinceSimulationStartedDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             </children>

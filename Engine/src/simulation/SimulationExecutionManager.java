@@ -54,4 +54,31 @@ public class SimulationExecutionManager implements Serializable {
         SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationId);
         threadExecutor.execute(simulationRunnerImpl);
     }
+
+    public void stopSimulation(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
+        Thread simulationThread = simulationExecutionDetails.getSimulationThread();
+        if (simulationThread != null) {
+            simulationThread.interrupt();
+            simulationExecutionDetails.setRunning(false);
+        }
+    }
+
+    public void pauseSimulation(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
+        Thread simulationThread = simulationExecutionDetails.getSimulationThread();
+        if (simulationThread != null) {
+            simulationThread.suspend();
+            simulationExecutionDetails.setPaused(true);
+        }
+    }
+
+    public void resumeSimulation(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
+        Thread simulationThread = simulationExecutionDetails.getSimulationThread();
+        if (simulationThread != null) {
+            simulationThread.resume();
+            simulationExecutionDetails.setPaused(false);
+        }
+    }
 }
