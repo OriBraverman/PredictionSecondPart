@@ -5,6 +5,7 @@ import world.World;
 import world.factors.environment.execution.api.ActiveEnvironment;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +71,7 @@ public class SimulationExecutionManager implements Serializable {
         if (simulationThread != null) {
             simulationThread.suspend();
             simulationExecutionDetails.setPaused(true);
+            simulationExecutionDetails.addDuration(Duration.between(simulationExecutionDetails.getCurrStartTime(), java.time.Instant.now()));
         }
     }
 
@@ -79,6 +81,7 @@ public class SimulationExecutionManager implements Serializable {
         if (simulationThread != null) {
             simulationThread.resume();
             simulationExecutionDetails.setPaused(false);
+            simulationExecutionDetails.setCurrStartTime(java.time.Instant.now());
         }
     }
 }

@@ -376,13 +376,7 @@ public class Engine implements Serializable {
         boolean isPaused = simulationExecutionDetails.isPaused();
         int entitiesCount = simulationExecutionDetails.getEntityInstanceManager().getAliveEntityCount();
         int currentTick = simulationExecutionDetails.getCurrentTick();
-        Instant startTime = simulationExecutionDetails.getStartTime();
-        if (startTime == null) {
-            startTime = Instant.now();
-        }
-        Instant now = Instant.now();
-        Duration duration = Duration.between(startTime, now);
-        long secondsPassed = duration.getSeconds();
+        long secondsPassed = simulationExecutionDetails.getSimulationSeconds();
         return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, isRunning, isPaused, entitiesCount, currentTick, secondsPassed);
     }
 

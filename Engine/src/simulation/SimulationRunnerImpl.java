@@ -44,19 +44,16 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
     public void run() {
         this.simulationED.setSimulationThread(Thread.currentThread());
         this.simulationED.setRunning(true);
-        this.simulationED.setStartTime(Instant.now());
+        this.simulationED.setCurrStartTime(Instant.now());
         Date date = new Date();
         this.simulationED.setFormattedStartTime(this.dateFormat.format(date));
 
         initEntityInstancesArray();
         int currentTick = 0;
-        Instant now = Instant.now();
-        Duration duration = Duration.between(simulationED.getStartTime(), now);
-        long seconds = duration.getSeconds();
-        while (!this.simulationED.getWorld().getTermination().isTerminated(currentTick, seconds) && !Thread.currentThread().isInterrupted()) {
+        while (!simulationED.getWorld().getTermination().isTerminated(currentTick, simulationED.getSimulationSeconds()) && !Thread.currentThread().isInterrupted()) {
             currentTick++;
             simulationED.setCurrentTick(currentTick);
-            simulationED.getEntityInstanceManager().moveAllInstances(this.simulationED.getWorld().getGrid());
+            simulationED.getEntityInstanceManager().moveAllInstances(simulationED.getWorld().getGrid());
             int finalCurrentTick = currentTick;
             List<Action> actionableRules = simulationED.getWorld().getRules()
                     .stream()
@@ -79,11 +76,8 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                     }
                 }
             }
-            now = Instant.now();
-            duration = Duration.between(simulationED.getStartTime(), now);
-            seconds = duration.getSeconds();
         }
-        simulationED.setIsTerminatedBySecondsCount(simulationED.getWorld().getTermination().isTerminatedBySecondsCount(seconds));
+        simulationED.setIsTerminatedBySecondsCount(simulationED.getWorld().getTermination().isTerminatedBySecondsCount(simulationED.getSimulationSeconds()));
         simulationED.setIsTerminatedByTicksCount(simulationED.getWorld().getTermination().isTerminatedByTicksCount(currentTick));
         simulationED.setRunning(false);
     }

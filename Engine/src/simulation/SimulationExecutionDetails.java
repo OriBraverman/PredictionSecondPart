@@ -6,7 +6,10 @@ import world.factors.entity.execution.manager.EntityInstanceManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimulationExecutionDetails {
     private final int id;
@@ -17,7 +20,8 @@ public class SimulationExecutionDetails {
     private boolean isTerminatedByTicksCount = false;
     private boolean isRunning = false;
     private boolean isPaused = false;
-    private Instant startTime;
+    private Instant currStartTime;
+    private List<Duration> durations;
     private String formattedStartTime;
     private int currentTick = 0;
     private Thread simulationThread;
@@ -27,6 +31,7 @@ public class SimulationExecutionDetails {
         this.activeEnvironment = activeEnvironment;
         this.world = world;
         this.entityInstanceManager = new EntityInstanceManagerImpl();
+        this.durations = new ArrayList<>();
     }
 
     public ActiveEnvironment getActiveEnvironment() { return activeEnvironment; }
@@ -65,12 +70,26 @@ public class SimulationExecutionDetails {
         this.currentTick = currentTick;
     }
 
-    public Instant getStartTime() {
-        return startTime;
+    public Instant getCurrStartTime() {
+        return currStartTime;
     }
 
-    public void setStartTime(Instant startTime) {
-        this.startTime = startTime;
+    public void setCurrStartTime(Instant currStartTime) {
+        this.currStartTime = currStartTime;
+    }
+
+    public long getSimulationSeconds() {
+        if (isRunning && !isPaused) {
+            Instant now = Instant.now();
+            Duration duration = Duration.between(currStartTime, now);
+            return duration.getSeconds() + durations.stream().mapToLong(Duration::getSeconds).sum();
+        } else {
+            return durations.stream().mapToLong(Duration::getSeconds).sum();
+        }
+    }
+
+    public void addDuration(Duration duration) {
+        durations.add(duration);
     }
 
     public boolean isRunning() {
