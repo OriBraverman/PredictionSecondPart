@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import static validator.StringValidator.validateStringIsInteger;
@@ -29,7 +30,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     public EntityInstanceManagerImpl() {
         count = 0;
-        instances = new ArrayList<>();
+        instances = new CopyOnWriteArrayList<>();
     }
 
     @Override

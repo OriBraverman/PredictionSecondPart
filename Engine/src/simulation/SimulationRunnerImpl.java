@@ -61,8 +61,8 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                     .flatMap(rule -> rule.getActionsToPerform().stream())
                     .collect(Collectors.toList());
 
-            List<EntityInstance> tempEntityInstances = new ArrayList<>(simulationED.getEntityInstanceManager().getInstances());
-            for (EntityInstance entityInstance : tempEntityInstances) {
+            //List<EntityInstance> tempEntityInstances = new ArrayList<>(simulationED.getEntityInstanceManager().getInstances());
+            for (EntityInstance entityInstance : simulationED.getEntityInstanceManager().getInstances()) {
                 for (Action action : actionableRules) {
                     if (action.getPrimaryEntityDefinition().getName().equals(entityInstance.getEntityDefinition().getName())) {
                         if (action.getSecondaryEntity() != null) {

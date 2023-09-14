@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 
 import java.util.List;
 import java.util.Map;
@@ -17,62 +18,58 @@ public class DynamicGridView {
     public ScrollPane createDynamicGrid(GridViewDTO gridViewDTO) {
         // Create a ScrollPane to contain the GridPane
         ScrollPane scrollPane = new ScrollPane();
+        // set scrollPane size
+        scrollPane.setPrefSize(600, 400);
 
         // Create a GridPane
         GridPane dynamicGrid = new GridPane();
-        dynamicGrid.setHgap(5.0);
-        dynamicGrid.setVgap(5.0);
 
         int gridWidth = gridViewDTO.getGridWidth();
         int gridHeight = gridViewDTO.getGridHeight();
 
         // Define column constraints for the specified width
+        //<ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="50.0" prefWidth="80.0" />
         for (int i = 0; i < gridWidth; i++) {
             ColumnConstraints colConstraints = new ColumnConstraints();
-            colConstraints.setHgrow(Priority.ALWAYS);
+            colConstraints.setHgrow(Priority.NEVER);
+            colConstraints.setMaxWidth(Double.MAX_VALUE);
+            colConstraints.setMinWidth(5.0);
+            colConstraints.setPrefWidth(10.0);
             dynamicGrid.getColumnConstraints().add(colConstraints);
-            dynamicGrid.getColumnConstraints().add(new ColumnConstraints(50));
         }
 
         // Define row constraints for the specified height
+        //<RowConstraints maxHeight="-Infinity" minHeight="30.0" prefHeight="50.0" vgrow="SOMETIMES" />
         for (int i = 0; i < gridHeight; i++) {
             RowConstraints rowConstraints = new RowConstraints();
-            rowConstraints.setVgrow(Priority.ALWAYS);
+            rowConstraints.setMaxHeight(Double.MAX_VALUE);
+            rowConstraints.setMinHeight(5.0);
+            rowConstraints.setPrefHeight(10.0);
+            rowConstraints.setVgrow(Priority.SOMETIMES);
             dynamicGrid.getRowConstraints().add(rowConstraints);
-            dynamicGrid.getRowConstraints().add(new RowConstraints(50));
+        }
+
+        // Add an empty label to each cell of the grid
+        for (int i = 0; i < gridWidth; i++) {
+            for (int j = 0; j < gridHeight; j++) {
+                dynamicGrid.add(createColoredRectangle(Color.WHITE), i, j);
+            }
         }
 
         // Create and add labels with different colors for each entity
-        int entityIndex = 0;
         for (EntityInstanceDTO entityInstanceDTO : gridViewDTO.getEntityInstances()) {
             String entityName = entityInstanceDTO.getEntityName();
             int x = entityInstanceDTO.getX();
             int y = entityInstanceDTO.getY();
             Color entityColor = calculateColor(entityName);
             if (entityColor != null) {
-                Label entityLabel = createColoredLabel(entityName, entityColor);
-                dynamicGrid.add(entityLabel, x, y);
-                entityIndex++;
+                //paint the cell with the entity color
+                dynamicGrid.add(createColoredRectangle(entityColor), x, y);
             }
         }
 
         // Set the dynamicGrid as the content of the ScrollPane
         scrollPane.setContent(dynamicGrid);
-
-        // Add a black border around the grid
-        BorderStroke borderStroke = new BorderStroke(Color.BLACK,
-                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1));
-        dynamicGrid.setBorder(new Border(borderStroke));
-
-        // Add black strokes to each cell (horizontal and vertical lines)
-        for (int row = 0; row < gridHeight; row++) {
-            for (int col = 0; col < gridWidth; col++) {
-                Region cell = new Region();
-                cell.setBorder(new Border(new BorderStroke(Color.BLACK,
-                        BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(1))));
-                dynamicGrid.add(cell, col, row);
-            }
-        }
 
         return scrollPane;
     }
@@ -88,12 +85,10 @@ public class DynamicGridView {
         return Color.rgb(red, green, blue);
     }
 
-    private Label createColoredLabel(String text, Color color) {
-        Label label = new Label(text);
-        label.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
-        label.setTextFill(Color.WHITE); // Set text color to white for better visibility
-        label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        label.setAlignment(javafx.geometry.Pos.CENTER);
-        return label;
+    private Rectangle createColoredRectangle(Color color) {
+        Rectangle rectangle = new Rectangle(10, 10);
+        rectangle.setFill(color);
+        rectangle.setStroke(Color.BLACK);
+        return rectangle;
     }
 }
