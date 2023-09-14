@@ -1,6 +1,7 @@
 package gui.components.main.app;
 
 import dtos.*;
+import dtos.gridView.GridViewDTO;
 import dtos.world.WorldDTO;
 import engine.Engine;
 import gui.components.main.details.scene.DetailsController;
@@ -113,5 +114,9 @@ public class AppController {
 
     public void resumeSimulation(int simulationID) {
         engine.resumeSimulation(simulationID);
+    }
+
+    public GridViewDTO getGridViewDTO(int simulationID) {
+        return engine.getGridViewDTO(simulationID);
     }
 }

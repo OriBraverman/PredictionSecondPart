@@ -2,6 +2,8 @@ package engine;
 
 import convertor.Convertor;
 import dtos.*;
+import dtos.gridView.EntityInstanceDTO;
+import dtos.gridView.GridViewDTO;
 import dtos.world.*;
 import dtos.world.action.*;
 import resources.schema.generatedWorld.PRDWorld;
@@ -390,6 +392,16 @@ public class Engine implements Serializable {
 
     public void resumeSimulation(int simulationID) {
         this.simulationExecutionManager.resumeSimulation(simulationID);
+    }
+
+    public GridViewDTO getGridViewDTO(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
+        int gridWidth = simulationExecutionDetails.getWorld().getGrid().getWidth();
+        int gridHeight = simulationExecutionDetails.getWorld().getGrid().getHeight();
+        List<EntityInstanceDTO> entityInstanceDTOS = new ArrayList<>();
+        simulationExecutionDetails.getEntityInstanceManager().getInstances()
+                .forEach(entityInstance -> entityInstanceDTOS.add(new EntityInstanceDTO(entityInstance.getEntityDefinition().getName(), entityInstance.getCoordinate().getX(), entityInstance.getCoordinate().getY())));
+        return new GridViewDTO(gridWidth, gridHeight, entityInstanceDTOS);
     }
 }
 

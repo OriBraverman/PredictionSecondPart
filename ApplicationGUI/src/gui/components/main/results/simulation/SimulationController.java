@@ -2,10 +2,12 @@ package gui.components.main.results.simulation;
 
 import dtos.HistogramDTO;
 import dtos.SimulationExecutionDetailsDTO;
+import dtos.gridView.GridViewDTO;
 import dtos.world.EntityDefinitionDTO;
 import dtos.world.PropertyDefinitionDTO;
 import dtos.world.WorldDTO;
 import gui.components.main.app.AppController;
+import gui.components.main.results.simulation.grid.DynamicGridView;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -13,10 +15,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 
 public class SimulationController {
@@ -28,6 +37,7 @@ public class SimulationController {
     @FXML private Button pauseSimulationButton;
     @FXML private Button resumeSimulationButton;
     @FXML private Button stopSimulationButton;
+    @FXML private Button gridViewButton;
 
     private AppController appController;
 
@@ -138,5 +148,26 @@ public class SimulationController {
     @FXML
     void stopSimulationButtonAction(ActionEvent event) {
         appController.stopSimulation(currentSimulationID.get());
+    }
+
+    @FXML
+    void gridViewButtonAction(ActionEvent event) {
+        // Create an instance of the DynamicGridView class to generate the dynamic grid
+        DynamicGridView dynamicGridView = new DynamicGridView();
+
+        GridViewDTO gridViewDTO = appController.getGridViewDTO(currentSimulationID.get());
+        // Call the createDynamicGrid method to create the dynamic grid
+        ScrollPane dynamicGridScrollPane = dynamicGridView.createDynamicGrid(gridViewDTO);
+
+        // Create a new stage for the grid view
+        Stage gridViewStage = new Stage();
+        gridViewStage.setTitle("Grid View");
+
+        // Set the scene with the dynamic grid wrapped in the ScrollPane
+        Scene scene = new Scene(dynamicGridScrollPane);
+        gridViewStage.setScene(scene);
+
+        // Show the grid view window
+        gridViewStage.show();
     }
 }

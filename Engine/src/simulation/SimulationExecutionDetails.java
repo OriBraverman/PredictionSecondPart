@@ -123,4 +123,5 @@ public class SimulationExecutionDetails {
     public void setSimulationThread(Thread simulationThread) {
         this.simulationThread = simulationThread;
     }
+
 }
