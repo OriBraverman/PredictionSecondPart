@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -29,6 +30,7 @@
                <children>
                   <Label fx:id="HeaderLabel" text="Predictions" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
                   <fx:include fx:id="uploadComponent" source="../upload/upload.fxml" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <ListView fx:id="queueManagementListView" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="4" GridPane.rowSpan="2147483647" />
                </children>
             </GridPane>
             <TabPane fx:id="tabPane" prefHeight="500.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">

@@ -17,7 +17,7 @@
       <Button fx:id="clearSimulationButton" layoutX="37.0" layoutY="407.0" mnemonicParsing="false" onAction="#clearSimulationButtonAction" text="Clear" />
       <ScrollPane layoutX="19.0" layoutY="14.0">
          <content>
-            <ListView fx:id="entityPopulationListView" prefHeight="351.0" prefWidth="315.0" />
+            <ListView fx:id="entityPopulationListView" prefHeight="377.0" prefWidth="316.0" />
          </content>
       </ScrollPane>
    </children>

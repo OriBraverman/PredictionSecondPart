@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SimulationExecutionDetails {
     private final int id;
@@ -18,8 +19,8 @@ public class SimulationExecutionDetails {
     private final EntityInstanceManager entityInstanceManager;
     private boolean isTerminatedBySecondsCount = false;
     private boolean isTerminatedByTicksCount = false;
-    private boolean isRunning = false;
-    private boolean isPaused = false;
+    private AtomicBoolean isRunning;
+    private AtomicBoolean isPaused;
     private Instant currStartTime;
     private List<Duration> durations;
     private String formattedStartTime;
@@ -32,6 +33,8 @@ public class SimulationExecutionDetails {
         this.world = world;
         this.entityInstanceManager = new EntityInstanceManagerImpl();
         this.durations = new ArrayList<>();
+        this.isRunning = new AtomicBoolean(false);
+        this.isPaused = new AtomicBoolean(false);
     }
 
     public ActiveEnvironment getActiveEnvironment() { return activeEnvironment; }
@@ -79,7 +82,7 @@ public class SimulationExecutionDetails {
     }
 
     public long getSimulationSeconds() {
-        if (isRunning && !isPaused) {
+        if (isRunning.get() && !isPaused.get()) {
             Instant now = Instant.now();
             Duration duration = Duration.between(currStartTime, now);
             return duration.getSeconds() + durations.stream().mapToLong(Duration::getSeconds).sum();
@@ -93,11 +96,11 @@ public class SimulationExecutionDetails {
     }
 
     public boolean isRunning() {
-        return isRunning;
+        return isRunning.get();
     }
 
     public boolean isPaused() {
-        return isPaused;
+        return isPaused.get();
     }
 
     public void setTerminatedBySecondsCount(boolean terminatedBySecondsCount) {
@@ -109,11 +112,11 @@ public class SimulationExecutionDetails {
     }
 
     public void setRunning(boolean running) {
-        isRunning = running;
+        isRunning.set(running);
     }
 
     public void setPaused(boolean paused) {
-        isPaused = paused;
+        isPaused.set(paused);
     }
 
     public Thread getSimulationThread() {

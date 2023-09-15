@@ -2,13 +2,13 @@ package dtos;
 
 public class EntityPopulationDTO {
     private final String name;
-    private final String value;
+    private final String population;
     private final boolean hasValue;
 
 
-    public EntityPopulationDTO(String name, String value, boolean hasValue) {
+    public EntityPopulationDTO(String name, String population, boolean hasValue) {
         this.name = name;
-        this.value = value;
+        this.population = population;
         this.hasValue = hasValue;
     }
 
@@ -20,5 +20,5 @@ public class EntityPopulationDTO {
         return name;
     }
 
-    public String getValue() { return value; }
+    public String getPopulation() { return population; }
 }

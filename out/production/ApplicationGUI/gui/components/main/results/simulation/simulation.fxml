@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
 <AnchorPane fx:id="simulationView" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="471.0" prefWidth="636.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.results.simulation.SimulationController">
@@ -21,27 +22,29 @@
             <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <Label text="entites count:" GridPane.rowIndex="1" />
-                <Label fx:id="entitiesCountDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Button fx:id="rerunSimulationButton" mnemonicParsing="false" onAction="#rerunSimulationButtonAction" text="Rerun!" GridPane.rowIndex="4" />
-            <Label text="current tick:" GridPane.rowIndex="2" />
-            <Label fx:id="currentTickDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Button fx:id="pauseSimulationButton" mnemonicParsing="false" onAction="#pauseSimulationButtonAction" text="pause" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <Button fx:id="resumeSimulationButton" mnemonicParsing="false" onAction="#resumeSimulationButtonAction" text="resume" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Button fx:id="stopSimulationButton" mnemonicParsing="false" onAction="#stopSimulationButtonAction" text="stop" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-            <Label text="time since simulation started:" GridPane.rowIndex="3" />
-            <Label fx:id="timeSinceSimulationStartedDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Button fx:id="gridViewButton" mnemonicParsing="false" onAction="#gridViewButtonAction" text="see grid" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <Label text="entites count:" />
+                <Label fx:id="entitiesCountDisplay" text="display" GridPane.columnIndex="1" />
+                <Button fx:id="rerunSimulationButton" mnemonicParsing="false" onAction="#rerunSimulationButtonAction" text="Rerun!" GridPane.rowIndex="5" />
+            <Label text="current tick:" GridPane.rowIndex="3" />
+            <Label fx:id="currentTickDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Button fx:id="pauseSimulationButton" mnemonicParsing="false" onAction="#pauseSimulationButtonAction" text="pause" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <Button fx:id="resumeSimulationButton" mnemonicParsing="false" onAction="#resumeSimulationButtonAction" text="resume" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Button fx:id="stopSimulationButton" mnemonicParsing="false" onAction="#stopSimulationButtonAction" text="stop" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+            <Label text="time since simulation started:" GridPane.rowIndex="4" />
+            <Label fx:id="timeSinceSimulationStartedDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Button fx:id="gridViewButton" mnemonicParsing="false" onAction="#gridViewButtonAction" text="see grid" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <HBox fx:id="entityPopulationHBox" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="1" GridPane.rowSpan="2" />
             </children>
         </GridPane>
-      <ScrollPane layoutX="44.0" layoutY="204.0" prefHeight="229.0" prefWidth="547.0">
+      <ScrollPane layoutX="45.0" layoutY="218.0" prefHeight="229.0" prefWidth="547.0">
          <content>
-                <FlowPane fx:id="executionResult" prefHeight="246.0" prefWidth="606.0" />
+                <FlowPane fx:id="executionResult" prefHeight="246.0" prefWidth="552.0" />
          </content>
       </ScrollPane>
     </children>

@@ -16,4 +16,6 @@ public interface Action {
     boolean isPropertyExistInEntity();
     boolean isEntityExistInWorld(List<EntityDefinition> entities);
     public SecondaryEntity getSecondaryEntity();
+    boolean isLastAction();
+    boolean isFirstAction();
 }

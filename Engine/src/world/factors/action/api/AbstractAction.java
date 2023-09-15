@@ -47,4 +47,17 @@ public abstract class AbstractAction implements Action, Serializable {
     public SecondaryEntity getSecondaryEntity() {
         return secondaryEntity;
     }
+
+    @Override
+    public boolean isLastAction() {
+        return actionType.equals(ActionType.KILL)
+                || actionType.equals(ActionType.REPLACE)
+                || actionType.equals(ActionType.CONDITION) // might contain kill or replace in thenActions or elseActions
+                || actionType.equals(ActionType.PROXIMITY); // might contain kill or replace in thenActions
+    }
+
+    @Override
+    public boolean isFirstAction() {
+        return !isLastAction();
+    }
 }

@@ -43,10 +43,14 @@ public class ProximityAction extends AbstractAction {
         boolean matchesDefintions = context.getPrimaryEntityInstance().getEntityDefinition().getName().equals(primaryEntityDefinition.getName())
                 && context.getSecondaryEntityInstance().getEntityDefinition().getName().equals(secondaryEntity.getSecondaryEntityDefinition().getName());
         //context.getValueByExpression(this.of) is float like 1.65 so get the floor of it
+        int rank;
         if (!(context.getValueByExpression(this.of) instanceof Number)) {
             throw new RuntimeException("ProximityAction: shouldActivateActions: of expression should be a number");
+        } else if (context.getValueByExpression(this.of) instanceof Float) {
+            rank = (int) floor((Float)context.getValueByExpression(this.of));
+        } else {
+            rank = (int) context.getValueByExpression(this.of);
         }
-        int rank = (int) floor((Float)context.getValueByExpression(this.of));
         Collection<Coordinate> envCells = context.getGrid().findEnvironmentCells(context.getPrimaryEntityInstance().getCoordinate(), rank);
         boolean areClose = envCells.contains(context.getSecondaryEntityInstance().getCoordinate());
 

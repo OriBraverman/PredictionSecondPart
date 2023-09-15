@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Engine implements Serializable {
@@ -342,7 +343,7 @@ public class Engine implements Serializable {
         for (EntityPopulationDTO entityPopulation : entityPopulationDTO.getEntitiesPopulation()) {
             String value;
             if (entityPopulation.hasValue()) {
-                value = entityPopulation.getValue();
+                value = entityPopulation.getPopulation();
                 world.getEntityByName(entityPopulation.getName()).setPopulation(Integer.parseInt(value));
             }
         }
@@ -354,7 +355,7 @@ public class Engine implements Serializable {
         for (EntityPopulationDTO entityPopulation : entitiesPopulationDTO.getEntitiesPopulation()) {
             EntityDefinition entityDefinition = this.world.getEntityByName(entityPopulation.getName());
             if (entityPopulation.hasValue()) {
-                String value = entityPopulation.getValue();
+                String value = entityPopulation.getPopulation();
                 if (!validateStringIsInteger(value)) {
                     throw new IllegalArgumentException("Invalid value type for entity: " + entityPopulation.getName());
                 }
@@ -377,9 +378,19 @@ public class Engine implements Serializable {
         boolean isRunning = simulationExecutionDetails.isRunning();
         boolean isPaused = simulationExecutionDetails.isPaused();
         int entitiesCount = simulationExecutionDetails.getEntityInstanceManager().getAliveEntityCount();
+        List<EntityPopulationDTO> entitiesPopulation = getEntityPopulationDTOList(simulationExecutionDetails);
         int currentTick = simulationExecutionDetails.getCurrentTick();
         long secondsPassed = simulationExecutionDetails.getSimulationSeconds();
-        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, isRunning, isPaused, entitiesCount, currentTick, secondsPassed);
+        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, isRunning, isPaused, entitiesCount, entitiesPopulation, currentTick, secondsPassed);
+    }
+
+    public List<EntityPopulationDTO> getEntityPopulationDTOList(SimulationExecutionDetails simulationExecutionDetails) {
+        return simulationExecutionDetails.getEntityInstanceManager().getInstances().stream()
+                .map(entityInstance -> entityInstance.getEntityDefinition().getName())
+                .collect(Collectors.toMap(entityName -> entityName, entityName -> 1, Integer::sum))
+                .entrySet().stream()
+                .map(entry -> new EntityPopulationDTO(entry.getKey(), entry.getValue().toString(), true))
+                .collect(Collectors.toList());
     }
 
     public void stopSimulation(int simulationID) {
@@ -394,6 +405,11 @@ public class Engine implements Serializable {
         this.simulationExecutionManager.resumeSimulation(simulationID);
     }
 
+    public void rerunSimulation(int simulationID) {
+        this.simulationExecutionManager.recreateSimulation(simulationID);
+        this.simulationExecutionManager.runSimulation(simulationID);
+    }
+
     public GridViewDTO getGridViewDTO(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
         int gridWidth = simulationExecutionDetails.getWorld().getGrid().getWidth();
@@ -402,6 +418,16 @@ public class Engine implements Serializable {
         simulationExecutionDetails.getEntityInstanceManager().getInstances()
                 .forEach(entityInstance -> entityInstanceDTOS.add(new EntityInstanceDTO(entityInstance.getEntityDefinition().getName(), entityInstance.getCoordinate().getX(), entityInstance.getCoordinate().getY())));
         return new GridViewDTO(gridWidth, gridHeight, entityInstanceDTOS);
+    }
+
+    public QueueManagementDTO getQueueManagementDTO() {
+        if (this.simulationExecutionManager == null) {
+            return new QueueManagementDTO(0, 0, 0);
+        }
+        int pendingSimulations = this.simulationExecutionManager.getPendingSimulationsCount();
+        int activeSimulations = this.simulationExecutionManager.getActiveSimulationsCount();
+        int completedSimulations = this.simulationExecutionManager.getCompletedSimulationsCount();
+        return new QueueManagementDTO(pendingSimulations, activeSimulations, completedSimulations);
     }
 }
 

@@ -15,8 +15,6 @@ import world.factors.property.execution.PropertyInstanceImpl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -30,7 +28,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     public EntityInstanceManagerImpl() {
         count = 0;
-        instances = new CopyOnWriteArrayList<>();
+        instances = new ArrayList<>();
     }
 
     @Override
@@ -69,6 +67,11 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     @Override
     public List<EntityInstance> getInstances() {
         return instances;
+    }
+
+    @Override
+    public void setInstances(List<EntityInstance> instances) {
+        this.instances = instances;
     }
 
     @Override

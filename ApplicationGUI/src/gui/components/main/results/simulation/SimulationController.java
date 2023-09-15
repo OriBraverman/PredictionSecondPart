@@ -1,5 +1,6 @@
 package gui.components.main.results.simulation;
 
+import dtos.EntityPopulationDTO;
 import dtos.HistogramDTO;
 import dtos.SimulationExecutionDetailsDTO;
 import dtos.gridView.GridViewDTO;
@@ -8,6 +9,7 @@ import dtos.world.PropertyDefinitionDTO;
 import dtos.world.WorldDTO;
 import gui.components.main.app.AppController;
 import gui.components.main.results.simulation.grid.DynamicGridView;
+import gui.components.main.results.simulation.tableView.EntityPopulationTableView;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -22,10 +24,13 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
 
 public class SimulationController {
@@ -37,6 +42,7 @@ public class SimulationController {
     @FXML private Button pauseSimulationButton;
     @FXML private Button resumeSimulationButton;
     @FXML private Button stopSimulationButton;
+    @FXML private HBox entityPopulationHBox;
     @FXML private Button gridViewButton;
 
     private AppController appController;
@@ -49,6 +55,7 @@ public class SimulationController {
     private SimpleBooleanProperty pauseSimulation;
     private SimpleBooleanProperty resumeSimulation;
     private SimpleBooleanProperty stopSimulation;
+    private static int counter = 0;
 
     public void initialize() {
         currentSimulationID = new SimpleIntegerProperty();
@@ -127,7 +134,13 @@ public class SimulationController {
             resumeSimulation.set(false);
             stopSimulation.set(false);
         }
-        updateSimulationHistograms(simulationEDDTO.getId());
+        EntityPopulationTableView epTableView = new EntityPopulationTableView();
+        entityPopulationHBox.getChildren().clear();
+        entityPopulationHBox.getChildren().addAll(epTableView.createEntityPopulationTableView(simulationEDDTO));
+        counter = (counter + 1) % 5;
+        if (counter == 0) {
+            updateSimulationHistograms(simulationEDDTO.getId());
+        }
     }
 
     @FXML
@@ -137,7 +150,7 @@ public class SimulationController {
 
     @FXML
     void rerunSimulationButtonAction(ActionEvent event) {
-        //appController.runSimulation(currentSimulationID.get());
+        appController.rerunSimulation(currentSimulationID.get());
     }
 
     @FXML

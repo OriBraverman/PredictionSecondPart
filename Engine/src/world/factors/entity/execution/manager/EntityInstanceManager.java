@@ -13,6 +13,9 @@ public interface EntityInstanceManager {
 
     EntityInstance create(EntityDefinition entityDefinition, Grid grid);
     List<EntityInstance> getInstances();
+
+    void setInstances(List<EntityInstance> instances);
+
     EntityInstance getEntityInstanceByName(String entityName);
     void killEntity(int id);
     boolean isEntityAlive(int id);

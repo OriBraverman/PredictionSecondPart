@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 public class SimulationExecutionManager implements Serializable {
     private Map<Integer, SimulationRunner> simulations;
@@ -51,6 +52,21 @@ public class SimulationExecutionManager implements Serializable {
         return simulationDetails.get(simulationID);
     }
 
+    public void recreateSimulation(int simulationId) {
+        if (simulationDetails.containsKey(simulationId)) {
+            SimulationExecutionDetails prevSED = simulationDetails.get(simulationId);
+            World world = prevSED.getWorld();
+            ActiveEnvironment activeEnvironment = prevSED.getActiveEnvironment();
+            SimulationExecutionDetails currSED = new SimulationExecutionDetails(simulationId, activeEnvironment, world);
+            SimulationRunner simulationRunner = new SimulationRunnerImpl(simulationId, currSED);
+            simulations.remove(simulationId);
+            simulationDetails.remove(simulationId);
+            simulations.put(simulationId, simulationRunner);
+            simulationDetails.put(simulationId, currSED);
+
+        }
+    }
+
     public void runSimulation(int simulationId) {
         SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationId);
         threadExecutor.execute(simulationRunnerImpl);
@@ -68,9 +84,10 @@ public class SimulationExecutionManager implements Serializable {
     public void pauseSimulation(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
         Thread simulationThread = simulationExecutionDetails.getSimulationThread();
-        if (simulationThread != null) {
-            simulationThread.suspend();
+        if (simulationThread != null && simulationExecutionDetails.isRunning()) {
             simulationExecutionDetails.setPaused(true);
+            SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationID);
+            simulationRunnerImpl.pauseSimulation();
             simulationExecutionDetails.addDuration(Duration.between(simulationExecutionDetails.getCurrStartTime(), java.time.Instant.now()));
         }
     }
@@ -79,9 +96,38 @@ public class SimulationExecutionManager implements Serializable {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
         Thread simulationThread = simulationExecutionDetails.getSimulationThread();
         if (simulationThread != null) {
-            simulationThread.resume();
             simulationExecutionDetails.setPaused(false);
+            SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationID);
+            simulationRunnerImpl.resumeSimulation();
             simulationExecutionDetails.setCurrStartTime(java.time.Instant.now());
         }
+    }
+
+    public int getPendingSimulationsCount() {
+        int count = 0;
+        for (SimulationExecutionDetails simulationExecutionDetails : simulationDetails.values()) {
+            if (simulationExecutionDetails.getSimulationThread() == null) {
+                count++;
+            }
+        }
+        return count;
+    }
+    public int getActiveSimulationsCount() {
+        int count = 0;
+        for (SimulationExecutionDetails simulationExecutionDetails : simulationDetails.values()) {
+            if (simulationExecutionDetails.isRunning() && simulationExecutionDetails.getSimulationThread() != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+    public int getCompletedSimulationsCount() {
+        int count = 0;
+        for (SimulationExecutionDetails simulationExecutionDetails : simulationDetails.values()) {
+            if (!simulationExecutionDetails.isRunning() && simulationExecutionDetails.getSimulationThread() != null) {
+                count++;
+            }
+        }
+        return count;
     }
 }

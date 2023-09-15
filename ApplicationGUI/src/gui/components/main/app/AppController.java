@@ -8,6 +8,7 @@ import gui.components.main.details.scene.DetailsController;
 import gui.components.main.execution.scene.NewExecutionController;
 import gui.components.main.results.scene.ResultsController;
 import gui.components.main.upload.UploadController;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -16,6 +17,9 @@ import javafx.scene.layout.HBox;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class AppController {
 
@@ -28,9 +32,11 @@ public class AppController {
     @FXML private AnchorPane resultsComponent;
     @FXML private ResultsController resultsComponentController;
     @FXML private TabPane tabPane;
+    @FXML private ListView queueManagementListView;
     private final Engine engine = new Engine();
     private final SimpleBooleanProperty isXMLLoaded;
     private final SimpleBooleanProperty isSimulationExecuted;
+    private ScheduledExecutorService queueManagement;
 
     public AppController() {
         this.isXMLLoaded = new SimpleBooleanProperty(false);
@@ -48,6 +54,21 @@ public class AppController {
             resultsComponentController.setAppController(this);
             resultsComponentController.getSimulationComponentController().setAppController(this);
         }
+        queueManagement = Executors.newScheduledThreadPool(1);
+        queueManagement.scheduleAtFixedRate(this::updateQueueManagement, 0, 200, TimeUnit.MILLISECONDS);
+    }
+
+    private void updateQueueManagement() {
+        QueueManagementDTO queueManagementDTO = engine.getQueueManagementDTO();
+        Platform.runLater(() -> {
+            queueManagementListView.getItems().clear();
+            Label label = new Label("Queue Management");
+            label.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-underline: true;");
+            queueManagementListView.getItems().add(label);
+            queueManagementListView.getItems().add("Pending: " + queueManagementDTO.getPending());
+            queueManagementListView.getItems().add("Active: " + queueManagementDTO.getActive());
+            queueManagementListView.getItems().add("Completed: " + queueManagementDTO.getCompleted());
+        });
     }
 
     public void uploadWorldFromXML(File selectedFile) {
@@ -118,5 +139,9 @@ public class AppController {
 
     public GridViewDTO getGridViewDTO(int simulationID) {
         return engine.getGridViewDTO(simulationID);
+    }
+
+    public void rerunSimulation(int simulationID) {
+        engine.rerunSimulation(simulationID);
     }
 }
