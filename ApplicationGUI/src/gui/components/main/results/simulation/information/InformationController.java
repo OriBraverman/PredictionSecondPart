@@ -17,10 +17,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -28,11 +25,12 @@ import javafx.stage.Stage;
 
 public class InformationController {
     @FXML private FlowPane executionResult;
-    @FXML private ScrollPane entityPopulationScrollPane;
     @FXML private RadioButton entityPopulationByTicksRadioButton;
     @FXML private RadioButton propertyHistogramRadioButton;
-    @FXML private Label entitiesCountDisplay;
     @FXML private Label consistencyDisplay;
+    @FXML private Label avarageValueDisplay;
+    @FXML private ChoiceBox<String> entityChoiceBox;
+    @FXML private ChoiceBox<String> propertyChoiceBox;
 
     private AppController appController;
     private SimulationController simulationController;
@@ -54,14 +52,14 @@ public class InformationController {
             if (newValue) {
                 propertyHistogram.set(false);
                 propertyConsistency.set(false);
-                //updateSimulationEntityPopulation(appController.getSimulationExecutionDetailsDTO(simulationController.getCurrentSimulationID()));
+                updateSimulationEntityPopulation(appController.getSimulationExecutionDetailsDTO(simulationController.getCurrentSimulationID()));
             }
         });
         propertyHistogramRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 entityPopulationByTicks.set(false);
                 propertyConsistency.set(false);
-                //updateSimulationHistograms(simulationController.getCurrentSimulationID());
+                updateSimulationHistograms(simulationController.getCurrentSimulationID());
             }
         });
     }

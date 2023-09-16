@@ -73,6 +73,7 @@ public class SimulationController {
         // See resume when running and paused --> Disable resume when not running or not paused
         resumeSimulationButton.disableProperty().bind(isRunning.not().or(isPaused.not()));
         stopSimulationButton.disableProperty().bind(isRunning.not());
+        informationComponent.disableProperty().bind(isRunning);
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -136,5 +137,9 @@ public class SimulationController {
 
         // Show the grid view window
         gridViewStage.show();
+    }
+
+    public int getCurrentSimulationID() {
+        return currentSimulationID.get();
     }
 }
