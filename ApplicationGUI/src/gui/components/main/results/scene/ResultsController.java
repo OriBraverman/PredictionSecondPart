@@ -29,7 +29,6 @@ public class ResultsController {
     @FXML private ListView<String> executionList;
     @FXML private SimulationController simulationComponentController;
     @FXML private AnchorPane simulationComponent;
-    //when the first simulation starts initiate thread that will every 200 ms update the results list & the current selected simulation result
     private ScheduledExecutorService executorService;
     private AppController appController;
     private boolean setActive = false;

@@ -9,6 +9,7 @@ import dtos.world.PropertyDefinitionDTO;
 import dtos.world.WorldDTO;
 import gui.components.main.app.AppController;
 import gui.components.main.results.simulation.grid.DynamicGridView;
+import gui.components.main.results.simulation.information.InformationController;
 import gui.components.main.results.simulation.tableView.EntityPopulationTableView;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -22,6 +23,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -33,7 +35,6 @@ import java.util.List;
 
 public class SimulationController {
     @FXML private Label entitiesCountDisplay;
-    @FXML private FlowPane executionResult;
     @FXML private Label currentTickDisplay;
     @FXML private Label timeSinceSimulationStartedDisplay;
     @FXML private Button rerunSimulationButton;
@@ -41,10 +42,10 @@ public class SimulationController {
     @FXML private Button resumeSimulationButton;
     @FXML private Button stopSimulationButton;
     @FXML private ScrollPane entityPopulationScrollPane;
-    @FXML private RadioButton entityPopulationByTicksRadioButton;
-    @FXML private RadioButton propertyHistogramRadioButton;
     @FXML private Button gridViewButton;
 
+    @FXML private InformationController informationComponentController;
+    @FXML private AnchorPane informationComponent;
     private AppController appController;
 
     private SimpleIntegerProperty currentSimulationID;
@@ -53,9 +54,6 @@ public class SimulationController {
     private SimpleLongProperty timeSinceSimulationStarted;
     private SimpleBooleanProperty isRunning;
     private SimpleBooleanProperty isPaused;
-    private SimpleBooleanProperty entityPopulationByTicks;
-    private SimpleBooleanProperty propertyHistogram;
-    private SimpleBooleanProperty propertyConsistency;
 
     public void initialize() {
         currentSimulationID = new SimpleIntegerProperty();
@@ -64,9 +62,6 @@ public class SimulationController {
         timeSinceSimulationStarted = new SimpleLongProperty();
         isRunning = new SimpleBooleanProperty(false);
         isPaused = new SimpleBooleanProperty(false);
-        entityPopulationByTicks = new SimpleBooleanProperty(true);
-        propertyHistogram = new SimpleBooleanProperty(false);
-        propertyConsistency = new SimpleBooleanProperty(false);
         entitiesCountDisplay.textProperty().bind(entitiesCount.asString());
         currentTickDisplay.textProperty().bind(currentTick.asString());
         timeSinceSimulationStartedDisplay.textProperty().bind(timeSinceSimulationStarted.asString());
@@ -78,26 +73,6 @@ public class SimulationController {
         // See resume when running and paused --> Disable resume when not running or not paused
         resumeSimulationButton.disableProperty().bind(isRunning.not().or(isPaused.not()));
         stopSimulationButton.disableProperty().bind(isRunning.not());
-
-        // Present the simulation results
-        entityPopulationByTicksRadioButton.selectedProperty().bindBidirectional(entityPopulationByTicks);
-        propertyHistogramRadioButton.selectedProperty().bindBidirectional(propertyHistogram);
-        entityPopulationByTicksRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                propertyHistogram.set(false);
-                propertyConsistency.set(false);
-                updateSimulationEntityPopulation(appController.getSimulationExecutionDetailsDTO(currentSimulationID.get()));
-            }
-        });
-        propertyHistogramRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                entityPopulationByTicks.set(false);
-                propertyConsistency.set(false);
-                updateSimulationHistograms(currentSimulationID.get());
-            }
-        });
-        entityPopulationByTicksRadioButton.disableProperty().bind(isRunning);
-        propertyHistogramRadioButton.disableProperty().bind(isRunning);
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -118,44 +93,8 @@ public class SimulationController {
         entityPopulationScrollPane.setContent(entityPopulationHBox);
         entityPopulationHBox.getChildren().clear();
         entityPopulationHBox.getChildren().addAll(epTableView.createEntityPopulationTableView(simulationEDDTO));
-        if (isRunning.get() && executionResult.getChildren() != null) {
-            executionResult.getChildren().clear();
-        }
-    }
-
-    private void updateSimulationPropertyConsistency(SimulationExecutionDetailsDTO simulationEDDTO) {
-
-    }
-
-    private void updateSimulationEntityPopulation(SimulationExecutionDetailsDTO simulationEDDTO) {
-    }
-    public void updateSimulationHistograms(int id) {
-        if (executionResult.getChildren() != null) {
-            executionResult.getChildren().clear();
-        }
-        WorldDTO worldDTO = appController.getWorldDTO();
-        for (EntityDefinitionDTO entityDefinitionDTO : worldDTO.getEntities()) {
-            for (PropertyDefinitionDTO propertyDefinitionDTO : entityDefinitionDTO.getProperties()) {
-                HistogramDTO histogramDTO = appController.getHistogramDTO(id, entityDefinitionDTO.getName(), propertyDefinitionDTO.getName());
-                // histogramDTO is a map of <Object, Integer> where the object can be:
-                // 1. String
-                // 2. Integer
-                // 3. Float
-                // 4. Boolean
-                // create a bar chart for the histogramDTO
-                BarChart<String, Number> barChart = new BarChart<>(new javafx.scene.chart.CategoryAxis(), new javafx.scene.chart.NumberAxis());
-                barChart.setTitle(entityDefinitionDTO.getName() + " - " + propertyDefinitionDTO.getName());
-                javafx.scene.chart.CategoryAxis xAxis = (javafx.scene.chart.CategoryAxis) barChart.getXAxis();
-                xAxis.setLabel("Value of property");
-                javafx.scene.chart.NumberAxis yAxis = (javafx.scene.chart.NumberAxis) barChart.getYAxis();
-                yAxis.setLabel("Amount of entities");
-                javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
-                for (Object key : histogramDTO.getHistogram().keySet()) {
-                    series.getData().add(new javafx.scene.chart.XYChart.Data<>(key.toString(), histogramDTO.getHistogram().get(key)));
-                }
-                barChart.getData().add(series);
-                executionResult.getChildren().add(barChart);
-            }
+        if (isRunning.get() && informationComponentController.getExecutionResult().getChildren() != null) {
+            informationComponentController.getExecutionResult().getChildren().clear();
         }
     }
     @FXML

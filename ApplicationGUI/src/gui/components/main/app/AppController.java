@@ -47,12 +47,14 @@ public class AppController {
         tabPane.getTabs().get(1).disableProperty().bind(isXMLLoaded.not());
         tabPane.getTabs().get(2).disableProperty().bind(isSimulationExecuted.not());
         if (uploadComponentController != null && detailsComponentController != null && newExecutionComponentController != null
-                && resultsComponentController != null && resultsComponentController.getSimulationComponentController() != null) {
+                && resultsComponentController != null && resultsComponentController.getSimulationComponentController() != null
+                /*&& resultsComponentController.getSimulationComponentController().getInformationComponentController() != null*/) {
             uploadComponentController.setAppController(this);
             detailsComponentController.setAppController(this);
             newExecutionComponentController.setAppController(this);
             resultsComponentController.setAppController(this);
             resultsComponentController.getSimulationComponentController().setAppController(this);
+            /*resultsComponentController.getSimulationComponentController().getInformationComponentController().setAppController(this);*/
         }
         queueManagement = Executors.newScheduledThreadPool(1);
         queueManagement.scheduleAtFixedRate(this::updateQueueManagement, 0, 200, TimeUnit.MILLISECONDS);
