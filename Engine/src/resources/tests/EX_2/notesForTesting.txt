@@ -20,4 +20,6 @@ Error loading XML file: 6. Condition action has non-numeric argument
 
 C:\src\github.com\OriBraverman\PredictionSecondPart\Engine\src\resources\tests\EX_2\master-ex2.xml
 
+C:\src\github.com\OriBraverman\PredictionSecondPart\Engine\src\resources\tests\EX_2\more-elements.xml
+
 C:\src\github.com\OriBraverman\PredictionSecondPart\Prediction.dat

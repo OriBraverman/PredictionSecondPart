@@ -21,11 +21,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
@@ -42,7 +40,10 @@ public class SimulationController {
     @FXML private Button pauseSimulationButton;
     @FXML private Button resumeSimulationButton;
     @FXML private Button stopSimulationButton;
-    @FXML private HBox entityPopulationHBox;
+    @FXML private ScrollPane entityPopulationScrollPane;
+    @FXML private RadioButton entityPopulationRadioButton;
+    @FXML private RadioButton propertyHistogramRadioButton;
+    @FXML private RadioButton propertyConsistencyRadioButton;
     @FXML private Button gridViewButton;
 
     private AppController appController;
@@ -55,6 +56,9 @@ public class SimulationController {
     private SimpleBooleanProperty pauseSimulation;
     private SimpleBooleanProperty resumeSimulation;
     private SimpleBooleanProperty stopSimulation;
+    private SimpleBooleanProperty entityPopulation;
+    private SimpleBooleanProperty propertyHistogram;
+    private SimpleBooleanProperty propertyConsistency;
     private static int counter = 0;
 
     public void initialize() {
@@ -66,6 +70,9 @@ public class SimulationController {
         pauseSimulation = new SimpleBooleanProperty(false);
         resumeSimulation = new SimpleBooleanProperty(false);
         stopSimulation = new SimpleBooleanProperty(false);
+        entityPopulation = new SimpleBooleanProperty(true);
+        propertyHistogram = new SimpleBooleanProperty(false);
+        propertyConsistency = new SimpleBooleanProperty(false);
         entitiesCountDisplay.textProperty().bind(entitiesCount.asString());
         currentTickDisplay.textProperty().bind(currentTick.asString());
         timeSinceSimulationStartedDisplay.textProperty().bind(timeSinceSimulationStarted.asString());
@@ -73,6 +80,27 @@ public class SimulationController {
         pauseSimulationButton.disableProperty().bind(pauseSimulation.not());
         resumeSimulationButton.disableProperty().bind(resumeSimulation.not());
         stopSimulationButton.disableProperty().bind(stopSimulation.not());
+        entityPopulationRadioButton.selectedProperty().bindBidirectional(entityPopulation);
+        propertyHistogramRadioButton.selectedProperty().bindBidirectional(propertyHistogram);
+        propertyConsistencyRadioButton.selectedProperty().bindBidirectional(propertyConsistency);
+        entityPopulationRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                propertyHistogram.set(false);
+                propertyConsistency.set(false);
+            }
+        });
+        propertyHistogramRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                entityPopulation.set(false);
+                propertyConsistency.set(false);
+            }
+        });
+        propertyConsistencyRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                entityPopulation.set(false);
+                propertyHistogram.set(false);
+            }
+        });
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -135,11 +163,23 @@ public class SimulationController {
             stopSimulation.set(false);
         }
         EntityPopulationTableView epTableView = new EntityPopulationTableView();
+        HBox entityPopulationHBox = new HBox();
+        entityPopulationScrollPane.setContent(entityPopulationHBox);
         entityPopulationHBox.getChildren().clear();
         entityPopulationHBox.getChildren().addAll(epTableView.createEntityPopulationTableView(simulationEDDTO));
         counter = (counter + 1) % 5;
         if (counter == 0) {
+            updateSimulationInfoBasedOnSelectedRadioButton(simulationEDDTO);
+        }
+    }
+
+    private void updateSimulationInfoBasedOnSelectedRadioButton(SimulationExecutionDetailsDTO simulationEDDTO) {
+        if (entityPopulation.get()) {
+            //updateSimulationEntityPopulation(simulationEDDTO);
+        } else if (propertyHistogram.get()) {
             updateSimulationHistograms(simulationEDDTO.getId());
+        } else if (propertyConsistency.get()) {
+            //updateSimulationPropertyConsistency(simulationEDDTO);
         }
     }
 

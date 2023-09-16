@@ -40,6 +40,9 @@ public class EntityPopulationTableView {
         // Set the table width to the column width
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
+        // Set the table width to be max 100
+        tableView.setPrefWidth(100);
+
         return tableView;
     }
 }
