@@ -41,9 +41,8 @@ public class SimulationController {
     @FXML private Button resumeSimulationButton;
     @FXML private Button stopSimulationButton;
     @FXML private ScrollPane entityPopulationScrollPane;
-    @FXML private RadioButton entityPopulationRadioButton;
+    @FXML private RadioButton entityPopulationByTicksRadioButton;
     @FXML private RadioButton propertyHistogramRadioButton;
-    @FXML private RadioButton propertyConsistencyRadioButton;
     @FXML private Button gridViewButton;
 
     private AppController appController;
@@ -52,61 +51,83 @@ public class SimulationController {
     private SimpleIntegerProperty entitiesCount;
     private SimpleIntegerProperty currentTick;
     private SimpleLongProperty timeSinceSimulationStarted;
-    private SimpleBooleanProperty rerunSimulation;
-    private SimpleBooleanProperty pauseSimulation;
-    private SimpleBooleanProperty resumeSimulation;
-    private SimpleBooleanProperty stopSimulation;
-    private SimpleBooleanProperty entityPopulation;
+    private SimpleBooleanProperty isRunning;
+    private SimpleBooleanProperty isPaused;
+    private SimpleBooleanProperty entityPopulationByTicks;
     private SimpleBooleanProperty propertyHistogram;
     private SimpleBooleanProperty propertyConsistency;
-    private static int counter = 0;
 
     public void initialize() {
         currentSimulationID = new SimpleIntegerProperty();
         entitiesCount = new SimpleIntegerProperty();
         currentTick = new SimpleIntegerProperty();
         timeSinceSimulationStarted = new SimpleLongProperty();
-        rerunSimulation = new SimpleBooleanProperty(false);
-        pauseSimulation = new SimpleBooleanProperty(false);
-        resumeSimulation = new SimpleBooleanProperty(false);
-        stopSimulation = new SimpleBooleanProperty(false);
-        entityPopulation = new SimpleBooleanProperty(true);
+        isRunning = new SimpleBooleanProperty(false);
+        isPaused = new SimpleBooleanProperty(false);
+        entityPopulationByTicks = new SimpleBooleanProperty(true);
         propertyHistogram = new SimpleBooleanProperty(false);
         propertyConsistency = new SimpleBooleanProperty(false);
         entitiesCountDisplay.textProperty().bind(entitiesCount.asString());
         currentTickDisplay.textProperty().bind(currentTick.asString());
         timeSinceSimulationStartedDisplay.textProperty().bind(timeSinceSimulationStarted.asString());
-        rerunSimulationButton.visibleProperty().bind(rerunSimulation);
-        pauseSimulationButton.disableProperty().bind(pauseSimulation.not());
-        resumeSimulationButton.disableProperty().bind(resumeSimulation.not());
-        stopSimulationButton.disableProperty().bind(stopSimulation.not());
-        entityPopulationRadioButton.selectedProperty().bindBidirectional(entityPopulation);
+
+        // Simulation control buttons
+        rerunSimulationButton.visibleProperty().bind(isRunning.not());
+        // See pause when running and not paused --> Disable pause when not running or paused
+        pauseSimulationButton.disableProperty().bind(isRunning.not().or(isPaused));
+        // See resume when running and paused --> Disable resume when not running or not paused
+        resumeSimulationButton.disableProperty().bind(isRunning.not().or(isPaused.not()));
+        stopSimulationButton.disableProperty().bind(isRunning.not());
+
+        // Present the simulation results
+        entityPopulationByTicksRadioButton.selectedProperty().bindBidirectional(entityPopulationByTicks);
         propertyHistogramRadioButton.selectedProperty().bindBidirectional(propertyHistogram);
-        propertyConsistencyRadioButton.selectedProperty().bindBidirectional(propertyConsistency);
-        entityPopulationRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+        entityPopulationByTicksRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 propertyHistogram.set(false);
                 propertyConsistency.set(false);
+                updateSimulationEntityPopulation(appController.getSimulationExecutionDetailsDTO(currentSimulationID.get()));
             }
         });
         propertyHistogramRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                entityPopulation.set(false);
+                entityPopulationByTicks.set(false);
                 propertyConsistency.set(false);
+                updateSimulationHistograms(currentSimulationID.get());
             }
         });
-        propertyConsistencyRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                entityPopulation.set(false);
-                propertyHistogram.set(false);
-            }
-        });
+        entityPopulationByTicksRadioButton.disableProperty().bind(isRunning);
+        propertyHistogramRadioButton.disableProperty().bind(isRunning);
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
     }
     public void setEntitiesCountDisplay(String entitiesCountDisplayText) {
         this.entitiesCountDisplay.setText(entitiesCountDisplayText);
+    }
+
+    public void updateSimulationComponent(SimulationExecutionDetailsDTO simulationEDDTO) {
+        currentSimulationID.set(simulationEDDTO.getId());
+        entitiesCount.set(simulationEDDTO.getNumberOfEntities());
+        currentTick.set(simulationEDDTO.getCurrentTick());
+        timeSinceSimulationStarted.set(simulationEDDTO.getDurationInSeconds());
+        isRunning.set(simulationEDDTO.isRunning());
+        isPaused.set(simulationEDDTO.isPaused());
+        EntityPopulationTableView epTableView = new EntityPopulationTableView();
+        HBox entityPopulationHBox = new HBox();
+        entityPopulationScrollPane.setContent(entityPopulationHBox);
+        entityPopulationHBox.getChildren().clear();
+        entityPopulationHBox.getChildren().addAll(epTableView.createEntityPopulationTableView(simulationEDDTO));
+        if (isRunning.get() && executionResult.getChildren() != null) {
+            executionResult.getChildren().clear();
+        }
+    }
+
+    private void updateSimulationPropertyConsistency(SimulationExecutionDetailsDTO simulationEDDTO) {
+
+    }
+
+    private void updateSimulationEntityPopulation(SimulationExecutionDetailsDTO simulationEDDTO) {
     }
     public void updateSimulationHistograms(int id) {
         if (executionResult.getChildren() != null) {
@@ -137,52 +158,6 @@ public class SimulationController {
             }
         }
     }
-
-    public void updateSimulationComponent(SimulationExecutionDetailsDTO simulationEDDTO) {
-        currentSimulationID.set(simulationEDDTO.getId());
-        entitiesCount.set(simulationEDDTO.getNumberOfEntities());
-        currentTick.set(simulationEDDTO.getCurrentTick());
-        timeSinceSimulationStarted.set(simulationEDDTO.getDurationInSeconds());
-        if (simulationEDDTO.isRunning()) {
-            if (simulationEDDTO.isPaused())
-            {
-                rerunSimulation.set(false);
-                pauseSimulation.set(false);
-                resumeSimulation.set(true);
-                stopSimulation.set(true);
-            } else {
-                rerunSimulation.set(false);
-                pauseSimulation.set(true);
-                resumeSimulation.set(false);
-                stopSimulation.set(true);
-            }
-        } else {
-            rerunSimulation.set(true);
-            pauseSimulation.set(false);
-            resumeSimulation.set(false);
-            stopSimulation.set(false);
-        }
-        EntityPopulationTableView epTableView = new EntityPopulationTableView();
-        HBox entityPopulationHBox = new HBox();
-        entityPopulationScrollPane.setContent(entityPopulationHBox);
-        entityPopulationHBox.getChildren().clear();
-        entityPopulationHBox.getChildren().addAll(epTableView.createEntityPopulationTableView(simulationEDDTO));
-        counter = (counter + 1) % 5;
-        if (counter == 0) {
-            updateSimulationInfoBasedOnSelectedRadioButton(simulationEDDTO);
-        }
-    }
-
-    private void updateSimulationInfoBasedOnSelectedRadioButton(SimulationExecutionDetailsDTO simulationEDDTO) {
-        if (entityPopulation.get()) {
-            //updateSimulationEntityPopulation(simulationEDDTO);
-        } else if (propertyHistogram.get()) {
-            updateSimulationHistograms(simulationEDDTO.getId());
-        } else if (propertyConsistency.get()) {
-            //updateSimulationPropertyConsistency(simulationEDDTO);
-        }
-    }
-
     @FXML
     void pauseSimulationButtonAction(ActionEvent event) {
         appController.pauseSimulation(currentSimulationID.get());
