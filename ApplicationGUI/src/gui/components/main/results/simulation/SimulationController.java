@@ -2,8 +2,10 @@ package gui.components.main.results.simulation;
 
 import dtos.SimulationExecutionDetailsDTO;
 import dtos.gridView.GridViewDTO;
+import gui.components.main.PredictionApplication;
 import gui.components.main.app.AppController;
 import gui.components.main.results.simulation.grid.DynamicGridView;
+import gui.components.main.results.simulation.grid.GridController;
 import gui.components.main.results.simulation.information.InformationController;
 import gui.components.main.results.simulation.tableView.EntityPopulationTableView;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -11,11 +13,17 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 
 
 public class SimulationController {
@@ -108,23 +116,41 @@ public class SimulationController {
 
     @FXML
     void gridViewButtonAction(ActionEvent event) {
-        // Create an instance of the DynamicGridView class to generate the dynamic grid
-        DynamicGridView dynamicGridView = new DynamicGridView();
+        try {
+            // Load the FXML file
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("grid/grid.fxml"));
+            Parent root = loader.load();
 
-        GridViewDTO gridViewDTO = appController.getGridViewDTO(currentSimulationID.get());
-        // Call the createDynamicGrid method to create the dynamic grid
-        ScrollPane dynamicGridScrollPane = dynamicGridView.createDynamicGrid(gridViewDTO);
+            // Get the controller instance from the loader
+            GridController gridController = loader.getController();
 
-        // Create a new stage for the grid view
-        Stage gridViewStage = new Stage();
-        gridViewStage.setTitle("Grid View");
+            // Set the appController
+            gridController.setAppController(appController);
 
-        // Set the scene with the dynamic grid wrapped in the ScrollPane
-        Scene scene = new Scene(dynamicGridScrollPane);
-        gridViewStage.setScene(scene);
+            // Set the current simulation ID
+            gridController.setCurrentSimulationID(currentSimulationID.get());
 
-        // Show the grid view window
-        gridViewStage.show();
+            // Create a new scene using the loaded FXML
+            Scene scene = new Scene(root);
+
+            // Create a new stage (window) and set the scene
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.setTitle("Grid View");
+            //stage.getIcons().add(new Image(PredictionApplication.class.getResourceAsStream("icon.png")));
+
+            // Make the stage modal (blocks interaction with the main window)
+            stage.initModality(Modality.WINDOW_MODAL);
+
+            // Set the main stage as the owner of the new stage (adjust the reference as needed)
+            stage.initOwner(PredictionApplication.getStage());
+
+            // Show the stage
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle any potential exceptions that may occur during loading
+        }
     }
 
     public int getCurrentSimulationID() {

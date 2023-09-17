@@ -63,6 +63,16 @@ public class InformationController {
         });
     }
 
+    private void bindVisibilityOfComponentsToPropertyHistogram() {
+        chooseEntityandPropertyLabel.visibleProperty().bind(propertyHistogram);
+        consistencyLabel.visibleProperty().bind(propertyHistogram);
+        avarageValueLabel.visibleProperty().bind(propertyHistogram);
+        entityChoiceBox.visibleProperty().bind(propertyHistogram);
+        propertyChoiceBox.visibleProperty().bind(propertyHistogram);
+        consistencyDisplay.visibleProperty().bind(propertyHistogram);
+        avarageValueDisplay.visibleProperty().bind(propertyHistogram);
+    }
+
     private void updatePropertyStatistics() {
         int id = simulationController.getCurrentSimulationID();
         String entityName = entityChoiceBox.getSelectionModel().getSelectedItem();
@@ -113,16 +123,6 @@ public class InformationController {
         }
         barChart.getData().add(series);
         executionResult.getChildren().add(barChart);
-    }
-
-    private void bindVisibilityOfComponentsToPropertyHistogram() {
-        chooseEntityandPropertyLabel.visibleProperty().bind(propertyHistogram);
-        consistencyLabel.visibleProperty().bind(propertyHistogram);
-        avarageValueLabel.visibleProperty().bind(propertyHistogram);
-        entityChoiceBox.visibleProperty().bind(propertyHistogram);
-        propertyChoiceBox.visibleProperty().bind(propertyHistogram);
-        consistencyDisplay.visibleProperty().bind(propertyHistogram);
-        avarageValueDisplay.visibleProperty().bind(propertyHistogram);
     }
 
     public void updateInformationComponent(int simulationID) {
