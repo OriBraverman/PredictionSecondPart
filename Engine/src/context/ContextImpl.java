@@ -14,11 +14,6 @@ import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static world.factors.expression.api.AbstractExpression.isFunctionExpression;
 
 public class ContextImpl implements Context {
@@ -126,23 +121,27 @@ public class ContextImpl implements Context {
 
     @Override
     public void setPropertyValue(String name, String property, String value) {
-        EntityInstance entityInstance = entityInstanceManager.getEntityInstanceByName(name);
+        if (!name.equals(primaryEntityInstance.getEntityDefinition().getName())) {
+            throw new IllegalArgumentException("entity [" + name + "] is not the primary entity");
+        }
+        EntityInstance entityInstance = primaryEntityInstance;
         Expression expression = AbstractExpression.getExpressionByString(value, primaryEntityInstance.getEntityDefinition());
         Object evaluateValue = getValueByExpression(expression);
-        // check if entity instance is exist
-        if (entityInstance == null) {
-            throw new IllegalArgumentException("entity [" + name + "] is not exist");
-        }
+
         // check if entity instance property type is the same as evaluate type
         if (!entityInstance.getPropertyByName(property).getValue().getClass().equals(evaluateValue.getClass())) {
             throw new IllegalArgumentException("property [" + property + "] type is not the same as evaluate type");
         }
-        entityInstance.getPropertyByName(property).updateValue(evaluateValue);
+        entityInstance.getPropertyByName(property).updateValue(evaluateValue, currentTick);
     }
 
     @Override
     public Object getNumberOfTicksPropertyHasentChanged(String propertyName) {
         int lastUpdateTick = primaryEntityInstance.getPropertyByName(propertyName).getLastUpdatedTick();
         return this.currentTick - lastUpdateTick;
+    }
+    @Override
+    public int getCurrentTick() {
+        return currentTick;
     }
 }

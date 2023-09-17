@@ -2,6 +2,10 @@ package gui.components.main.app;
 
 import dtos.*;
 import dtos.gridView.GridViewDTO;
+import dtos.result.EntityPopulationByTicksDTO;
+import dtos.result.HistogramDTO;
+import dtos.result.PropertyAvaregeValueDTO;
+import dtos.result.PropertyConstistencyDTO;
 import dtos.world.WorldDTO;
 import engine.Engine;
 import gui.components.main.details.scene.DetailsController;
@@ -48,13 +52,13 @@ public class AppController {
         tabPane.getTabs().get(2).disableProperty().bind(isSimulationExecuted.not());
         if (uploadComponentController != null && detailsComponentController != null && newExecutionComponentController != null
                 && resultsComponentController != null && resultsComponentController.getSimulationComponentController() != null
-                /*&& resultsComponentController.getSimulationComponentController().getInformationComponentController() != null*/) {
+                && resultsComponentController.getSimulationComponentController().getInformationComponentController() != null) {
             uploadComponentController.setAppController(this);
             detailsComponentController.setAppController(this);
             newExecutionComponentController.setAppController(this);
             resultsComponentController.setAppController(this);
             resultsComponentController.getSimulationComponentController().setAppController(this);
-            /*resultsComponentController.getSimulationComponentController().getInformationComponentController().setAppController(this);*/
+            resultsComponentController.getSimulationComponentController().getInformationComponentController().setAppController(this);
         }
         queueManagement = Executors.newScheduledThreadPool(1);
         queueManagement.scheduleAtFixedRate(this::updateQueueManagement, 0, 200, TimeUnit.MILLISECONDS);
@@ -84,6 +88,7 @@ public class AppController {
                 resultsComponentController.resetExecutionList();
                 isXMLLoaded.set(true);
                 isSimulationExecuted.set(false);
+                resultsComponentController.getSimulationComponentController().getInformationComponentController().defineEntityChoiceBox();
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -145,5 +150,21 @@ public class AppController {
 
     public void rerunSimulation(int simulationID) {
         engine.rerunSimulation(simulationID);
+    }
+
+    public boolean isSimulationCompleted(int simulationID) {
+        return engine.isSimulationCompleted(simulationID);
+    }
+
+    public PropertyConstistencyDTO getPropertyConsistencyDTO(int currentSimulationID, String entityName, String propertyName) {
+        return engine.getPropertyConsistencyDTO(currentSimulationID, entityName, propertyName);
+    }
+
+    public PropertyAvaregeValueDTO getPropertyAvaregeValueDTO(int currentSimulationID, String entityName, String propertyName) {
+        return engine.getPropertyAvaregeValueDTO(currentSimulationID, entityName, propertyName);
+    }
+
+    public EntityPopulationByTicksDTO getEntityPopulationByTicksDTO(int simulationID) {
+        return engine.getEntityPopulationByTicksDTO(simulationID);
     }
 }

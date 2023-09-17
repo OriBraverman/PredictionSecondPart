@@ -6,7 +6,9 @@ import world.factors.property.definition.api.PropertyType;
 public interface PropertyInstance {
     PropertyDefinition getPropertyDefinition();
     Object getValue();
-    void updateValue(Object val);
+    void updateValue(Object val, int currentTick);
+
     PropertyType getType();
     int getLastUpdatedTick();
+    int getConsistency(int currentTick);
 }

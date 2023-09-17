@@ -4,6 +4,10 @@ import convertor.Convertor;
 import dtos.*;
 import dtos.gridView.EntityInstanceDTO;
 import dtos.gridView.GridViewDTO;
+import dtos.result.EntityPopulationByTicksDTO;
+import dtos.result.HistogramDTO;
+import dtos.result.PropertyAvaregeValueDTO;
+import dtos.result.PropertyConstistencyDTO;
 import dtos.world.*;
 import dtos.world.action.*;
 import resources.schema.generatedWorld.PRDWorld;
@@ -13,8 +17,6 @@ import static validator.StringValidator.validateStringIsInteger;
 import static validator.XMLValidator.*;
 
 import simulation.SimulationExecutionDetails;
-import simulation.SimulationRunner;
-import simulation.SimulationRunnerImpl;
 import simulation.SimulationExecutionManager;
 import world.World;
 import world.factors.action.api.AbstractAction;
@@ -40,8 +42,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -385,7 +385,11 @@ public class Engine implements Serializable {
     }
 
     public List<EntityPopulationDTO> getEntityPopulationDTOList(SimulationExecutionDetails simulationExecutionDetails) {
-        return simulationExecutionDetails.getEntityInstanceManager().getInstances().stream()
+        List<EntityInstance> instancesCopy;
+        synchronized (simulationExecutionDetails.getEntityInstanceManager()) {
+            instancesCopy = new ArrayList<>(simulationExecutionDetails.getEntityInstanceManager().getInstances());
+        }
+        return instancesCopy.stream().filter(Objects::nonNull)
                 .map(entityInstance -> entityInstance.getEntityDefinition().getName())
                 .collect(Collectors.toMap(entityName -> entityName, entityName -> 1, Integer::sum))
                 .entrySet().stream()
@@ -428,6 +432,57 @@ public class Engine implements Serializable {
         int activeSimulations = this.simulationExecutionManager.getActiveSimulationsCount();
         int completedSimulations = this.simulationExecutionManager.getCompletedSimulationsCount();
         return new QueueManagementDTO(pendingSimulations, activeSimulations, completedSimulations);
+    }
+
+    public PropertyAvaregeValueDTO getPropertyAvaregeValueDTO(int currentSimulationID, String entityName, String propertyName){
+        List<EntityInstance> tempInstances;
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(currentSimulationID);
+        synchronized (simulationExecutionDetails.getEntityInstanceManager()) {
+            tempInstances = new ArrayList<>(simulationExecutionDetails.getEntityInstanceManager()
+                    .getEntityInstancesByName(entityName));
+        }
+        float sumValues = 0;
+        for (EntityInstance entityInstance: tempInstances){
+            PropertyInstance propertyInstance = entityInstance.getPropertyByName(propertyName);
+            if(!(propertyInstance.getValue()  instanceof Number)){
+                return new PropertyAvaregeValueDTO(currentSimulationID, entityName, propertyName, "Not a numeric value ");
+            }
+            sumValues += (float)(propertyInstance.getValue());
+        }
+        float avgValue = sumValues / tempInstances.size();
+        return new PropertyAvaregeValueDTO(currentSimulationID, entityName, propertyName, String.valueOf(avgValue));
+    }
+
+    public boolean isSimulationCompleted(int simulationID) {
+        return this.simulationExecutionManager.isSimulationCompleted(simulationID);
+    }
+
+    public PropertyConstistencyDTO getPropertyConsistencyDTO(int currentSimulationID, String entityName, String propertyName) {
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(currentSimulationID);
+        List<EntityInstance> instancesCopy;
+        synchronized (simulationExecutionDetails.getEntityInstanceManager()) {
+            instancesCopy = new ArrayList<>(simulationExecutionDetails.getEntityInstanceManager()
+                    .getEntityInstancesByName(entityName));
+        }
+        int sumConsistency = 0;
+        for (EntityInstance entityInstance : instancesCopy) {
+            PropertyInstance propertyInstance = entityInstance.getPropertyByName(propertyName);
+            if (propertyInstance == null) {
+                throw new IllegalArgumentException("Property " + propertyName + " does not exist in entity " + entityName);
+            }
+            sumConsistency += propertyInstance.getConsistency(simulationExecutionDetails.getCurrentTick());
+
+        }
+        if (instancesCopy.size() == 0) {
+            return new PropertyConstistencyDTO(currentSimulationID, entityName, propertyName, "0");
+        } else {
+            return new PropertyConstistencyDTO(currentSimulationID, entityName, propertyName, String.valueOf(sumConsistency / instancesCopy.size()));
+        }
+    }
+
+    public EntityPopulationByTicksDTO getEntityPopulationByTicksDTO(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
+        return new EntityPopulationByTicksDTO(simulationExecutionDetails.getEntityPopulationByTicks());
     }
 }
 

@@ -111,7 +111,7 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                 }
             }
             // move all instances from tempInstances to simulationED.getEntityInstanceManager().getInstances()
-            //simulationED.getEntityInstanceManager().setInstances(tempInstances);
+            simulationED.getEntityInstanceManager().setInstances(tempInstances);
 
         }
         simulationED.setIsTerminatedBySecondsCount(simulationED.getWorld().getTermination().isTerminatedBySecondsCount(simulationED.getSimulationSeconds()));

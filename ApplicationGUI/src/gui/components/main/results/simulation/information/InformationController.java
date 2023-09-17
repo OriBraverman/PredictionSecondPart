@@ -1,26 +1,20 @@
 package gui.components.main.results.simulation.information;
 
-import dtos.HistogramDTO;
+import dtos.result.EntityPopulationByTicksDTO;
+import dtos.result.HistogramDTO;
+import dtos.result.PropertyAvaregeValueDTO;
+import dtos.result.PropertyConstistencyDTO;
 import dtos.SimulationExecutionDetailsDTO;
-import dtos.gridView.GridViewDTO;
 import dtos.world.EntityDefinitionDTO;
 import dtos.world.PropertyDefinitionDTO;
 import dtos.world.WorldDTO;
 import gui.components.main.app.AppController;
 import gui.components.main.results.simulation.SimulationController;
-import gui.components.main.results.simulation.grid.DynamicGridView;
-import gui.components.main.results.simulation.tableView.EntityPopulationTableView;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 
 
 public class InformationController {
@@ -31,73 +25,157 @@ public class InformationController {
     @FXML private Label avarageValueDisplay;
     @FXML private ChoiceBox<String> entityChoiceBox;
     @FXML private ChoiceBox<String> propertyChoiceBox;
+    @FXML private Label chooseEntityandPropertyLabel;
+    @FXML private Label consistencyLabel;
+    @FXML private Label avarageValueLabel;
 
     private AppController appController;
     private SimulationController simulationController;
 
     private SimpleBooleanProperty entityPopulationByTicks;
     private SimpleBooleanProperty propertyHistogram;
-    private SimpleBooleanProperty propertyConsistency;
 
 
 
     public void initialize() {
-        entityPopulationByTicks = new SimpleBooleanProperty(true);
+        entityPopulationByTicks = new SimpleBooleanProperty(false);
         propertyHistogram = new SimpleBooleanProperty(false);
-        propertyConsistency = new SimpleBooleanProperty(false);
         // Present the simulation results
         entityPopulationByTicksRadioButton.selectedProperty().bindBidirectional(entityPopulationByTicks);
         propertyHistogramRadioButton.selectedProperty().bindBidirectional(propertyHistogram);
         entityPopulationByTicksRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 propertyHistogram.set(false);
-                propertyConsistency.set(false);
-                updateSimulationEntityPopulation(appController.getSimulationExecutionDetailsDTO(simulationController.getCurrentSimulationID()));
+                updateSimulationEntityPopulation(simulationController.getCurrentSimulationID());
             }
         });
         propertyHistogramRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 entityPopulationByTicks.set(false);
-                propertyConsistency.set(false);
-                updateSimulationHistograms(simulationController.getCurrentSimulationID());
             }
         });
+        bindVisibilityOfComponentsToPropertyHistogram();
+        entityChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            definePropertyChoiceBox(newValue);
+        });
+        propertyChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            updatePropertyStatistics();
+        });
+    }
+
+    private void updatePropertyStatistics() {
+        int id = simulationController.getCurrentSimulationID();
+        String entityName = entityChoiceBox.getSelectionModel().getSelectedItem();
+        String propertyName = propertyChoiceBox.getSelectionModel().getSelectedItem();
+        if (id == 0 || entityName == null || propertyName == null || !appController.isSimulationCompleted(id)) {
+            return;
+        }
+        updatePropertyConsistency(id, entityName, propertyName);
+        updatePropertyAvarageValue(id, entityName, propertyName);
+        updatePropertyHistogram(id, entityName, propertyName);
+    }
+
+    private void updatePropertyAvarageValue(int id, String entityName, String propertyName) {
+        PropertyAvaregeValueDTO propertyAvaregeValueDTO = appController.getPropertyAvaregeValueDTO(id, entityName, propertyName);
+        if (propertyAvaregeValueDTO != null) {
+            avarageValueDisplay.setText(propertyAvaregeValueDTO.getAvarageValue());
+        }
+    }
+
+    private void updatePropertyConsistency(int id, String entityName, String propertyName) {
+        PropertyConstistencyDTO propertyConsistencyDTO = appController.getPropertyConsistencyDTO(id, entityName, propertyName);
+        if (propertyConsistencyDTO != null) {
+            consistencyDisplay.setText(propertyConsistencyDTO.getConsistency());
+        }
+    }
+
+    private void updatePropertyHistogram(int id, String entityName, String propertyName) {
+        if (executionResult.getChildren() != null) {
+            executionResult.getChildren().clear();
+        }
+
+        HistogramDTO histogramDTO = appController.getHistogramDTO(id, entityName, propertyName);
+        // histogramDTO is a map of <Object, Integer> where the object can be:
+        // 1. String
+        // 2. Integer
+        // 3. Float
+        // 4. Boolean
+        // create a bar chart for the histogramDTO
+        BarChart<String, Number> barChart = new BarChart<>(new javafx.scene.chart.CategoryAxis(), new javafx.scene.chart.NumberAxis());
+        barChart.setTitle(entityName + " - " + propertyName);
+        javafx.scene.chart.CategoryAxis xAxis = (javafx.scene.chart.CategoryAxis) barChart.getXAxis();
+        xAxis.setLabel("Value of property");
+        javafx.scene.chart.NumberAxis yAxis = (javafx.scene.chart.NumberAxis) barChart.getYAxis();
+        yAxis.setLabel("Amount of entities");
+        javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
+        for (Object key : histogramDTO.getHistogram().keySet()) {
+            series.getData().add(new javafx.scene.chart.XYChart.Data<>(key.toString(), histogramDTO.getHistogram().get(key)));
+        }
+        barChart.getData().add(series);
+        executionResult.getChildren().add(barChart);
+    }
+
+    private void bindVisibilityOfComponentsToPropertyHistogram() {
+        chooseEntityandPropertyLabel.visibleProperty().bind(propertyHistogram);
+        consistencyLabel.visibleProperty().bind(propertyHistogram);
+        avarageValueLabel.visibleProperty().bind(propertyHistogram);
+        entityChoiceBox.visibleProperty().bind(propertyHistogram);
+        propertyChoiceBox.visibleProperty().bind(propertyHistogram);
+        consistencyDisplay.visibleProperty().bind(propertyHistogram);
+        avarageValueDisplay.visibleProperty().bind(propertyHistogram);
+    }
+
+    public void updateInformationComponent(int simulationID) {
+        if (propertyHistogram.get()) {
+            updatePropertyStatistics();
+        } else {
+            updateSimulationEntityPopulation(simulationID);
+        }
+    }
+
+    public void defineEntityChoiceBox() {
+        entityChoiceBox.getItems().clear();
+        WorldDTO worldDTO = appController.getWorldDTO();
+        for (EntityDefinitionDTO entityDefinitionDTO : worldDTO.getEntities()) {
+            entityChoiceBox.getItems().add(entityDefinitionDTO.getName());
+        }
+    }
+
+    public void definePropertyChoiceBox(String entityName) {
+        propertyChoiceBox.getItems().clear();
+        WorldDTO worldDTO = appController.getWorldDTO();
+        for (EntityDefinitionDTO entityDefinitionDTO : worldDTO.getEntities()) {
+            if (entityDefinitionDTO.getName().equals(entityName)) {
+                for (PropertyDefinitionDTO propertyDefinitionDTO : entityDefinitionDTO.getProperties()) {
+                    propertyChoiceBox.getItems().add(propertyDefinitionDTO.getName());
+                }
+            }
+        }
+        propertyChoiceBox.getSelectionModel().selectFirst();
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
     }
 
 
-    private void updateSimulationEntityPopulation(SimulationExecutionDetailsDTO simulationEDDTO) {
-    }
-    public void updateSimulationHistograms(int id) {
+    private void updateSimulationEntityPopulation(int simulationID) {
         if (executionResult.getChildren() != null) {
             executionResult.getChildren().clear();
         }
-        WorldDTO worldDTO = appController.getWorldDTO();
-        for (EntityDefinitionDTO entityDefinitionDTO : worldDTO.getEntities()) {
-            for (PropertyDefinitionDTO propertyDefinitionDTO : entityDefinitionDTO.getProperties()) {
-                HistogramDTO histogramDTO = appController.getHistogramDTO(id, entityDefinitionDTO.getName(), propertyDefinitionDTO.getName());
-                // histogramDTO is a map of <Object, Integer> where the object can be:
-                // 1. String
-                // 2. Integer
-                // 3. Float
-                // 4. Boolean
-                // create a bar chart for the histogramDTO
-                BarChart<String, Number> barChart = new BarChart<>(new javafx.scene.chart.CategoryAxis(), new javafx.scene.chart.NumberAxis());
-                barChart.setTitle(entityDefinitionDTO.getName() + " - " + propertyDefinitionDTO.getName());
-                javafx.scene.chart.CategoryAxis xAxis = (javafx.scene.chart.CategoryAxis) barChart.getXAxis();
-                xAxis.setLabel("Value of property");
-                javafx.scene.chart.NumberAxis yAxis = (javafx.scene.chart.NumberAxis) barChart.getYAxis();
-                yAxis.setLabel("Amount of entities");
-                javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
-                for (Object key : histogramDTO.getHistogram().keySet()) {
-                    series.getData().add(new javafx.scene.chart.XYChart.Data<>(key.toString(), histogramDTO.getHistogram().get(key)));
-                }
-                barChart.getData().add(series);
-                executionResult.getChildren().add(barChart);
-            }
+
+        EntityPopulationByTicksDTO entityPopulationByTicksDTO = appController.getEntityPopulationByTicksDTO(simulationID);
+        BarChart<String, Number> barChart = new BarChart<>(new javafx.scene.chart.CategoryAxis(), new javafx.scene.chart.NumberAxis());
+        barChart.setTitle("Entity population by ticks");
+        javafx.scene.chart.CategoryAxis xAxis = (javafx.scene.chart.CategoryAxis) barChart.getXAxis();
+        xAxis.setLabel("Tick");
+        javafx.scene.chart.NumberAxis yAxis = (javafx.scene.chart.NumberAxis) barChart.getYAxis();
+        yAxis.setLabel("Amount of entities");
+        javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
+        for (Integer key : entityPopulationByTicksDTO.getEntityPopulationByTicks().keySet()) {
+            series.getData().add(new javafx.scene.chart.XYChart.Data<>(key.toString(), entityPopulationByTicksDTO.getEntityPopulationByTicks().get(key)));
         }
+        barChart.getData().add(series);
+        executionResult.getChildren().add(barChart);
     }
 
     public void setSimulationComponentController(SimulationController simulationController) {

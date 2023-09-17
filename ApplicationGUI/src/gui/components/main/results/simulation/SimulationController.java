@@ -1,12 +1,7 @@
 package gui.components.main.results.simulation;
 
-import dtos.EntityPopulationDTO;
-import dtos.HistogramDTO;
 import dtos.SimulationExecutionDetailsDTO;
 import dtos.gridView.GridViewDTO;
-import dtos.world.EntityDefinitionDTO;
-import dtos.world.PropertyDefinitionDTO;
-import dtos.world.WorldDTO;
 import gui.components.main.app.AppController;
 import gui.components.main.results.simulation.grid.DynamicGridView;
 import gui.components.main.results.simulation.information.InformationController;
@@ -14,23 +9,13 @@ import gui.components.main.results.simulation.tableView.EntityPopulationTableVie
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.BarChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.util.List;
 
 
 public class SimulationController {
@@ -56,6 +41,9 @@ public class SimulationController {
     private SimpleBooleanProperty isPaused;
 
     public void initialize() {
+        if (informationComponentController != null) {
+            informationComponentController.setSimulationComponentController(this);
+        }
         currentSimulationID = new SimpleIntegerProperty();
         entitiesCount = new SimpleIntegerProperty();
         currentTick = new SimpleIntegerProperty();
@@ -73,7 +61,7 @@ public class SimulationController {
         // See resume when running and paused --> Disable resume when not running or not paused
         resumeSimulationButton.disableProperty().bind(isRunning.not().or(isPaused.not()));
         stopSimulationButton.disableProperty().bind(isRunning.not());
-        informationComponent.disableProperty().bind(isRunning);
+        informationComponent.visibleProperty().bind(isRunning.not());
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -141,5 +129,17 @@ public class SimulationController {
 
     public int getCurrentSimulationID() {
         return currentSimulationID.get();
+    }
+
+    public InformationController getInformationComponentController() {
+        return informationComponentController;
+    }
+
+    public boolean getIsRunning() {
+        return isRunning.get();
+    }
+
+    public SimpleBooleanProperty isRunningProperty() {
+        return isRunning;
     }
 }

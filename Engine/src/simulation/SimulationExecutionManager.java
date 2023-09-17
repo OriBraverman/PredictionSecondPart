@@ -130,4 +130,9 @@ public class SimulationExecutionManager implements Serializable {
         }
         return count;
     }
+
+    public boolean isSimulationCompleted(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
+        return !simulationExecutionDetails.isRunning() && simulationExecutionDetails.getSimulationThread() != null;
+    }
 }

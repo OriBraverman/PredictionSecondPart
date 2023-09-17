@@ -1,6 +1,7 @@
 package world.factors.entity.execution;
 
 import world.factors.entity.definition.EntityDefinition;
+import world.factors.grid.Cell;
 import world.factors.grid.Coordinate;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
@@ -13,5 +14,6 @@ public interface EntityInstance {
     void addPropertyInstance(PropertyInstance propertyInstance);
     EntityDefinition getEntityDefinition();
     Coordinate getCoordinate();
-    void setCoordinate(Coordinate coordinate);
+    Cell getCell();
+    void setCell(Cell cell);
 }

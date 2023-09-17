@@ -9,7 +9,9 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SimulationExecutionDetails {
@@ -26,15 +28,18 @@ public class SimulationExecutionDetails {
     private String formattedStartTime;
     private int currentTick = 0;
     private Thread simulationThread;
+    private Map<Integer, Integer> entityPopulationByTicks;
 
     public SimulationExecutionDetails(int id, ActiveEnvironment activeEnvironment, World world) {
         this.id = id;
         this.activeEnvironment = activeEnvironment;
         this.world = world;
         this.entityInstanceManager = new EntityInstanceManagerImpl();
+        this.currStartTime = Instant.now();
         this.durations = new ArrayList<>();
         this.isRunning = new AtomicBoolean(false);
         this.isPaused = new AtomicBoolean(false);
+        this.entityPopulationByTicks = new HashMap<>();
     }
 
     public ActiveEnvironment getActiveEnvironment() { return activeEnvironment; }
@@ -70,6 +75,7 @@ public class SimulationExecutionDetails {
     }
 
     public void setCurrentTick(int currentTick) {
+        this.entityPopulationByTicks.put(currentTick, entityInstanceManager.getAliveEntityCount());
         this.currentTick = currentTick;
     }
 
@@ -127,4 +133,7 @@ public class SimulationExecutionDetails {
         this.simulationThread = simulationThread;
     }
 
+    public Map<Integer, Integer> getEntityPopulationByTicks() {
+        return entityPopulationByTicks;
+    }
 }

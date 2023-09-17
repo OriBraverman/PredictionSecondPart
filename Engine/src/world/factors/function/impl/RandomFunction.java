@@ -27,7 +27,7 @@ public class RandomFunction extends AbstractFunction {
         if (!(expression.evaluate(context) instanceof Integer)) {
             throw new IllegalArgumentException("argument must be a Integer");
         }
-        return (int) (Math.random() * ((Integer) expression.evaluate(context) + 1));
+        return (float) (Math.random() * ((Integer) expression.evaluate(context) + 1));
     }
 
     @Override

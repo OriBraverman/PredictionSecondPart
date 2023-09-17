@@ -16,7 +16,8 @@ public interface EntityInstanceManager {
 
     void setInstances(List<EntityInstance> instances);
 
-    EntityInstance getEntityInstanceByName(String entityName);
+    List<EntityInstance> getEntityInstancesByName(String entityName);
+
     void killEntity(int id);
     boolean isEntityAlive(int id);
     int getEntityCountByName(String entityName);

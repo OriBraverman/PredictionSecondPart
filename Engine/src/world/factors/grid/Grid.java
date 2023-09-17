@@ -31,12 +31,12 @@ public class Grid {
         return !grid[coordinate.getX()][coordinate.getY()].isOccupied();
     }
 
-    public Coordinate moveEntity(Coordinate source, Direction direction) {
+    public Cell moveEntity(Coordinate source, Direction direction) {
         Coordinate destination = getCoordinateInDirection(source, direction);
         if (isCellFree(destination)) {
             grid[source.getX()][source.getY()].setOccupied(false);
             grid[destination.getX()][destination.getY()].setOccupied(true);
-            return destination;
+            return grid[destination.getX()][destination.getY()];
         }
         return null;
     }
@@ -177,20 +177,20 @@ public class Grid {
         }
     }
 
-    public Coordinate getRandomAvailableCoordinate() {
-        List<Coordinate> availableCoordinates = new ArrayList<>();
+    public Cell getRandomAvailableCell() {
+        List<Cell> availableCells = new ArrayList<>();
         for (int i = 0; i < horizontalDiameter; i++) {
             for (int j = 0; j < verticalDiameter; j++) {
                 if (!grid[i][j].isOccupied()) {
-                    availableCoordinates.add(grid[i][j].getCoordinate());
+                    availableCells.add(grid[i][j]);
                 }
             }
         }
-        if (availableCoordinates.isEmpty()) {
+        if (availableCells.isEmpty()) {
             throw new IllegalStateException("Grid is full");
         }
-        Coordinate coordinate = availableCoordinates.get((int) (Math.random() * availableCoordinates.size()));
-        grid[coordinate.getX()][coordinate.getY()].setOccupied(true);
-        return coordinate;
+        Cell cell = availableCells.get((int) (Math.random() * availableCells.size()));
+        cell.setOccupied(true);
+        return cell;
     }
 }

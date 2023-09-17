@@ -1,6 +1,7 @@
 package world.factors.entity.execution;
 
 import world.factors.entity.definition.EntityDefinition;
+import world.factors.grid.Cell;
 import world.factors.grid.Coordinate;
 import world.factors.property.execution.PropertyInstance;
 
@@ -14,12 +15,12 @@ public class EntityInstanceImpl implements EntityInstance, Serializable {
     private final int id;
     private Map<String, PropertyInstance> properties;
     private Map<PropertyInstance, Integer> propertiesLastUpdatedTick;
-    private Coordinate coordinate;
+    private Cell cell;
 
-    public EntityInstanceImpl(EntityDefinition entityDefinition, int id, Coordinate coordinate) {
+    public EntityInstanceImpl(EntityDefinition entityDefinition, int id, Cell cell) {
         this.entityDefinition = entityDefinition;
         this.id = id;
-        this.coordinate = coordinate;
+        this.cell = cell;
         properties = new HashMap<>();
         propertiesLastUpdatedTick = new HashMap<>();
     }
@@ -50,11 +51,14 @@ public class EntityInstanceImpl implements EntityInstance, Serializable {
 
     @Override
     public Coordinate getCoordinate() {
-        return coordinate;
+        return cell.getCoordinate();
     }
 
-    @Override
-    public void setCoordinate(Coordinate coordinate) {
-        this.coordinate = coordinate;
+    public Cell getCell() {
+        return cell;
+    }
+
+    public void setCell(Cell cell) {
+        this.cell = cell;
     }
 }

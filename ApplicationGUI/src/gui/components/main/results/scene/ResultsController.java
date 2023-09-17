@@ -55,7 +55,7 @@ public class ResultsController {
             return;
         }
         Platform.runLater(() -> {
-            updateSimulationComponent();
+            updateSimulationComponent(false);
         });
     }
 
@@ -70,18 +70,20 @@ public class ResultsController {
     }
     @FXML
     public void onExecutionListClicked(MouseEvent event) {
-        updateSimulationComponent();
+        updateSimulationComponent(true);
     }
 
-    public void updateSimulationComponent() {
+    public void updateSimulationComponent(Boolean isClicked) {
         String selectedItem = executionList.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
             String[] split = selectedItem.split(" ");
             int id = Integer.parseInt(split[1]);
             SimulationExecutionDetailsDTO simulationExecutionDetailsDTO = appController.getSimulationExecutionDetailsDTO(id);
             simulationComponentController.updateSimulationComponent(simulationExecutionDetailsDTO);
+            if (appController.isSimulationCompleted(id) && isClicked) {
+                simulationComponentController.getInformationComponentController().updateInformationComponent(id);
+            }
         }
-
     }
     public SimulationController getSimulationComponentController() {
         return simulationComponentController;

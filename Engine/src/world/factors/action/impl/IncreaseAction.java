@@ -65,7 +65,7 @@ public class IncreaseAction extends AbstractAction {
                 throw new IllegalArgumentException("increase action of a real number can't operate on an integer property [" + property + "]");
             } else if (value instanceof Integer) {
                 if (v + (int)value <= (int)range.getTo()) {
-                    propertyInstance.updateValue(v + (int)value);
+                    propertyInstance.updateValue(v + (int)value, context.getCurrentTick());
                 }
             }
         }
@@ -75,7 +75,7 @@ public class IncreaseAction extends AbstractAction {
             Float v = PropertyType.FLOAT.convert(propertyInstance.getValue());
             if (value instanceof Float) {
                 if (v + (float)value <= (float)range.getTo()) {
-                    propertyInstance.updateValue(v + (float)value);
+                    propertyInstance.updateValue(v + (float)value, context.getCurrentTick());
                 }
             }
         }

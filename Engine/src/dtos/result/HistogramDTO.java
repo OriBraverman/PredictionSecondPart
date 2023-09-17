@@ -1,4 +1,4 @@
-package dtos;
+package dtos.result;
 
 import java.util.Map;
 

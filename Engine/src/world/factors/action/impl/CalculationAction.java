@@ -75,7 +75,7 @@ public class CalculationAction extends AbstractAction {
             else /* if (operator == CalculationOperator.MULTIPLY)*/ {
                 v = PropertyType.DECIMAL.convert(Multiply(exp1Value, exp2Value));
             }
-            propertyInstance.updateValue(v);
+            propertyInstance.updateValue(v, context.getCurrentTick());
         }
 
         else if (propertyInstance.getType() == PropertyType.FLOAT) {
@@ -86,7 +86,7 @@ public class CalculationAction extends AbstractAction {
             else /* if (operator == CalculationOperator.MULTIPLY)*/ {
                 v = PropertyType.FLOAT.convert(Multiply(exp1Value, exp2Value));
             }
-            propertyInstance.updateValue(v);
+            propertyInstance.updateValue(v, context.getCurrentTick());
         }
 
         else {

@@ -28,13 +28,13 @@
             <RadioButton fx:id="entityPopulationByTicksRadioButton" mnemonicParsing="false" text="Entity Population By Ticks" GridPane.columnIndex="1" GridPane.columnSpan="2" />
             <RadioButton fx:id="propertyHistogramRadioButton" mnemonicParsing="false" text="Property Histogram" GridPane.columnIndex="3" GridPane.halignment="CENTER" />
             <Label text="See results by:" />
-            <Label text="Choose Entity and Property:" GridPane.rowIndex="1" />
-            <ChoiceBox prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <ChoiceBox prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Label text="Consistency:" GridPane.rowIndex="2" />
-            <Label fx:id="consistencyDisplay" text="display" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label fx:id="avarageValueDisplay" text="display" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Label text="Avarage Value:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="entityChoiceBox" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ChoiceBox fx:id="propertyChoiceBox" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Label fx:id="consistencyLabel" text="Consistency:" GridPane.rowIndex="2" />
+            <Label fx:id="consistencyDisplay" text="none" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label fx:id="avarageValueDisplay" text="none" GridPane.columnIndex="3" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+            <Label fx:id="avarageValueLabel" text="Avarage Value:" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <Label fx:id="chooseEntityandPropertyLabel" text="Choose Entity and Property:" GridPane.rowIndex="1" />
             </children>
         </GridPane>
       <ScrollPane layoutX="26.0" layoutY="100.0" prefHeight="197.0" prefWidth="585.0">

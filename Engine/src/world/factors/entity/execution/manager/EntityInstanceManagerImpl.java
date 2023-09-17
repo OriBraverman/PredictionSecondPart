@@ -7,7 +7,7 @@ import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.entity.execution.EntityInstanceImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
-import world.factors.grid.Coordinate;
+import world.factors.grid.Cell;
 import world.factors.grid.Grid;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
@@ -16,7 +16,6 @@ import world.factors.property.execution.PropertyInstanceImpl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import static validator.StringValidator.validateStringIsInteger;
@@ -34,7 +33,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     @Override
     public EntityInstance create(EntityDefinition entityDefinition, Grid grid) {
         count++;
-        EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, count, grid.getRandomAvailableCoordinate());
+        EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, count, grid.getRandomAvailableCell());
         instances.add(newEntityInstance);
 
         for (PropertyDefinition propertyDefinition : entityDefinition.getProps()) {
@@ -47,7 +46,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     @Override
     public void replaceDerived(EntityInstance entityInstance, EntityDefinition entityDefinition) {
-        EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, entityInstance.getId(), entityInstance.getCoordinate());
+        EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, entityInstance.getId(), entityInstance.getCell());
         instances.remove(entityInstance);
         instances.add(newEntityInstance);
 
@@ -70,24 +69,26 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     }
 
     @Override
-    public void setInstances(List<EntityInstance> instances) {
+    public synchronized void setInstances(List<EntityInstance> instances) {
         this.instances = instances;
     }
 
     @Override
-    public EntityInstance getEntityInstanceByName(String entityName) {
+    public List<EntityInstance> getEntityInstancesByName(String entityName) {
+        List<EntityInstance> res = new ArrayList<>();
         for (EntityInstance entityInstance : instances) {
             if (entityInstance.getEntityDefinition().getName().equals(entityName)) {
-                return entityInstance;
+                res.add(entityInstance);
             }
         }
-        return null;
+        return res;
     }
 
     @Override
     public void killEntity(int id) {
         for (EntityInstance entityInstance : instances) {
             if (entityInstance.getId() == id) {
+                entityInstance.getCell().setOccupied(false);
                 instances.remove(entityInstance);
                 return;
             }
@@ -124,15 +125,15 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     @Override
     public void moveEntity(EntityInstance entityInstance, Grid grid) {
-        Coordinate newCoordinate;
-        if ((newCoordinate = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP)) != null) {
-            entityInstance.setCoordinate(newCoordinate);
-        } else if ((newCoordinate = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.DOWN)) != null) {
-            entityInstance.setCoordinate(newCoordinate);
-        } else if ((newCoordinate = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.RIGHT)) != null) {
-            entityInstance.setCoordinate(newCoordinate);
-        } else if ((newCoordinate = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.LEFT)) != null) {
-            entityInstance.setCoordinate(newCoordinate);
+        Cell newCell;
+        if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP)) != null) {
+            entityInstance.setCell(newCell);
+        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.DOWN)) != null) {
+            entityInstance.setCell(newCell);
+        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.RIGHT)) != null) {
+            entityInstance.setCell(newCell);
+        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.LEFT)) != null) {
+            entityInstance.setCell(newCell);
         }
     }
 

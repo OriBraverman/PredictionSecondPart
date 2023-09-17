@@ -27,4 +27,6 @@ public interface Context {
     void replaceEntity(EntityDefinition createEntityDefinition, ReplaceType mode);
 
     Object getNumberOfTicksPropertyHasentChanged(String propertyName);
+
+    int getCurrentTick();
 }
