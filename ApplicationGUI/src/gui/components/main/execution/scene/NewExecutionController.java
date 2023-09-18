@@ -154,6 +154,8 @@ public class NewExecutionController {
             return;
         }
         appController.activateSimulation(envVariablesValuesDTO, entityPopulationDTO);
+        Tab resultsTab = appController.getTabPane().getTabs().get(2);
+        appController.getTabPane().getSelectionModel().select(resultsTab);
     }
 
     private EntitiesPopulationDTO getEntityPopulationDTOS() {
@@ -228,4 +230,5 @@ public class NewExecutionController {
             textField.setText("");
         }
     }
+
 }

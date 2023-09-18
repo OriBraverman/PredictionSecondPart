@@ -38,8 +38,8 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
     private void initEntityInstancesArray() {
         List<EntityDefinition> entityDefinitions = this.simulationED.getWorld().getEntities();
         for (EntityDefinition entityDefinition : entityDefinitions) {
-            for (int i = 0; i < entityDefinition.getPopulation(); i++) {
-                this.simulationED.getEntityInstanceManager().create(entityDefinition, this.simulationED.getWorld().getGrid());
+            for (int i = 0; i < this.simulationED.getEntityInstanceManager().getPopulationByEntityDefinition(entityDefinition); i++) {
+                this.simulationED.getEntityInstanceManager().create(entityDefinition, this.simulationED.getGridInstance());
             }
         }
     }
@@ -58,15 +58,16 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
 
     @Override
     public void run() {
-        this.simulationED.setSimulationThread(Thread.currentThread());
-        this.simulationED.setRunning(true);
-        this.simulationED.setCurrStartTime(Instant.now());
+        synchronized (simulationED) {
+            this.simulationED.setSimulationThread(Thread.currentThread());
+            simulationED.setRunning(true);
+        }
         Date date = new Date();
         this.simulationED.setFormattedStartTime(this.dateFormat.format(date));
 
         initEntityInstancesArray();
         int currentTick = 0;
-        while (!simulationED.getWorld().getTermination().isTerminated(currentTick, simulationED.getSimulationSeconds()) && !Thread.currentThread().isInterrupted()) {
+        while (!simulationED.getWorld().getTermination().isTerminated(currentTick, simulationED.getSimulationSeconds()) && simulationED.isRunning()) {
             synchronized (this) {
                 while (this.simulationED.isPaused()) {
                     try {
@@ -80,7 +81,7 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
 
             currentTick++;
             simulationED.setCurrentTick(currentTick);
-            simulationED.getEntityInstanceManager().moveAllInstances(simulationED.getWorld().getGrid());
+            simulationED.getEntityInstanceManager().moveAllInstances(simulationED.getGridInstance());
             int finalCurrentTick = currentTick;
             // get all runnable rules
             List<Action> actionableRules = simulationED.getWorld().getRules()
@@ -100,12 +101,12 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                 for (Action action : actionableRules) {
                     if (action.getPrimaryEntityDefinition().getName().equals(entityInstance.getEntityDefinition().getName())) {
                         if (action.getSecondaryEntity() != null) {
-                            List<EntityInstance> selectedSecondaryEntityInstances = simulationED.getEntityInstanceManager().getSelectedSeconderyEntites(action.getSecondaryEntity(),  simulationED.getActiveEnvironment(), simulationED.getWorld().getGrid(), currentTick);
+                            List<EntityInstance> selectedSecondaryEntityInstances = simulationED.getEntityInstanceManager().getSelectedSeconderyEntites(action.getSecondaryEntity(),  simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick);
                             for (EntityInstance secondaryEntityInstance : selectedSecondaryEntityInstances) {
-                                action.invoke(new ContextImpl(entityInstance, secondaryEntityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getWorld().getGrid(), currentTick));
+                                action.invoke(new ContextImpl(entityInstance, secondaryEntityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick));
                             }
                         } else {
-                            action.invoke(new ContextImpl(entityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getWorld().getGrid(), currentTick));
+                            action.invoke(new ContextImpl(entityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick));
                         }
                     }
                 }

@@ -45,6 +45,7 @@ public class SimulationController {
     private SimpleIntegerProperty entitiesCount;
     private SimpleIntegerProperty currentTick;
     private SimpleLongProperty timeSinceSimulationStarted;
+    private SimpleBooleanProperty isCompleted; // is the simulation entered the completed simulation queue
     private SimpleBooleanProperty isRunning;
     private SimpleBooleanProperty isPaused;
 
@@ -56,6 +57,7 @@ public class SimulationController {
         entitiesCount = new SimpleIntegerProperty();
         currentTick = new SimpleIntegerProperty();
         timeSinceSimulationStarted = new SimpleLongProperty();
+        isCompleted = new SimpleBooleanProperty(false);
         isRunning = new SimpleBooleanProperty(false);
         isPaused = new SimpleBooleanProperty(false);
         entitiesCountDisplay.textProperty().bind(entitiesCount.asString());
@@ -63,13 +65,15 @@ public class SimulationController {
         timeSinceSimulationStartedDisplay.textProperty().bind(timeSinceSimulationStarted.asString());
 
         // Simulation control buttons
-        rerunSimulationButton.visibleProperty().bind(isRunning.not());
+        rerunSimulationButton.visibleProperty().bind(isCompleted);
         // See pause when running and not paused --> Disable pause when not running or paused
         pauseSimulationButton.disableProperty().bind(isRunning.not().or(isPaused));
         // See resume when running and paused --> Disable resume when not running or not paused
         resumeSimulationButton.disableProperty().bind(isRunning.not().or(isPaused.not()));
         stopSimulationButton.disableProperty().bind(isRunning.not());
-        informationComponent.visibleProperty().bind(isRunning.not());
+        informationComponent.visibleProperty().bind(isCompleted);
+        // See gridView when running or completed --> Disable gridView when not running and not completed
+        gridViewButton.disableProperty().bind(isRunning.not().and(isCompleted.not()));
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -85,6 +89,7 @@ public class SimulationController {
         timeSinceSimulationStarted.set(simulationEDDTO.getDurationInSeconds());
         isRunning.set(simulationEDDTO.isRunning());
         isPaused.set(simulationEDDTO.isPaused());
+        isCompleted.set(simulationEDDTO.isCompleted());
         EntityPopulationTableView epTableView = new EntityPopulationTableView();
         HBox entityPopulationHBox = new HBox();
         entityPopulationScrollPane.setContent(entityPopulationHBox);
@@ -137,7 +142,7 @@ public class SimulationController {
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.setTitle("Grid View");
-            //stage.getIcons().add(new Image(PredictionApplication.class.getResourceAsStream("icon.png")));
+            stage.getIcons().add(new Image(SimulationController.class.getResourceAsStream("grid/prediction-icon-2.png")));
 
             // Make the stage modal (blocks interaction with the main window)
             stage.initModality(Modality.WINDOW_MODAL);

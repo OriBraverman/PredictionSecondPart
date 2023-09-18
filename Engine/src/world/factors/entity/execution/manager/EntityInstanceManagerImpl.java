@@ -9,13 +9,16 @@ import world.factors.entity.execution.EntityInstanceImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.grid.Cell;
 import world.factors.grid.Grid;
+import world.factors.grid.execution.GridInstance;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
 import world.factors.property.execution.PropertyInstanceImpl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static validator.StringValidator.validateStringIsInteger;
@@ -24,14 +27,16 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     private int count;
     private List<EntityInstance> instances;
+    private Map<EntityDefinition, Integer> entityPopulationMap;
 
     public EntityInstanceManagerImpl() {
         count = 0;
         instances = new ArrayList<>();
+        entityPopulationMap = new HashMap<>();
     }
 
     @Override
-    public EntityInstance create(EntityDefinition entityDefinition, Grid grid) {
+    public EntityInstance create(EntityDefinition entityDefinition, GridInstance grid) {
         count++;
         EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, count, grid.getRandomAvailableCell());
         instances.add(newEntityInstance);
@@ -124,7 +129,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     }
 
     @Override
-    public void moveEntity(EntityInstance entityInstance, Grid grid) {
+    public void moveEntity(EntityInstance entityInstance, GridInstance grid) {
         Cell newCell;
         if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP)) != null) {
             entityInstance.setCell(newCell);
@@ -138,14 +143,14 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     }
 
     @Override
-    public void moveAllInstances(Grid grid) {
+    public void moveAllInstances(GridInstance grid) {
         for (EntityInstance entityInstance : instances) {
             moveEntity(entityInstance, grid);
         }
     }
 
     @Override
-    public List<EntityInstance> getSelectedSeconderyEntites(SecondaryEntity secondaryEntity, ActiveEnvironment activeEnvironment, Grid grid, int currentTick) {
+    public List<EntityInstance> getSelectedSeconderyEntites(SecondaryEntity secondaryEntity, ActiveEnvironment activeEnvironment, GridInstance grid, int currentTick) {
         List<EntityInstance> secondaryEntityInstances = instances
                 .stream()
                 .filter(instance -> instance.getEntityDefinition().getName().equals(secondaryEntity.getSecondaryEntityDefinition().getName()))
@@ -189,5 +194,15 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
             throw new IllegalArgumentException("secondary entity selection count is not a number");
 
         }
+    }
+
+    @Override
+    public void addEntityDefinitionPopulation(EntityDefinition entityDefinition, int population){
+        this.entityPopulationMap.put(entityDefinition, population);
+    }
+
+    @Override
+    public int getPopulationByEntityDefinition(EntityDefinition entityDefinition){
+        return this.entityPopulationMap.get(entityDefinition);
     }
 }

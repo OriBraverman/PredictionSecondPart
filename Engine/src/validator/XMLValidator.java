@@ -14,6 +14,7 @@ import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.expression.api.Expression;
 import world.factors.grid.Grid;
+import world.factors.grid.api.GridDefinition;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.rule.Rule;
 
@@ -145,7 +146,7 @@ public class XMLValidator {
             }
         }
     }
-    public static void validateGrid(Grid grid) {
+    public static void validateGrid(GridDefinition grid) {
         int height = grid.getHeight();
         int width = grid.getWidth();
         // both between 10 and 100

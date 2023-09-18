@@ -108,6 +108,8 @@ public class AppController {
 
     }
 
+    public TabPane getTabPane(){ return tabPane; }
+
     public SimulationIDListDTO getSimulationListDTO() {
         return engine.getSimulationListDTO();
     }

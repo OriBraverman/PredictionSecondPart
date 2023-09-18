@@ -10,18 +10,22 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class GridController {
     @FXML private ScrollPane dynamicGrid;
-    @FXML private ListView<?> listView;
+    @FXML private ListView listView;
 
     private AppController appController;
+    private DynamicGridView dynamicGridView;
 
     private SimpleIntegerProperty currentSimulationID;
 
@@ -35,11 +39,22 @@ public class GridController {
 
     public void updateGrid() {
         // Create an instance of the DynamicGridView class to generate the dynamic grid
-        DynamicGridView dynamicGridView = new DynamicGridView();
+        dynamicGridView = new DynamicGridView();
 
         GridViewDTO gridViewDTO = appController.getGridViewDTO(currentSimulationID.get());
         ScrollPane scrollPane = dynamicGridView.createDynamicGrid(gridViewDTO);
         dynamicGrid.setContent(scrollPane);
+        updateListViewOfEntities(dynamicGridView.getEntityNameToColorMap());
+    }
+
+    private void updateListViewOfEntities(Map<String, Color> entityNameToColorMap) {
+        listView.getItems().clear();
+        Label label = new Label("Entities:");
+        label.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-underline: true;");
+        listView.getItems().add(label);
+        for (String entityName : entityNameToColorMap.keySet()) {
+            listView.getItems().add(entityName);
+        }
     }
 
     public void setAppController(AppController appController) {

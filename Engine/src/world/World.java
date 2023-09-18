@@ -4,6 +4,7 @@ import engine.Serialization;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.grid.Grid;
+import world.factors.grid.api.GridDefinition;
 import world.factors.rule.Rule;
 import world.factors.termination.Termination;
 
@@ -13,12 +14,12 @@ import java.util.List;
 public class World implements Serializable {
     private EnvVariablesManager environment;
     private List<EntityDefinition> entities;
-    private Grid grid;
+    private GridDefinition grid;
     private List<Rule> rules;
     private Termination termination;
     private int threadCount;
 
-    public World(EnvVariablesManager environment, List<EntityDefinition> entities, Grid grid, List<Rule> rules, Termination termination, int threadCount) {
+    public World(EnvVariablesManager environment, List<EntityDefinition> entities, GridDefinition grid, List<Rule> rules, Termination termination, int threadCount) {
         this.environment = environment;
         this.entities = entities;
         this.grid = grid;
@@ -52,11 +53,12 @@ public class World implements Serializable {
         return termination;
     }
 
-    public Grid getGrid() {
+    public GridDefinition getGridDefinition() {
         return grid;
     }
 
     public int getThreadCount() {
         return threadCount;
     }
+
 }

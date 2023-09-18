@@ -8,16 +8,18 @@ public class SimulationExecutionDetailsDTO {
     private boolean isTerminatedByTicksCount;
     private boolean isRunning;
     private boolean isPaused;
+    private boolean isCompleted;
     private int numberOfEntities;
     private List<EntityPopulationDTO> entitiesPopulation;
     private int currentTick;
     private long durationInSeconds;
-    public SimulationExecutionDetailsDTO(int id, boolean isTerminatedBySecondsCount, boolean isTerminatedByTicksCount, boolean isRunning, boolean isPaused, int numberOfEntities, List<EntityPopulationDTO> entitiesPopulation, int currentTick, long durationInSeconds) {
+    public SimulationExecutionDetailsDTO(int id, boolean isTerminatedBySecondsCount, boolean isTerminatedByTicksCount, boolean isRunning, boolean isPaused, boolean isCompleted, int numberOfEntities, List<EntityPopulationDTO> entitiesPopulation, int currentTick, long durationInSeconds) {
         this.id = id;
         this.isTerminatedBySecondsCount = isTerminatedBySecondsCount;
         this.isTerminatedByTicksCount = isTerminatedByTicksCount;
         this.isRunning = isRunning;
         this.isPaused = isPaused;
+        this.isCompleted = isCompleted;
         this.numberOfEntities = numberOfEntities;
         this.entitiesPopulation = entitiesPopulation;
         this.currentTick = currentTick;
@@ -58,5 +60,9 @@ public class SimulationExecutionDetailsDTO {
 
     public List<EntityPopulationDTO> getEntitiesPopulation() {
         return entitiesPopulation;
+    }
+
+    public boolean isCompleted() {
+        return isCompleted;
     }
 }

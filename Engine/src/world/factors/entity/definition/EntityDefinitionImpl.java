@@ -9,28 +9,16 @@ import java.util.List;
 public class EntityDefinitionImpl implements EntityDefinition, Serializable {
 
     private final String name;
-    private int population;
     private final List<PropertyDefinition> properties;
 
     public EntityDefinitionImpl(String name) {
         this.name = name;
-        this.population = 0;
         properties = new ArrayList<>();
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public int getPopulation() {
-        return population;
-    }
-
-    @Override
-    public void setPopulation(int population) {
-        this.population = population;
     }
 
     @Override

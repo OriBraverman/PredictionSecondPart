@@ -12,4 +12,11 @@ public class EntitiesPopulationDTO {
     public List<EntityPopulationDTO> getEntitiesPopulation() {
         return entitiesPopulation;
     }
+
+    public EntityPopulationDTO getEntityPopulationByName(String name) {
+        return entitiesPopulation.stream()
+                .filter(entityPopulationDTO -> entityPopulationDTO.getName().equals(name))
+                .findFirst()
+                .orElse(null);
+    }
 }

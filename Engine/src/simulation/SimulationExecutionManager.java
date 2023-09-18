@@ -2,35 +2,32 @@ package simulation;
 
 import dtos.SimulationIDListDTO;
 import world.World;
+import world.factors.entity.execution.manager.EntityInstanceManager;
 import world.factors.environment.execution.api.ActiveEnvironment;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadFactory;
 
 public class SimulationExecutionManager implements Serializable {
     private Map<Integer, SimulationRunner> simulations;
     private Map<Integer, SimulationExecutionDetails> simulationDetails;
     private int currentSimulationIndex;
     ExecutorService threadExecutor;
-
     public SimulationExecutionManager(int threadCount) {
         this.simulations = new HashMap<>();
         this.simulationDetails = new HashMap<>();
         this.currentSimulationIndex = 0;
         this.threadExecutor = Executors.newFixedThreadPool(threadCount);
-
     }
 
-    public int createSimulation(World world, ActiveEnvironment activeEnvironment) {
+    public int createSimulation(World world, ActiveEnvironment activeEnvironment, EntityInstanceManager entityInstanceManager) {
         currentSimulationIndex++;
-        SimulationExecutionDetails simulationExecutionDetails = new SimulationExecutionDetails(currentSimulationIndex, activeEnvironment, world);
+        SimulationExecutionDetails simulationExecutionDetails = new SimulationExecutionDetails(currentSimulationIndex, activeEnvironment, entityInstanceManager, world);
         SimulationRunner simulationRunner = new SimulationRunnerImpl(currentSimulationIndex, simulationExecutionDetails);
         simulations.put(currentSimulationIndex, simulationRunner);
         simulationDetails.put(currentSimulationIndex, simulationExecutionDetails);
@@ -57,7 +54,8 @@ public class SimulationExecutionManager implements Serializable {
             SimulationExecutionDetails prevSED = simulationDetails.get(simulationId);
             World world = prevSED.getWorld();
             ActiveEnvironment activeEnvironment = prevSED.getActiveEnvironment();
-            SimulationExecutionDetails currSED = new SimulationExecutionDetails(simulationId, activeEnvironment, world);
+            EntityInstanceManager entityInstanceManager = prevSED.getEntityInstanceManager();
+            SimulationExecutionDetails currSED = new SimulationExecutionDetails(simulationId, activeEnvironment, entityInstanceManager, world);
             SimulationRunner simulationRunner = new SimulationRunnerImpl(simulationId, currSED);
             simulations.remove(simulationId);
             simulationDetails.remove(simulationId);
@@ -76,7 +74,7 @@ public class SimulationExecutionManager implements Serializable {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
         Thread simulationThread = simulationExecutionDetails.getSimulationThread();
         if (simulationThread != null) {
-            simulationThread.interrupt();
+            //simulationThread.interrupt();
             simulationExecutionDetails.setRunning(false);
         }
     }
@@ -135,4 +133,5 @@ public class SimulationExecutionManager implements Serializable {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
         return !simulationExecutionDetails.isRunning() && simulationExecutionDetails.getSimulationThread() != null;
     }
+
 }

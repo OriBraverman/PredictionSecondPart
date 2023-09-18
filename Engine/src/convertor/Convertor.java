@@ -15,6 +15,8 @@ import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.expression.api.AbstractExpression;
 import world.factors.grid.Grid;
+import world.factors.grid.api.GridDefinition;
+import world.factors.grid.api.GridDefinitionImpl;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.definition.api.Range;
 import world.factors.property.definition.impl.BooleanPropertyDefinition;
@@ -39,7 +41,7 @@ public class Convertor implements Serializable {
         List<EntityDefinition> entities = getEntities();
         List<Rule> rules = getRules(entities);
         Termination termination = getTermination();
-        Grid grid = new Grid(generatedWorld.getPRDGrid().getRows(), generatedWorld.getPRDGrid().getColumns());
+        GridDefinition grid = new GridDefinitionImpl(generatedWorld.getPRDGrid().getRows(), generatedWorld.getPRDGrid().getColumns());
         int threadCount = generatedWorld.getPRDThreadCount();
         return new World(environment, entities, grid, rules, termination, threadCount);
     }

@@ -24,6 +24,8 @@ import world.factors.action.api.Action;
 import world.factors.action.impl.*;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
+import world.factors.entity.execution.manager.EntityInstanceManager;
+import world.factors.entity.execution.manager.EntityInstanceManagerImpl;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.property.definition.api.NumericPropertyDefinition;
@@ -50,11 +52,13 @@ public class Engine implements Serializable {
     private World world;
     private SimulationExecutionManager simulationExecutionManager;
     private ActiveEnvironment activeEnvironment;
+    private EntityInstanceManager entityInstanceManager;
 
     public Engine() {
         this.world = null;
         this.simulationExecutionManager = null;
         this.activeEnvironment = null;
+        this.entityInstanceManager = null;
     }
 
     private static PRDWorld fromXmlFileToObject(Path path) {
@@ -81,7 +85,7 @@ public class Engine implements Serializable {
         Convertor convertor = new Convertor();
         convertor.setGeneratedWorld(generatedWorld);
         World tempWorld = convertor.convertPRDWorldToWorld();
-        validateGrid(tempWorld.getGrid());
+        validateGrid(tempWorld.getGridDefinition());
         validateAllActionsReferToExistingEntities(tempWorld);
         validateAllActionsReferToExistingEntityProperties(tempWorld);
         validateMathActionHasNumericArgs(tempWorld.getRules(), tempWorld.getEntities(), (EnvVariableManagerImpl) tempWorld.getEnvironment());
@@ -107,7 +111,7 @@ public class Engine implements Serializable {
         return envVariablesValuesDTO;
     }
     public SimulationIDDTO activateSimulation() {
-        int simulationId = this.simulationExecutionManager.createSimulation(this.world, this.activeEnvironment);
+        int simulationId = this.simulationExecutionManager.createSimulation(this.world, this.activeEnvironment, this.entityInstanceManager);
         this.simulationExecutionManager.runSimulation(simulationId);
         return new SimulationIDDTO(simulationId);
     }
@@ -117,8 +121,8 @@ public class Engine implements Serializable {
         List<EntityDefinitionDTO> entities = getEntitiesDTO();
         List<RuleDTO> rules = getRulesDTO();
         TerminationDTO termination = getTerminationDTO();
-        int gridWidth = this.world.getGrid().getWidth();
-        int gridHeight = this.world.getGrid().getHeight();
+        int gridWidth = this.world.getGridDefinition().getWidth();
+        int gridHeight = this.world.getGridDefinition().getHeight();
         int threadCount = this.world.getThreadCount();
         return new WorldDTO(environment, entities, rules, termination, gridWidth, gridHeight, threadCount);
     }
@@ -218,10 +222,9 @@ public class Engine implements Serializable {
 
     private EntityDefinitionDTO getEntityDefinitionDTO(EntityDefinition entityDefinition) {
         String name = entityDefinition.getName();
-        int population = entityDefinition.getPopulation();
         List<PropertyDefinitionDTO> entityPropertyDefinitionDTOS = new ArrayList<>();
         entityDefinition.getProps().forEach(propertyDefinition -> entityPropertyDefinitionDTOS.add(getPropertyDefinitionDTO(propertyDefinition)));
-        return new EntityDefinitionDTO(name, population, entityPropertyDefinitionDTOS);
+        return new EntityDefinitionDTO(name, entityPropertyDefinitionDTOS);
     }
 
     private PropertyDefinitionDTO getPropertyDefinitionDTO(PropertyDefinition propertyDefinition) {
@@ -250,9 +253,8 @@ public class Engine implements Serializable {
 
     private EntityDefinitionDTO getEntityDTO(EntityDefinition entityDefinition) {
         String name = entityDefinition.getName();
-        int population = entityDefinition.getPopulation();
         List<PropertyDefinitionDTO> entityPropertyDefinitionDTOS = getEntityPropertyDefinitionDTOS(entityDefinition.getProps());
-        return new EntityDefinitionDTO(name, population, entityPropertyDefinitionDTOS);
+        return new EntityDefinitionDTO(name, entityPropertyDefinitionDTOS);
     }
 
     private List<PropertyDefinitionDTO> getEntityPropertyDefinitionDTOS(List<PropertyDefinition> properties) {
@@ -297,7 +299,7 @@ public class Engine implements Serializable {
         EntityResultDTO[] entityResultDTOS = stream(this.world.getEntities().toArray())
                 .map(entityDefinition -> {
                     String name = ((EntityDefinition) entityDefinition).getName();
-                    int startingPopulation = ((EntityDefinition) entityDefinition).getPopulation();
+                    int startingPopulation  = this.entityInstanceManager.getPopulationByEntityDefinition((EntityDefinition) entityDefinition);
                     int endingPopulation = simulationExecutionDetails.getEntityInstanceManager().getEntityCountByName(name);
                     return new EntityResultDTO(name, startingPopulation, endingPopulation);
                 })
@@ -339,18 +341,23 @@ public class Engine implements Serializable {
         return new NewExecutionInputDTO(envVariables, entityDefinitionDTOS);
     }
 
-    public void updateActiveEntityPopulation(EntitiesPopulationDTO entityPopulationDTO) {
-        for (EntityPopulationDTO entityPopulation : entityPopulationDTO.getEntitiesPopulation()) {
+    public void updateActiveEntityPopulation(EntitiesPopulationDTO entitiesPopulationDTO) {
+        EntityInstanceManager entityInstanceManager = new EntityInstanceManagerImpl();
+        for (EntityDefinition entityDefinition : world.getEntities()) {
+            EntityPopulationDTO entityPopulation = entitiesPopulationDTO.getEntityPopulationByName(entityDefinition.getName());
             String value;
             if (entityPopulation.hasValue()) {
                 value = entityPopulation.getPopulation();
-                world.getEntityByName(entityPopulation.getName()).setPopulation(Integer.parseInt(value));
+                entityInstanceManager.addEntityDefinitionPopulation(entityDefinition, Integer.parseInt(value));
+            } else {
+                entityInstanceManager.addEntityDefinitionPopulation(entityDefinition, 0);
             }
         }
+        this.entityInstanceManager = entityInstanceManager;
     }
 
     public void validateEntitiesPopulation(EntitiesPopulationDTO entitiesPopulationDTO) {
-        int MaxPopulation = this.world.getGrid().getHeight() * this.world.getGrid().getWidth();
+        int MaxPopulation = this.world.getGridDefinition().getHeight() * this.world.getGridDefinition().getWidth();
         int totalPopulation = 0;
         for (EntityPopulationDTO entityPopulation : entitiesPopulationDTO.getEntitiesPopulation()) {
             EntityDefinition entityDefinition = this.world.getEntityByName(entityPopulation.getName());
@@ -362,6 +369,8 @@ public class Engine implements Serializable {
                 int population = Integer.parseInt(value);
                 if (population < 0) {
                     throw new IllegalArgumentException("A negative value for entity: " + entityPopulation.getName());
+                } else if (population > MaxPopulation) {
+                    throw new IllegalArgumentException("A value bigger than the maximum population(" + MaxPopulation + ") for entity: " + entityPopulation.getName());
                 }
                 totalPopulation += Integer.parseInt(value);
             }
@@ -377,11 +386,12 @@ public class Engine implements Serializable {
         boolean seconds = simulationExecutionDetails.isTerminatedBySecondsCount();
         boolean isRunning = simulationExecutionDetails.isRunning();
         boolean isPaused = simulationExecutionDetails.isPaused();
+        boolean isCompleted = simulationExecutionDetails.isCompleted();
         int entitiesCount = simulationExecutionDetails.getEntityInstanceManager().getAliveEntityCount();
         List<EntityPopulationDTO> entitiesPopulation = getEntityPopulationDTOList(simulationExecutionDetails);
         int currentTick = simulationExecutionDetails.getCurrentTick();
         long secondsPassed = simulationExecutionDetails.getSimulationSeconds();
-        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, isRunning, isPaused, entitiesCount, entitiesPopulation, currentTick, secondsPassed);
+        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, isRunning, isPaused, isCompleted, entitiesCount, entitiesPopulation, currentTick, secondsPassed);
     }
 
     public List<EntityPopulationDTO> getEntityPopulationDTOList(SimulationExecutionDetails simulationExecutionDetails) {
@@ -416,12 +426,14 @@ public class Engine implements Serializable {
 
     public GridViewDTO getGridViewDTO(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
-        int gridWidth = simulationExecutionDetails.getWorld().getGrid().getWidth();
-        int gridHeight = simulationExecutionDetails.getWorld().getGrid().getHeight();
+        int gridWidth = simulationExecutionDetails.getWorld().getGridDefinition().getWidth();
+        int gridHeight = simulationExecutionDetails.getWorld().getGridDefinition().getHeight();
         List<EntityInstanceDTO> entityInstanceDTOS = new ArrayList<>();
         simulationExecutionDetails.getEntityInstanceManager().getInstances()
                 .forEach(entityInstance -> entityInstanceDTOS.add(new EntityInstanceDTO(entityInstance.getEntityDefinition().getName(), entityInstance.getCoordinate().getX(), entityInstance.getCoordinate().getY())));
-        return new GridViewDTO(gridWidth, gridHeight, entityInstanceDTOS);
+        List<String> entityNames = simulationExecutionDetails.getWorld().getEntities()
+                .stream().map(EntityDefinition::getName).collect(Collectors.toList());
+        return new GridViewDTO(gridWidth, gridHeight, entityInstanceDTOS, entityNames);
     }
 
     public QueueManagementDTO getQueueManagementDTO() {
@@ -473,7 +485,7 @@ public class Engine implements Serializable {
             sumConsistency += propertyInstance.getConsistency(simulationExecutionDetails.getCurrentTick());
 
         }
-        if (instancesCopy.size() == 0) {
+        if (instancesCopy.isEmpty()) {
             return new PropertyConstistencyDTO(currentSimulationID, entityName, propertyName, "0");
         } else {
             return new PropertyConstistencyDTO(currentSimulationID, entityName, propertyName, String.valueOf(sumConsistency / instancesCopy.size()));
@@ -482,7 +494,19 @@ public class Engine implements Serializable {
 
     public EntityPopulationByTicksDTO getEntityPopulationByTicksDTO(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
-        return new EntityPopulationByTicksDTO(simulationExecutionDetails.getEntityPopulationByTicks());
+        if (simulationExecutionDetails.getEntityPopulationByTicks().size() < 1000) {
+            return new EntityPopulationByTicksDTO(simulationExecutionDetails.getEntityPopulationByTicks());
+        } else {
+            // there are more than 1000 ticks
+            // take items every simulationExecutionDetails.getCurrentTick()/1000 ticks
+            // this will get us 1000 items for the graph
+            Map<Integer, Integer> takenTicksEntityPopulation = simulationExecutionDetails.getEntityPopulationByTicks()
+                    .entrySet().stream()
+                    .filter(entry -> entry.getKey() % (simulationExecutionDetails.getCurrentTick() / 1000) == 0)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            return new EntityPopulationByTicksDTO(takenTicksEntityPopulation);
+        }
     }
 }
 

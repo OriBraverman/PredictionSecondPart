@@ -4,6 +4,9 @@ import world.World;
 import world.factors.entity.execution.manager.EntityInstanceManager;
 import world.factors.entity.execution.manager.EntityInstanceManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
+import world.factors.grid.Grid;
+import world.factors.grid.execution.GridInstance;
+import world.factors.grid.execution.GridInstanceImpl;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -17,6 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SimulationExecutionDetails {
     private final int id;
     private final ActiveEnvironment activeEnvironment;
+    private final GridInstance grid;
     private final World world;
     private final EntityInstanceManager entityInstanceManager;
     private boolean isTerminatedBySecondsCount = false;
@@ -30,11 +34,12 @@ public class SimulationExecutionDetails {
     private Thread simulationThread;
     private Map<Integer, Integer> entityPopulationByTicks;
 
-    public SimulationExecutionDetails(int id, ActiveEnvironment activeEnvironment, World world) {
+    public SimulationExecutionDetails(int id, ActiveEnvironment activeEnvironment, EntityInstanceManager entityInstanceManager, World world) {
         this.id = id;
         this.activeEnvironment = activeEnvironment;
+        this.grid = new GridInstanceImpl(world.getGridDefinition());
         this.world = world;
-        this.entityInstanceManager = new EntityInstanceManagerImpl();
+        this.entityInstanceManager = entityInstanceManager;
         this.currStartTime = Instant.now();
         this.durations = new ArrayList<>();
         this.isRunning = new AtomicBoolean(false);
@@ -135,5 +140,13 @@ public class SimulationExecutionDetails {
 
     public Map<Integer, Integer> getEntityPopulationByTicks() {
         return entityPopulationByTicks;
+    }
+
+    public boolean isCompleted() {
+        return !isRunning.get() && simulationThread != null;
+    }
+
+    public GridInstance getGridInstance() {
+        return grid;
     }
 }

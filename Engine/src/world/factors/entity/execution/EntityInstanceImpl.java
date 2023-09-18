@@ -61,4 +61,5 @@ public class EntityInstanceImpl implements EntityInstance, Serializable {
     public void setCell(Cell cell) {
         this.cell = cell;
     }
+
 }

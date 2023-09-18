@@ -11,6 +11,7 @@ import world.factors.expression.api.ExpressionType;
 import world.factors.function.api.Function;
 import world.factors.function.api.FunctionType;
 import world.factors.grid.Grid;
+import world.factors.grid.execution.GridInstance;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
 
@@ -22,14 +23,14 @@ public class ContextImpl implements Context {
     private EntityInstance secondaryEntityInstance;
     private EntityInstanceManager entityInstanceManager;
     private ActiveEnvironment activeEnvironment;
-    private Grid grid;
+    private GridInstance grid;
     private int currentTick;
 
-    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment, Grid grid, int currentTick) {
+    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment, GridInstance grid, int currentTick) {
         this(primaryEntityInstance, null, entityInstanceManager, activeEnvironment, grid, currentTick);
     }
 
-    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstance secondaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment, Grid grid, int currentTick) {
+    public ContextImpl(EntityInstance primaryEntityInstance, EntityInstance secondaryEntityInstance, EntityInstanceManager entityInstanceManager, ActiveEnvironment activeEnvironment, GridInstance grid, int currentTick) {
         this.primaryEntityInstance = primaryEntityInstance;
         this.secondaryEntityInstance = secondaryEntityInstance;
         this.entityInstanceManager = entityInstanceManager;
@@ -49,7 +50,7 @@ public class ContextImpl implements Context {
     }
 
     @Override
-    public Grid getGrid() {
+    public GridInstance getGrid() {
         return grid;
     }
 

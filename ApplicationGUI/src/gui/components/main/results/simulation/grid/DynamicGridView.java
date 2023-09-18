@@ -10,10 +10,16 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DynamicGridView {
+    private Map<String, Color> entityNameToColorMap;
+    private final List<Color> colors = new ArrayList<>(Arrays.asList(
+            Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.PURPLE,
+            Color.ORANGE, Color.PINK, Color.BROWN, Color.MAGENTA, Color.CYAN,
+            Color.DARKMAGENTA
+    ));
+
 
     public ScrollPane createDynamicGrid(GridViewDTO gridViewDTO) {
         // Create a ScrollPane to contain the GridPane
@@ -55,7 +61,9 @@ public class DynamicGridView {
                 dynamicGrid.add(createColoredRectangle(Color.WHITE), i, j);
             }
         }
-
+        // update the entityNameToColorMap
+        List<String> entityDefinitions = gridViewDTO.getEntityDefinitionNames();
+        updateEntityNameToColorMap(entityDefinitions);
         // Create and add labels with different colors for each entity
         for (EntityInstanceDTO entityInstanceDTO : gridViewDTO.getEntityInstances()) {
             String entityName = entityInstanceDTO.getEntityName();
@@ -74,15 +82,22 @@ public class DynamicGridView {
         return scrollPane;
     }
 
-    private Color calculateColor(String entityName) {
-        // Here, you can implement a logic to calculate the color based on the entity name.
-        // For example, you can use a hash of the entity name to generate a color.
-        int hashCode = entityName.hashCode();
-        int red = (hashCode & 0xFF0000) >> 16;
-        int green = (hashCode & 0x00FF00) >> 8;
-        int blue = hashCode & 0x0000FF;
+    private void updateEntityNameToColorMap(List<String> entityDefinitions) {
+        entityNameToColorMap = new HashMap<>();
+        for (int i = 0; i < entityDefinitions.size(); i++) {
+            entityNameToColorMap.put(entityDefinitions.get(i), colors.get(i % colors.size()));
+        }
+    }
 
-        return Color.rgb(red, green, blue);
+    private Color calculateColor(String entityName) {
+        if (entityNameToColorMap == null) {
+            throw new IllegalStateException("entityNameToColorMap is null");
+        }
+        if (!entityNameToColorMap.containsKey(entityName)) {
+            throw new IllegalStateException("entityNameToColorMap does not contain the entityName: " + entityName);
+        }
+
+        return entityNameToColorMap.get(entityName);
     }
 
     private Rectangle createColoredRectangle(Color color) {
@@ -90,5 +105,9 @@ public class DynamicGridView {
         rectangle.setFill(color);
         rectangle.setStroke(Color.BLACK);
         return rectangle;
+    }
+
+    public Map<String, Color> getEntityNameToColorMap() {
+        return entityNameToColorMap;
     }
 }
