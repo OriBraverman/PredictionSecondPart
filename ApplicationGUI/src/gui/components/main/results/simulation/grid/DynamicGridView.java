@@ -24,8 +24,6 @@ public class DynamicGridView {
     public ScrollPane createDynamicGrid(GridViewDTO gridViewDTO) {
         // Create a ScrollPane to contain the GridPane
         ScrollPane scrollPane = new ScrollPane();
-        // set scrollPane size
-        scrollPane.setPrefSize(600, 400);
 
         // Create a GridPane
         GridPane dynamicGrid = new GridPane();

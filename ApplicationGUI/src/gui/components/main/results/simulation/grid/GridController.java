@@ -14,7 +14,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -40,9 +42,9 @@ public class GridController {
     public void updateGrid() {
         // Create an instance of the DynamicGridView class to generate the dynamic grid
         dynamicGridView = new DynamicGridView();
-
         GridViewDTO gridViewDTO = appController.getGridViewDTO(currentSimulationID.get());
         ScrollPane scrollPane = dynamicGridView.createDynamicGrid(gridViewDTO);
+        scrollPane.setPrefSize(dynamicGrid.getPrefWidth(), dynamicGrid.getPrefHeight());
         dynamicGrid.setContent(scrollPane);
         updateListViewOfEntities(dynamicGridView.getEntityNameToColorMap());
     }
@@ -53,7 +55,14 @@ public class GridController {
         label.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-underline: true;");
         listView.getItems().add(label);
         for (String entityName : entityNameToColorMap.keySet()) {
-            listView.getItems().add(entityName);
+            // each list item is in the format: Entity: <entity name> - <color>
+            HBox itemContainer = new HBox(); // Container for CheckBox and TextField
+            Label entityNameLabel = new Label(entityName);
+            Label separator = new Label(" - ");
+            Rectangle colorRectangle = new Rectangle(20, 20);
+            colorRectangle.setFill(entityNameToColorMap.get(entityName));
+            itemContainer.getChildren().addAll(entityNameLabel, separator, colorRectangle);
+            listView.getItems().add(itemContainer);
         }
     }
 
