@@ -11,4 +11,5 @@ public interface EntityDefinition {
     PropertyDefinition getPropertyDefinitionByName(String name);
     void increasePopulation();
     void decreasePopulation();
+    int getPopulation();
 }

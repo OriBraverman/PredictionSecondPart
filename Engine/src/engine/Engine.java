@@ -26,6 +26,7 @@ import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.entity.execution.manager.EntityInstanceManager;
 import world.factors.entity.execution.manager.EntityInstanceManagerImpl;
+import world.factors.entityPopulation.EntityPopulation;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.property.definition.api.NumericPropertyDefinition;
@@ -487,20 +488,38 @@ public class Engine implements Serializable {
         }
     }
 
+    private Map<Integer, List<EntityPopulationDTO>> getEntityPopulationByTicks(int simulationID)
+    {
+        Map<Integer, List<EntityPopulationDTO>> res = new HashMap<>();
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
+        Map<Integer, List<EntityPopulation>> entityPopulationByTicks = simulationExecutionDetails.getEntityPopulationByTicks();
+        entityPopulationByTicks.forEach((tick, entityPopulationList) -> {
+            List<EntityPopulationDTO> entityPopulationDTOS = new ArrayList<>();
+            entityPopulationList.forEach(entityPopulation -> entityPopulationDTOS
+                    .add(new EntityPopulationDTO(entityPopulation.getEntityName(), Integer.toString(entityPopulation.getPopulation()), true)));
+            res.put(tick, entityPopulationDTOS);
+        });
+        return res;
+    }
     public EntityPopulationByTicksDTO getEntityPopulationByTicksDTO(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
-        if (simulationExecutionDetails.getEntityPopulationByTicks().size() < 1000) {
-            return new EntityPopulationByTicksDTO(simulationExecutionDetails.getEntityPopulationByTicks());
+        Map<Integer, List<EntityPopulationDTO>> entityPopulationByTicks = getEntityPopulationByTicks(simulationID);
+        List<String> entityNames = simulationExecutionDetails.getWorld().getEntities().stream()
+                .map(EntityDefinition::getName).collect(Collectors.toList());
+        if (simulationExecutionDetails.getEntityPopulationByTicks().size() < 100) {
+
+            return new EntityPopulationByTicksDTO(entityPopulationByTicks, entityNames);
         } else {
-            // there are more than 1000 ticks
+            // there are more than 100 ticks
             // take items every simulationExecutionDetails.getCurrentTick()/1000 ticks
-            // this will get us 1000 items for the graph
-            Map<Integer, Integer> takenTicksEntityPopulation = simulationExecutionDetails.getEntityPopulationByTicks()
-                    .entrySet().stream()
-                    .filter(entry -> entry.getKey() % (simulationExecutionDetails.getCurrentTick() / 1000) == 0)
+            // this will get us 100 items for the graph
+            Map<Integer, List<EntityPopulationDTO>> takenTicksEntityPopulation = entityPopulationByTicks
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey() % (simulationExecutionDetails.getCurrentTick() / 100) == 0)
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-            return new EntityPopulationByTicksDTO(takenTicksEntityPopulation);
+            return new EntityPopulationByTicksDTO(takenTicksEntityPopulation, entityNames);
         }
     }
 
@@ -524,13 +543,6 @@ public class Engine implements Serializable {
         return new EntitiesPopulationDTO(entityPopulationDTOS);
     }
 
-    public EntitiesPopulationDTO getEntitiesPopulationDTO(){
-        List<EntityPopulationDTO> entityPopulationDTOS = new ArrayList<>();
-        for (EntityDefinition entityDefinition: this.world.getEntities()){
-            entityPopulationDTOS.add(new EntityPopulationDTO())
-
-        }
-    }
 }
 
 

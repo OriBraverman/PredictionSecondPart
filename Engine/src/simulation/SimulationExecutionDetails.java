@@ -1,8 +1,10 @@
 package simulation;
 
 import world.World;
+import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.manager.EntityInstanceManager;
 import world.factors.entity.execution.manager.EntityInstanceManagerImpl;
+import world.factors.entityPopulation.EntityPopulation;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.grid.Grid;
 import world.factors.grid.execution.GridInstance;
@@ -32,7 +34,7 @@ public class SimulationExecutionDetails {
     private String formattedStartTime;
     private int currentTick = 0;
     private Thread simulationThread;
-    private Map<Integer, Integer> entityPopulationByTicks;
+    private Map<Integer, List<EntityPopulation>> entityPopulationByTicks;
 
     public SimulationExecutionDetails(int id, ActiveEnvironment activeEnvironment, EntityInstanceManager entityInstanceManager, World world) {
         this.id = id;
@@ -80,7 +82,7 @@ public class SimulationExecutionDetails {
     }
 
     public void setCurrentTick(int currentTick) {
-        this.entityPopulationByTicks.put(currentTick, entityInstanceManager.getAliveEntityCount());
+        this.entityPopulationByTicks.put(currentTick, entityInstanceManager.getCurrEntityPopulationList());
         this.currentTick = currentTick;
     }
 
@@ -138,7 +140,7 @@ public class SimulationExecutionDetails {
         this.simulationThread = simulationThread;
     }
 
-    public Map<Integer, Integer> getEntityPopulationByTicks() {
+    public Map<Integer, List<EntityPopulation>> getEntityPopulationByTicks() {
         return entityPopulationByTicks;
     }
 

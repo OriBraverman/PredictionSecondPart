@@ -40,6 +40,9 @@ public class EntityDefinitionImpl implements EntityDefinition, Serializable {
     public void decreasePopulation(){ this.population--; }
 
     @Override
+    public int getPopulation(){ return this.population; }
+
+    @Override
     public PropertyDefinition getPropertyDefinitionByName(String name) {
         for (PropertyDefinition propertyDefinition : properties) {
             if (propertyDefinition.getName().equals(name)) {

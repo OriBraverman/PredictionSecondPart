@@ -28,8 +28,6 @@ public class NewExecutionController {
         this.appController = appController;
     }
 
-    private Map<String, List<Object>> entityPopulationMap;
-
     @FXML public void initialize(){
         entityPopulationListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     }
@@ -74,7 +72,6 @@ public class NewExecutionController {
                 textField.setDisable(!newValue); // Enable/disable TextField
                 textField.setVisible(newValue);     // Show/hide TextField
             });
-            entityPopulationMap.a
 
             // Add the itemContainer (HBox) to the ListView
             entityPopulationListView.getItems().add(itemContainer);
@@ -102,9 +99,9 @@ public class NewExecutionController {
         prevName.setLayoutX(68.0);
         prevName.setLayoutY(52.0);
 
-        Label name = new Label(propertyDefinitionDTO.getName());
-        nameLabel.setLayoutX(137.0);
-        nameLabel.setLayoutY(52.0);
+        Label propertyName = new Label(propertyDefinitionDTO.getName());
+        propertyName.setLayoutX(137.0);
+        propertyName.setLayoutY(52.0);
 
         Label typeLabel = new Label("Type:");
         typeLabel.setLayoutX(72.0);
@@ -136,14 +133,14 @@ public class NewExecutionController {
             toValueLabel.setLayoutY(116.0);
 
             anchorPane.getChildren().addAll(
-                    checkBox, prevName, textField, typeLabel, rangeLabel,
+                    propertyName, checkBox, textField, prevName, typeLabel, rangeLabel,
                     fromLabel, fromValueLabel, toLabel, toValueLabel,
-                    typeValueLabel, nameLabel2
+                    typeValueLabel
             );
         } else {
             anchorPane.getChildren().addAll(
-                    checkBox, prevName, textField, typeLabel,
-                    typeValueLabel, nameLabel2
+                    propertyName, checkBox, textField, prevName, typeLabel,
+                    typeValueLabel
             );
         }
 
@@ -195,7 +192,7 @@ public class NewExecutionController {
         for (int i = 0; i < envVariablesAccordion.getPanes().size(); i++) {
             TitledPane titledPane = envVariablesAccordion.getPanes().get(i);
             AnchorPane anchorPane = (AnchorPane) titledPane.getContent();
-            CheckBox checkBox = (CheckBox) anchorPane.getChildren().get(0);
+            CheckBox checkBox = (CheckBox) anchorPane.getChildren().get(1);
             EnvVariableValueDTO envVariableValueDTO;
             if (checkBox.isSelected()) {
                 TextField textField = (TextField) anchorPane.getChildren().get(2);
@@ -239,10 +236,11 @@ public class NewExecutionController {
     public void fillEnvVariablesInputVBox(EnvVariablesValuesDTO envVariablesValuesDTO) {
         for (TitledPane titledPane : envVariablesAccordion.getPanes()) {
             AnchorPane anchorPane = (AnchorPane) titledPane.getContent();
-            CheckBox checkBox = (CheckBox) anchorPane.getChildren().get(0);
+            String envVariableName = ((Label)anchorPane.getChildren().get(0)).getText();
+            CheckBox checkBox = (CheckBox) anchorPane.getChildren().get(1);
             TextField textField = (TextField) anchorPane.getChildren().get(2);
             for (EnvVariableValueDTO envVariableValueDTO : envVariablesValuesDTO.getEnvVariablesValues()) {
-                if (titledPane.getText().equals(envVariableValueDTO.getName())) {
+                if (envVariableName.equals(envVariableValueDTO.getName())) {
                     checkBox.setSelected(envVariableValueDTO.hasValue());
                     textField.setText(envVariableValueDTO.getValue());
                 }
@@ -254,10 +252,11 @@ public class NewExecutionController {
     public void fillEntityPopulationInputVBox(EntitiesPopulationDTO entityPopulationDTO) {
         for (Object item : entityPopulationListView.getItems()) {
             HBox itemContainer = (HBox) item;
+            String entityName = ((Label) itemContainer.getChildren().get(2)).getText();
             CheckBox checkBox = (CheckBox) itemContainer.getChildren().get(0);
-            TextField textField = (TextField) itemContainer.getChildren().get(1);
+            TextField textField = (TextField) itemContainer.getChildren().get(4);
             for (EntityPopulationDTO entityPopulation : entityPopulationDTO.getEntitiesPopulation()) {
-                if (checkBox.getText().equals(entityPopulation.getName())) {
+                if (entityName.equals(entityPopulation.getName())) {
                     checkBox.setSelected(entityPopulation.hasValue());
                     textField.setText(entityPopulation.getPopulation());
                 }

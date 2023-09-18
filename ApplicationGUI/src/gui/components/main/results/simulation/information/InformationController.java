@@ -1,6 +1,7 @@
 package gui.components.main.results.simulation.information;
 
 import dtos.EntitiesPopulationDTO;
+import dtos.EntityPopulationDTO;
 import dtos.result.EntityPopulationByTicksDTO;
 import dtos.result.HistogramDTO;
 import dtos.result.PropertyAvaregeValueDTO;
@@ -16,6 +17,9 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class InformationController {
@@ -165,19 +169,32 @@ public class InformationController {
         }
 
         EntityPopulationByTicksDTO entityPopulationByTicksDTO = appController.getEntityPopulationByTicksDTO(simulationID);
+        Map<Integer, List<EntityPopulationDTO>> entityPopulationByTicks = entityPopulationByTicksDTO.getEntityPopulationByTicks();
+        List<String> entityNames = entityPopulationByTicksDTO.getEntityNames();
+
         BarChart<String, Number> barChart = new BarChart<>(new javafx.scene.chart.CategoryAxis(), new javafx.scene.chart.NumberAxis());
         barChart.setTitle("Entity population by ticks");
         javafx.scene.chart.CategoryAxis xAxis = (javafx.scene.chart.CategoryAxis) barChart.getXAxis();
         xAxis.setLabel("Tick");
         javafx.scene.chart.NumberAxis yAxis = (javafx.scene.chart.NumberAxis) barChart.getYAxis();
         yAxis.setLabel("Amount of entities");
-        javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
-        for (Integer key : entityPopulationByTicksDTO.getEntityPopulationByTicks().keySet()) {
-            series.getData().add(new javafx.scene.chart.XYChart.Data<>(key.toString(), entityPopulationByTicksDTO.getEntityPopulationByTicks().get(key)));
+
+        for (String entityName : entityNames) {
+            javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
+            series.setName(entityName);
+            for (Integer tick : entityPopulationByTicks.keySet()) {
+                for (EntityPopulationDTO entityPopulationDTO : entityPopulationByTicks.get(tick)) {
+                    if (entityPopulationDTO.getName().equals(entityName)) {
+                        series.getData().add(new javafx.scene.chart.XYChart.Data<>(tick.toString(), Integer.parseInt(entityPopulationDTO.getPopulation())));
+                    }
+                }
+            }
+            barChart.getData().add(series);
         }
-        barChart.getData().add(series);
+
         executionResult.getChildren().add(barChart);
     }
+
 
     public void setSimulationComponentController(SimulationController simulationController) {
         this.simulationController = simulationController;
@@ -189,9 +206,5 @@ public class InformationController {
 
     public void setExecutionResult(FlowPane executionResult) {
         this.executionResult = executionResult;
-    }
-
-    public EntitiesPopulationDTO getEntitiesPopulationDTO(){
-        return new EntitiesPopulationDTO()
     }
 }

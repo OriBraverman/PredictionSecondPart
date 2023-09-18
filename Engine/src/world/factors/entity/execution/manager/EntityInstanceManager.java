@@ -4,6 +4,7 @@ package world.factors.entity.execution.manager;
 import world.factors.action.api.SecondaryEntity;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
+import world.factors.entityPopulation.EntityPopulation;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.grid.Grid;
 import world.factors.grid.execution.GridInstance;
@@ -32,4 +33,6 @@ public interface EntityInstanceManager {
     List<EntityInstance> getSelectedSeconderyEntites(SecondaryEntity secondaryEntity, ActiveEnvironment activeEnvironment, GridInstance grid, int currentTick);
 
     Map<EntityDefinition, Integer> getEntityPopulationMap();
+
+    List<EntityPopulation> getCurrEntityPopulationList();
 }

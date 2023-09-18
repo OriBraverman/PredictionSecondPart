@@ -6,6 +6,7 @@ import world.factors.action.api.SecondaryEntity;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.entity.execution.EntityInstanceImpl;
+import world.factors.entityPopulation.EntityPopulation;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.grid.Cell;
 import world.factors.grid.Grid;
@@ -200,6 +201,9 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     @Override
     public void addEntityDefinitionPopulation(EntityDefinition entityDefinition, int population){
+        if (this.entityPopulationMap.containsKey(entityDefinition)){
+            return;
+        }
         this.entityPopulationMap.put(entityDefinition, population);
     }
 
@@ -211,5 +215,24 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     @Override
     public Map<EntityDefinition, Integer> getEntityPopulationMap() {
         return entityPopulationMap;
+    }
+
+    @Override
+    public List<EntityPopulation> getCurrEntityPopulationList() {
+        List<EntityPopulation> res = new ArrayList<>();
+        for (EntityDefinition entityDefinition : entityPopulationMap.keySet()) {
+            res.add(new EntityPopulation(entityDefinition.getName(), getAliveEntityCountByName(entityDefinition.getName())));
+        }
+        return res;
+    }
+
+    private int getAliveEntityCountByName(String entityName) {
+        int count = 0;
+        for (EntityInstance entityInstance : instances) {
+            if (entityInstance.getEntityDefinition().getName().equals(entityName)) {
+                count++;
+            }
+        }
+        return count;
     }
 }
