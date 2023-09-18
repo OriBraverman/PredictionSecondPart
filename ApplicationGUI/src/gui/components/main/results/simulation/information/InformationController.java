@@ -1,5 +1,6 @@
 package gui.components.main.results.simulation.information;
 
+import dtos.EntitiesPopulationDTO;
 import dtos.result.EntityPopulationByTicksDTO;
 import dtos.result.HistogramDTO;
 import dtos.result.PropertyAvaregeValueDTO;
@@ -188,5 +189,9 @@ public class InformationController {
 
     public void setExecutionResult(FlowPane executionResult) {
         this.executionResult = executionResult;
+    }
+
+    public EntitiesPopulationDTO getEntitiesPopulationDTO(){
+        return new EntitiesPopulationDTO()
     }
 }

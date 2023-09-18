@@ -49,22 +49,6 @@ public class SimulationExecutionManager implements Serializable {
         return simulationDetails.get(simulationID);
     }
 
-    public void recreateSimulation(int simulationId) {
-        if (simulationDetails.containsKey(simulationId)) {
-            SimulationExecutionDetails prevSED = simulationDetails.get(simulationId);
-            World world = prevSED.getWorld();
-            ActiveEnvironment activeEnvironment = prevSED.getActiveEnvironment();
-            EntityInstanceManager entityInstanceManager = prevSED.getEntityInstanceManager();
-            SimulationExecutionDetails currSED = new SimulationExecutionDetails(simulationId, activeEnvironment, entityInstanceManager, world);
-            SimulationRunner simulationRunner = new SimulationRunnerImpl(simulationId, currSED);
-            simulations.remove(simulationId);
-            simulationDetails.remove(simulationId);
-            simulations.put(simulationId, simulationRunner);
-            simulationDetails.put(simulationId, currSED);
-
-        }
-    }
-
     public void runSimulation(int simulationId) {
         SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationId);
         threadExecutor.execute(simulationRunnerImpl);

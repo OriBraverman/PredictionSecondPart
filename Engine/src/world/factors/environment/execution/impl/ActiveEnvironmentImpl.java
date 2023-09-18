@@ -4,8 +4,11 @@ import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.property.execution.PropertyInstance;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ActiveEnvironmentImpl implements ActiveEnvironment, Serializable {
 
@@ -26,5 +29,10 @@ public class ActiveEnvironmentImpl implements ActiveEnvironment, Serializable {
     @Override
     public void addPropertyInstance(PropertyInstance propertyInstance) {
         envVariables.put(propertyInstance.getPropertyDefinition().getName(), propertyInstance);
+    }
+
+    @Override
+    public List<PropertyInstance> getEnvVariables() {
+        return new ArrayList<>(envVariables.values());
     }
 }

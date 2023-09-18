@@ -46,6 +46,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
             PropertyInstance newPropertyInstance = new PropertyInstanceImpl(propertyDefinition, value);
             newEntityInstance.addPropertyInstance(newPropertyInstance);
         }
+        newEntityInstance.getEntityDefinition().increasePopulation();
         return newEntityInstance;
     }
 
@@ -95,6 +96,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
             if (entityInstance.getId() == id) {
                 entityInstance.getCell().setOccupied(false);
                 instances.remove(entityInstance);
+                entityInstance.getEntityDefinition().decreasePopulation();
                 return;
             }
         }
@@ -204,5 +206,10 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     @Override
     public int getPopulationByEntityDefinition(EntityDefinition entityDefinition){
         return this.entityPopulationMap.get(entityDefinition);
+    }
+
+    @Override
+    public Map<EntityDefinition, Integer> getEntityPopulationMap() {
+        return entityPopulationMap;
     }
 }

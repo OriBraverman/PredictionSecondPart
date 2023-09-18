@@ -419,11 +419,6 @@ public class Engine implements Serializable {
         this.simulationExecutionManager.resumeSimulation(simulationID);
     }
 
-    public void rerunSimulation(int simulationID) {
-        this.simulationExecutionManager.recreateSimulation(simulationID);
-        this.simulationExecutionManager.runSimulation(simulationID);
-    }
-
     public GridViewDTO getGridViewDTO(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
         int gridWidth = simulationExecutionDetails.getWorld().getGridDefinition().getWidth();
@@ -506,6 +501,34 @@ public class Engine implements Serializable {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             return new EntityPopulationByTicksDTO(takenTicksEntityPopulation);
+        }
+    }
+
+    public EnvVariablesValuesDTO getEnvVariablesValuesDTO(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
+        List<PropertyInstance> envVariables = simulationExecutionDetails.getActiveEnvironment().getEnvVariables();
+        EnvVariableValueDTO[] envVariableValueDTOS = new EnvVariableValueDTO[envVariables.size()];
+        for (int i = 0; i < envVariables.size(); i++) {
+            PropertyInstance propertyInstance = envVariables.get(i);
+            envVariableValueDTOS[i] = new EnvVariableValueDTO(propertyInstance.getPropertyDefinition().getName(), propertyInstance.getValue().toString(), true);
+        }
+        return new EnvVariablesValuesDTO(envVariableValueDTOS);
+    }
+
+    public EntitiesPopulationDTO getEntityPopulationDTO(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = this.simulationExecutionManager.getSimulationDetailsByID(simulationID);
+        Map<EntityDefinition, Integer> entityPopulationMap = simulationExecutionDetails.getEntityInstanceManager().getEntityPopulationMap();
+        List<EntityPopulationDTO> entityPopulationDTOS = new ArrayList<>();
+        entityPopulationMap
+                .forEach((entityDefinition, population) -> entityPopulationDTOS.add(new EntityPopulationDTO(entityDefinition.getName(), population.toString(), true)));
+        return new EntitiesPopulationDTO(entityPopulationDTOS);
+    }
+
+    public EntitiesPopulationDTO getEntitiesPopulationDTO(){
+        List<EntityPopulationDTO> entityPopulationDTOS = new ArrayList<>();
+        for (EntityDefinition entityDefinition: this.world.getEntities()){
+            entityPopulationDTOS.add(new EntityPopulationDTO())
+
         }
     }
 }

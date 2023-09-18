@@ -9,6 +9,7 @@ import world.factors.grid.Grid;
 import world.factors.grid.execution.GridInstance;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EntityInstanceManager {
 
@@ -29,4 +30,6 @@ public interface EntityInstanceManager {
     void addEntityDefinitionPopulation(EntityDefinition entityDefinition, int population);
     int getPopulationByEntityDefinition(EntityDefinition entityDefinition);
     List<EntityInstance> getSelectedSeconderyEntites(SecondaryEntity secondaryEntity, ActiveEnvironment activeEnvironment, GridInstance grid, int currentTick);
+
+    Map<EntityDefinition, Integer> getEntityPopulationMap();
 }

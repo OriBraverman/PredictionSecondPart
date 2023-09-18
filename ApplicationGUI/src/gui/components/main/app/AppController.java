@@ -13,11 +13,14 @@ import gui.components.main.execution.scene.NewExecutionController;
 import gui.components.main.results.scene.ResultsController;
 import gui.components.main.upload.UploadController;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import world.factors.entity.definition.EntityDefinition;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,6 +43,11 @@ public class AppController {
     private final Engine engine = new Engine();
     private final SimpleBooleanProperty isXMLLoaded;
     private final SimpleBooleanProperty isSimulationExecuted;
+
+    public enum Tab {
+        DETAILS, NEW_EXECUTION, RESULTS
+    };
+
     private ScheduledExecutorService queueManagement;
 
     public AppController() {
@@ -108,6 +116,27 @@ public class AppController {
 
     }
 
+    public void selectTab(Tab tab) {
+        switch (tab) {
+            case DETAILS:
+                tabPane.getSelectionModel().select(0);
+                break;
+            case NEW_EXECUTION:
+                tabPane.getSelectionModel().select(1);
+                break;
+            case RESULTS:
+                tabPane.getSelectionModel().select(2);
+                break;
+        }
+    }
+
+    public void updateNewExecutionByPrevSimulation(int simulationID) {
+        EnvVariablesValuesDTO envVariablesValuesDTO = engine.getEnvVariablesValuesDTO(simulationID);
+        EntitiesPopulationDTO entityPopulationDTO = engine.getEntityPopulationDTO(simulationID);
+        newExecutionComponentController.fillEnvVariablesInputVBox(envVariablesValuesDTO);
+        newExecutionComponentController.fillEntityPopulationInputVBox(entityPopulationDTO);
+    }
+
     public TabPane getTabPane(){ return tabPane; }
 
     public SimulationIDListDTO getSimulationListDTO() {
@@ -150,10 +179,6 @@ public class AppController {
         return engine.getGridViewDTO(simulationID);
     }
 
-    public void rerunSimulation(int simulationID) {
-        engine.rerunSimulation(simulationID);
-    }
-
     public boolean isSimulationCompleted(int simulationID) {
         return engine.isSimulationCompleted(simulationID);
     }
@@ -168,5 +193,9 @@ public class AppController {
 
     public EntityPopulationByTicksDTO getEntityPopulationByTicksDTO(int simulationID) {
         return engine.getEntityPopulationByTicksDTO(simulationID);
+    }
+
+    public  EntitiesPopulationDTO getEntitiesPopulationDTO(){
+        for (EntityDefinition entityDefinition: thi)
     }
 }

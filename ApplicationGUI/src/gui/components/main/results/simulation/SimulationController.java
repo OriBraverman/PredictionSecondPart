@@ -72,8 +72,8 @@ public class SimulationController {
         resumeSimulationButton.disableProperty().bind(isRunning.not().or(isPaused.not()));
         stopSimulationButton.disableProperty().bind(isRunning.not());
         informationComponent.visibleProperty().bind(isCompleted);
-        // See gridView when running or completed --> Disable gridView when not running and not completed
-        gridViewButton.disableProperty().bind(isRunning.not().and(isCompleted.not()));
+        // See resume when running and paused --> Disable resume when not running or not paused
+        gridViewButton.disableProperty().bind(isRunning.not().or(isPaused.not()));
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -106,7 +106,8 @@ public class SimulationController {
 
     @FXML
     void rerunSimulationButtonAction(ActionEvent event) {
-        appController.rerunSimulation(currentSimulationID.get());
+        appController.selectTab(AppController.Tab.NEW_EXECUTION);
+        appController.updateNewExecutionByPrevSimulation(currentSimulationID.get());
     }
 
     @FXML
