@@ -31,6 +31,7 @@ import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.property.definition.api.NumericPropertyDefinition;
 import world.factors.property.definition.api.PropertyDefinition;
+import world.factors.property.definition.impl.BooleanPropertyDefinition;
 import world.factors.property.definition.impl.FloatPropertyDefinition;
 import world.factors.property.definition.impl.IntegerPropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
@@ -100,17 +101,34 @@ public class Engine implements Serializable {
         ActiveEnvironment activeEnvironment = this.world.getEnvironment().createActiveEnvironment();
         for (int i = 0; i < envVariablesValuesDTO.getEnvVariablesValues().length; i++) {
             EnvVariableValueDTO envVariableValueDTO = envVariablesValuesDTO.getEnvVariablesValues()[i];
-            Object value = envVariableValueDTO.getValue();
+            String value = envVariableValueDTO.getValue();
+            PropertyDefinition propertyDefinition = this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName());
+            PropertyInstance propertyInstance;
             if (value.equals("")) {
-                value = this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName()).generateValue();
+                Object generatedValue = this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName()).generateValue();
+                propertyInstance = new PropertyInstanceImpl(propertyDefinition, generatedValue);
+            } else {
+                propertyInstance = new PropertyInstanceImpl(propertyDefinition, getPropertyFromString(value, propertyDefinition));
             }
-            PropertyInstance propertyInstance = new PropertyInstanceImpl(this.world.getEnvironment().getPropertyDefinitionByName(envVariableValueDTO.getName()), value);
             activeEnvironment.addPropertyInstance(propertyInstance);
             envVariablesValuesDTO.getEnvVariablesValues()[i] = new EnvVariableValueDTO(envVariableValueDTO.getName(), value.toString(), true);
         }
         this.activeEnvironment = activeEnvironment;
         return envVariablesValuesDTO;
     }
+
+    private Object getPropertyFromString(String value, PropertyDefinition propertyDefinition) {
+        if (propertyDefinition instanceof IntegerPropertyDefinition) {
+            return Integer.parseInt(value);
+        } else if (propertyDefinition instanceof FloatPropertyDefinition) {
+            return Float.parseFloat(value);
+        } else if (propertyDefinition instanceof BooleanPropertyDefinition) {
+            return Boolean.parseBoolean(value);
+        } else {
+            return value;
+        }
+    }
+
     public SimulationIDDTO activateSimulation() {
         int simulationId = this.simulationExecutionManager.createSimulation(this.world, this.activeEnvironment, this.entityInstanceManager);
         this.simulationExecutionManager.runSimulation(simulationId);

@@ -8,6 +8,7 @@ import dtos.result.PropertyAvaregeValueDTO;
 import dtos.result.PropertyConstistencyDTO;
 import dtos.world.WorldDTO;
 import engine.Engine;
+import gui.components.main.PredictionApplication;
 import gui.components.main.details.scene.DetailsController;
 import gui.components.main.execution.scene.NewExecutionController;
 import gui.components.main.results.scene.ResultsController;
@@ -31,6 +32,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AppController {
+    @FXML private ScrollPane applicationScrollPane;
 
     @FXML private HBox uploadComponent;
     @FXML private UploadController uploadComponentController;
@@ -72,6 +74,13 @@ public class AppController {
         }
         queueManagement = Executors.newScheduledThreadPool(1);
         queueManagement.scheduleAtFixedRate(this::updateQueueManagement, 0, 200, TimeUnit.MILLISECONDS);
+        Platform.runLater(() -> {
+            // Set applicationScrollPane to be the same size as the window
+            applicationScrollPane.prefWidthProperty().bind(PredictionApplication.getStage().widthProperty());
+            applicationScrollPane.prefHeightProperty().bind(PredictionApplication.getStage().heightProperty());
+            applicationScrollPane.setFitToWidth(true);
+            applicationScrollPane.setFitToHeight(true);
+        });
     }
 
     private void updateQueueManagement() {

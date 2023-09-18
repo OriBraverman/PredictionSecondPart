@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="312.0" prefWidth="636.0" stylesheets="@../Simulation.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.results.simulation.information.InformationController">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="395.0" prefWidth="636.0" stylesheets="@../Simulation.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.results.simulation.information.InformationController">
     <children>
         <GridPane layoutX="27.0" layoutY="10.0" prefHeight="90.0" prefWidth="585.0">
             <columnConstraints>
@@ -37,7 +37,7 @@
             <Label fx:id="chooseEntityandPropertyLabel" text="Choose Entity and Property:" GridPane.rowIndex="1" />
             </children>
         </GridPane>
-      <ScrollPane layoutX="26.0" layoutY="100.0" prefHeight="197.0" prefWidth="585.0">
+      <ScrollPane layoutX="26.0" layoutY="100.0" prefHeight="283.0" prefWidth="585.0">
          <content>
                 <FlowPane fx:id="executionResult" prefHeight="214.0" prefWidth="548.0" />
          </content>
