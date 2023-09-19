@@ -1,13 +1,11 @@
 package context;
 
-import world.factors.action.impl.ReplaceAction;
 import world.factors.action.impl.ReplaceType;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.expression.api.Expression;
 import world.factors.expression.api.ExpressionType;
-import world.factors.grid.Grid;
 import world.factors.grid.execution.GridInstance;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;

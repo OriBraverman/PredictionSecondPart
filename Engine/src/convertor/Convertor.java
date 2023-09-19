@@ -14,7 +14,6 @@ import world.factors.entity.definition.EntityDefinitionImpl;
 import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
 import world.factors.expression.api.AbstractExpression;
-import world.factors.grid.Grid;
 import world.factors.grid.api.GridDefinition;
 import world.factors.grid.api.GridDefinitionImpl;
 import world.factors.property.definition.api.PropertyDefinition;

@@ -9,6 +9,7 @@ import world.factors.entity.execution.EntityInstance;
 import world.factors.entity.execution.manager.EntityInstanceManager;
 import world.factors.entity.execution.manager.EntityInstanceManagerImpl;
 import world.factors.environment.execution.api.ActiveEnvironment;
+import world.factors.grid.execution.GridInstance;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -58,6 +59,25 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
 
     @Override
     public void run() {
+        try {
+            this.simulationED.setStatus("Running");
+            runSimulation();
+            this.simulationED.setStatus("Finished Successfully");
+            if (simulationED.getTerminationReason() == null) {
+                if (simulationED.isTerminatedBySecondsCount()) {
+                    this.simulationED.setTerminationReason("Terminated by seconds count");
+                } else if (simulationED.isTerminatedByTicksCount()) {
+                    this.simulationED.setTerminationReason("Terminated by ticks count");
+                }
+            }
+        } catch (Exception e) {
+            this.simulationED.setStatus("Failed");
+            this.simulationED.setTerminationReason(e.getMessage());
+            this.simulationED.setRunning(false);
+        }
+    }
+
+    private void runSimulation() {
         synchronized (simulationED) {
             this.simulationED.setSimulationThread(Thread.currentThread());
             simulationED.setRunning(true);
@@ -94,8 +114,7 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                     .filter(action -> action.isLastAction())
                     .collect(Collectors.toList());*/
 
-            List<EntityInstance> tempInstances = new ArrayList<>(simulationED.getEntityInstanceManager().getInstances());
-            for (EntityInstance entityInstance : tempInstances) {
+            for (EntityInstance entityInstance : simulationED.getEntityInstanceManager().getInstances()) {
                 for (Action action : actionableRules) {
                     if (action.getPrimaryEntityDefinition().getName().equals(entityInstance.getEntityDefinition().getName())) {
                         if (action.getSecondaryEntity() != null) {
@@ -109,12 +128,48 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                     }
                 }
             }
-            // move all instances from tempInstances to simulationED.getEntityInstanceManager().getInstances()
-            simulationED.getEntityInstanceManager().setInstances(tempInstances);
-
         }
         simulationED.setIsTerminatedBySecondsCount(simulationED.getWorld().getTermination().isTerminatedBySecondsCount(simulationED.getSimulationSeconds()));
         simulationED.setIsTerminatedByTicksCount(simulationED.getWorld().getTermination().isTerminatedByTicksCount(currentTick));
         simulationED.setRunning(false);
+    }
+    public void printDebug(List<EntityInstance> instances) {
+        GridInstance gridInstance = simulationED.getGridInstance();
+        for (int y = 0; y < gridInstance.getHeight(); y++) {
+            for (int x = 0; x < gridInstance.getWidth(); x++) {
+                if (!gridInstance.isCellFree(gridInstance.getCoordinate(x, y))) {
+                    boolean found = false;
+                    for (EntityInstance instance : instances) {
+                        if (instance.getCoordinate().getX() == x && instance.getCoordinate().getY() == y) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        System.out.print("1 ");
+                    } else {
+                        System.out.print("2 ");
+                    }
+                } else {
+                    System.out.print("0 ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    private void printReplacedEntities(List<EntityInstance> entityInstances) {
+        for (EntityInstance entityInstance : simulationED.getEntityInstanceManager().getInstances()) {
+            boolean Found = false;
+            for (EntityInstance temp : entityInstances) {
+                if (entityInstance.getId() == temp.getId()) {
+                    Found = true;
+                    break;
+                }
+            }
+            if (!Found) {
+                System.out.println("Entity " + entityInstance.getId() + " " + entityInstance.getCell().getCoordinate().getX() + " " + entityInstance.getCell().getCoordinate().getY() + " is replaced");
+            }
+        }
     }
 }

@@ -9,7 +9,4 @@ public interface EntityDefinition {
     void addProperty(PropertyDefinition propertyDefinition);
     List<PropertyDefinition> getProps();
     PropertyDefinition getPropertyDefinitionByName(String name);
-    void increasePopulation();
-    void decreasePopulation();
-    int getPopulation();
 }

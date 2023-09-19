@@ -23,7 +23,7 @@ public class Cell {
         return isOccupied;
     }
 
-    public void setOccupied(boolean occupied) {
+    public synchronized void setOccupied(boolean occupied) {
         isOccupied = occupied;
     }
 }

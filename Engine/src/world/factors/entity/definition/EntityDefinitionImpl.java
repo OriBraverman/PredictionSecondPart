@@ -10,12 +10,10 @@ public class EntityDefinitionImpl implements EntityDefinition, Serializable {
 
     private final String name;
     private final List<PropertyDefinition> properties;
-    private int population;
 
     public EntityDefinitionImpl(String name) {
         this.name = name;
         this. properties = new ArrayList<>();
-        this.population = 0;
     }
 
     @Override
@@ -32,15 +30,6 @@ public class EntityDefinitionImpl implements EntityDefinition, Serializable {
     public List<PropertyDefinition> getProps() {
         return properties;
     }
-
-    @Override
-    public void increasePopulation(){ this.population++; }
-
-    @Override
-    public void decreasePopulation(){ this.population--; }
-
-    @Override
-    public int getPopulation(){ return this.population; }
 
     @Override
     public PropertyDefinition getPropertyDefinitionByName(String name) {

@@ -108,8 +108,12 @@ public class AppController {
                 isXMLLoaded.set(true);
                 isSimulationExecuted.set(false);
                 resultsComponentController.getSimulationComponentController().getInformationComponentController().defineEntityChoiceBox();
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Error loading XML file");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
             }
     }
 

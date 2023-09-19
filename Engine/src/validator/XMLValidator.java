@@ -1,6 +1,5 @@
 package validator;
 
-import context.Context;
 import resources.schema.generatedWorld.*;
 import world.World;
 import world.factors.action.api.Action;
@@ -10,19 +9,13 @@ import world.factors.action.impl.ConditionAction;
 import world.factors.action.impl.DecreaseAction;
 import world.factors.action.impl.IncreaseAction;
 import world.factors.entity.definition.EntityDefinition;
-import world.factors.environment.definition.api.EnvVariablesManager;
 import world.factors.environment.definition.impl.EnvVariableManagerImpl;
-import world.factors.expression.api.Expression;
-import world.factors.grid.Grid;
 import world.factors.grid.api.GridDefinition;
-import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.rule.Rule;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.List;
-
-import static world.factors.expression.api.AbstractExpression.getExpressionByString;
 
 public class XMLValidator {
     public static void validateFileExists(Path file) throws FileNotFoundException {

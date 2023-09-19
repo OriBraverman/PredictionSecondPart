@@ -11,6 +11,7 @@ import gui.components.main.results.simulation.tableView.EntityPopulationTableVie
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -36,6 +37,9 @@ public class SimulationController {
     @FXML private Button stopSimulationButton;
     @FXML private ScrollPane entityPopulationScrollPane;
     @FXML private Button gridViewButton;
+    @FXML private Label statusDisplay;
+    @FXML private Button terminationReasonButton;
+
 
     @FXML private InformationController informationComponentController;
     @FXML private AnchorPane informationComponent;
@@ -48,6 +52,8 @@ public class SimulationController {
     private SimpleBooleanProperty isCompleted; // is the simulation entered the completed simulation queue
     private SimpleBooleanProperty isRunning;
     private SimpleBooleanProperty isPaused;
+    private SimpleStringProperty status;
+    private SimpleStringProperty terminationReason;
 
     public void initialize() {
         if (informationComponentController != null) {
@@ -60,6 +66,8 @@ public class SimulationController {
         isCompleted = new SimpleBooleanProperty(false);
         isRunning = new SimpleBooleanProperty(false);
         isPaused = new SimpleBooleanProperty(false);
+        status = new SimpleStringProperty();
+        terminationReason = new SimpleStringProperty();
         entitiesCountDisplay.textProperty().bind(entitiesCount.asString());
         currentTickDisplay.textProperty().bind(currentTick.asString());
         timeSinceSimulationStartedDisplay.textProperty().bind(timeSinceSimulationStarted.asString());
@@ -74,6 +82,8 @@ public class SimulationController {
         informationComponent.visibleProperty().bind(isCompleted);
         // See resume when running and paused --> Disable resume when not running or not paused
         gridViewButton.disableProperty().bind(isRunning.not().or(isPaused.not()));
+        terminationReasonButton.disableProperty().bind(isCompleted.not());
+        statusDisplay.textProperty().bind(status);
     }
     public void setAppController(AppController appController) {
         this.appController = appController;
@@ -90,6 +100,8 @@ public class SimulationController {
         isRunning.set(simulationEDDTO.isRunning());
         isPaused.set(simulationEDDTO.isPaused());
         isCompleted.set(simulationEDDTO.isCompleted());
+        status.set(simulationEDDTO.getStatus());
+        terminationReason.set(simulationEDDTO.getTerminationReason());
         EntityPopulationTableView epTableView = new EntityPopulationTableView();
         HBox entityPopulationHBox = new HBox();
         entityPopulationScrollPane.setContent(entityPopulationHBox);
@@ -157,6 +169,15 @@ public class SimulationController {
             e.printStackTrace();
             // Handle any potential exceptions that may occur during loading
         }
+    }
+
+    @FXML
+    void terminationReasonButtonAction(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Termination Reason");
+        alert.setHeaderText("Termination Reason");
+        alert.setContentText(terminationReason.get());
+        alert.showAndWait();
     }
 
     public int getCurrentSimulationID() {

@@ -1,16 +1,12 @@
 package simulation;
 
 import world.World;
-import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.manager.EntityInstanceManager;
-import world.factors.entity.execution.manager.EntityInstanceManagerImpl;
 import world.factors.entityPopulation.EntityPopulation;
 import world.factors.environment.execution.api.ActiveEnvironment;
-import world.factors.grid.Grid;
 import world.factors.grid.execution.GridInstance;
 import world.factors.grid.execution.GridInstanceImpl;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -35,6 +31,9 @@ public class SimulationExecutionDetails {
     private int currentTick = 0;
     private Thread simulationThread;
     private Map<Integer, List<EntityPopulation>> entityPopulationByTicks;
+    private String status = "Pending";
+    private String terminationReason = "";
+
 
     public SimulationExecutionDetails(int id, ActiveEnvironment activeEnvironment, EntityInstanceManager entityInstanceManager, World world) {
         this.id = id;
@@ -76,6 +75,10 @@ public class SimulationExecutionDetails {
     public void setIsTerminatedByTicksCount(boolean isTerminatedByTicksCount){ this.isTerminatedByTicksCount = isTerminatedByTicksCount; }
 
     public EntityInstanceManager getEntityInstanceManager() { return this.entityInstanceManager; }
+
+    public void setStatus(String status) {this.status = status; }
+
+    public void setTerminationReason(String terminationReason) {this.terminationReason = terminationReason; }
 
     public int getCurrentTick() {
         return currentTick;
@@ -151,4 +154,8 @@ public class SimulationExecutionDetails {
     public GridInstance getGridInstance() {
         return grid;
     }
+
+    public String getStatus(){return this.status;}
+
+    public String getTerminationReason(){return this.terminationReason;}
 }

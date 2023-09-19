@@ -1,8 +1,11 @@
 package world.factors.grid.execution;
 
+
+
+
 import world.factors.grid.Cell;
 import world.factors.grid.Coordinate;
-import world.factors.grid.Grid;
+import world.factors.grid.Direction;
 import world.factors.grid.api.GridDefinition;
 
 import java.util.ArrayList;
@@ -13,39 +16,40 @@ import java.util.List;
 public class GridInstanceImpl implements GridInstance{
     private GridDefinition gridDefinition;
     private Cell[][] grid;
-    public enum Direction {
-        UP, DOWN, LEFT, RIGHT
-    }
 
     public GridInstanceImpl(GridDefinition gridDefinition) {
         this.gridDefinition = gridDefinition;
-        int m = gridDefinition.getHeight();
-        int n = gridDefinition.getWidth();
+        int n = gridDefinition.getHeight();
+        int m = gridDefinition.getWidth();
         grid = new Cell[n][m];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                grid[i][j] = new Cell(new Coordinate(i, j));
+        for (int y = 0; y < n; y++) {
+            for (int x = 0; x < m; x++) {
+                grid[y][x] = new Cell(new Coordinate(x, y));
             }
         }
     }
 
     @Override
     public Coordinate getCoordinate(int x, int y) {
-        return grid[x][y].getCoordinate();
+        return grid[y][x].getCoordinate();
+    }
+
+    private Cell getCell(Coordinate coordinate) {
+        return grid[coordinate.getY()][coordinate.getX()];
     }
 
     @Override
     public boolean isCellFree(Coordinate coordinate) {
-        return !grid[coordinate.getX()][coordinate.getY()].isOccupied();
+        return !grid[coordinate.getY()][coordinate.getX()].isOccupied();
     }
 
     @Override
-    public Cell moveEntity(Coordinate source, Grid.Direction direction) {
+    public Cell moveEntity(Coordinate source, Direction direction) {
         Coordinate destination = getCoordinateInDirection(source, direction);
         if (isCellFree(destination)) {
-            grid[source.getX()][source.getY()].setOccupied(false);
-            grid[destination.getX()][destination.getY()].setOccupied(true);
-            return grid[destination.getX()][destination.getY()];
+            getCell(source).setOccupied(false);
+            getCell(destination).setOccupied(true);
+            return getCell(destination);
         }
         return null;
     }
@@ -58,7 +62,7 @@ public class GridInstanceImpl implements GridInstance{
         return this.gridDefinition.getHeight();
     }
 
-    private Coordinate getCoordinateInDirection(Coordinate source, Grid.Direction direction) {
+    private Coordinate getCoordinateInDirection(Coordinate source, Direction direction) {
         switch (direction) {
             case UP:
                 return getCoordinate(source.getX(), (source.getY() - 1 + getHeight()) % getHeight());
@@ -86,32 +90,32 @@ public class GridInstanceImpl implements GridInstance{
 
     private Collection<Coordinate> getRankCells(Coordinate source, int rank) {
         Collection<Coordinate> rankCells = new HashSet<>();
-        for (Grid.Direction d: Grid.Direction.values()){
+        for (Direction d: Direction.values()){
             rankCells.addAll(getCellsInDirection(source, rank, d));
         }
         return rankCells;
     }
 
-    private Collection<Coordinate> getCellsInDirection(Coordinate source, int rank, Grid.Direction direction) {
+    private Collection<Coordinate> getCellsInDirection(Coordinate source, int rank, Direction direction) {
         Collection<Coordinate> directionCells = new HashSet<>();
         int rankDiameter = 2 * rank + 1;
         if (rankDiameter <= getHeight() && rankDiameter <= getWidth()) {
             directionCells.addAll(getCellsInDirectionHelper(source, rank, direction));
-        } else if ((direction == Grid.Direction.UP || direction == Grid.Direction.DOWN) && rankDiameter > getWidth()) {
+        } else if ((direction == Direction.UP || direction == Direction.DOWN) && rankDiameter > getWidth()) {
             directionCells.addAll(getLineInDirection(source, rank, direction));
-        } else if ((direction == Grid.Direction.LEFT || direction == Grid.Direction.RIGHT) && rankDiameter > getHeight()) {
+        } else if ((direction == Direction.LEFT || direction == Direction.RIGHT) && rankDiameter > getHeight()) {
             directionCells.addAll(getLineInDirection(source, rank, direction));
-        } else if (direction == Grid.Direction.LEFT && rankDiameter == getWidth() + 1 && rankDiameter <= getHeight()) {
-            directionCells.addAll(getCellsInDirectionHelper(source, rank, Grid.Direction.LEFT));
-        } else if (direction == Grid.Direction.UP && rankDiameter == getHeight() + 1 && rankDiameter <= getWidth()) {
-            directionCells.addAll(getCellsInDirectionHelper(source, rank, Grid.Direction.UP));
+        } else if (direction == Direction.LEFT && rankDiameter == getWidth() + 1 && rankDiameter <= getHeight()) {
+            directionCells.addAll(getCellsInDirectionHelper(source, rank, Direction.LEFT));
+        } else if (direction == Direction.UP && rankDiameter == getHeight() + 1 && rankDiameter <= getWidth()) {
+            directionCells.addAll(getCellsInDirectionHelper(source, rank, Direction.UP));
         }
         return directionCells;
     }
 
-    private Collection<Coordinate> getLineInDirection(Coordinate source, int rank, Grid.Direction direction) {
+    private Collection<Coordinate> getLineInDirection(Coordinate source, int rank, Direction direction) {
         Coordinate from, to;
-        int hDiameter = grid.length, vDiameter = grid[0].length;
+        int hDiameter = getWidth(), vDiameter = getHeight();
         switch (direction) {
             case UP:
                 from = getCoordinate(0, (source.getY() - rank + vDiameter) % vDiameter);
@@ -135,7 +139,7 @@ public class GridInstanceImpl implements GridInstance{
         return getCellsInTheSameLine(from, to);
     }
 
-    private Collection<Coordinate> getCellsInDirectionHelper(Coordinate source, int rank, Grid.Direction direction) {
+    private Collection<Coordinate> getCellsInDirectionHelper(Coordinate source, int rank, Direction direction) {
         Coordinate from, to;
         int hDiameter = getWidth(), vDiameter = getHeight();
         switch (direction) {
@@ -196,8 +200,8 @@ public class GridInstanceImpl implements GridInstance{
         int horizontalDiameter = getWidth();
         int verticalDiameter = getHeight();
         List<Cell> availableCells = new ArrayList<>();
-        for (int i = 0; i < horizontalDiameter; i++) {
-            for (int j = 0; j < verticalDiameter; j++) {
+        for (int i = 0; i < verticalDiameter; i++) {
+            for (int j = 0; j < horizontalDiameter; j++) {
                 if (!grid[i][j].isOccupied()) {
                     availableCells.add(grid[i][j]);
                 }
@@ -211,4 +215,16 @@ public class GridInstanceImpl implements GridInstance{
         return cell;
     }
 
+    @Override
+    public int getNumberOfOccupiedCells() {
+        int count = 0;
+        for (Cell[] row : grid) {
+            for (Cell cell : row) {
+                if (cell.isOccupied()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
 }

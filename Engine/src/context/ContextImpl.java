@@ -10,7 +10,6 @@ import world.factors.expression.api.Expression;
 import world.factors.expression.api.ExpressionType;
 import world.factors.function.api.Function;
 import world.factors.function.api.FunctionType;
-import world.factors.grid.Grid;
 import world.factors.grid.execution.GridInstance;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;

@@ -9,7 +9,7 @@ import world.factors.entity.execution.EntityInstanceImpl;
 import world.factors.entityPopulation.EntityPopulation;
 import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.grid.Cell;
-import world.factors.grid.Grid;
+import world.factors.grid.Direction;
 import world.factors.grid.execution.GridInstance;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.execution.PropertyInstance;
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static validator.StringValidator.validateStringIsInteger;
@@ -27,12 +28,12 @@ import static validator.StringValidator.validateStringIsInteger;
 public class EntityInstanceManagerImpl implements EntityInstanceManager, Serializable {
 
     private int count;
-    private List<EntityInstance> instances;
+    private Map<Integer, EntityInstance> instancesMap;
     private Map<EntityDefinition, Integer> entityPopulationMap;
 
     public EntityInstanceManagerImpl() {
         count = 0;
-        instances = new ArrayList<>();
+        instancesMap = new ConcurrentHashMap<>();
         entityPopulationMap = new HashMap<>();
     }
 
@@ -40,22 +41,21 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     public EntityInstance create(EntityDefinition entityDefinition, GridInstance grid) {
         count++;
         EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, count, grid.getRandomAvailableCell());
-        instances.add(newEntityInstance);
+        instancesMap.put(count, newEntityInstance);
 
         for (PropertyDefinition propertyDefinition : entityDefinition.getProps()) {
             Object value = propertyDefinition.generateValue();
             PropertyInstance newPropertyInstance = new PropertyInstanceImpl(propertyDefinition, value);
             newEntityInstance.addPropertyInstance(newPropertyInstance);
         }
-        newEntityInstance.getEntityDefinition().increasePopulation();
         return newEntityInstance;
     }
 
     @Override
     public void replaceDerived(EntityInstance entityInstance, EntityDefinition entityDefinition) {
         EntityInstance newEntityInstance = new EntityInstanceImpl(entityDefinition, entityInstance.getId(), entityInstance.getCell());
-        instances.remove(entityInstance);
-        instances.add(newEntityInstance);
+        instancesMap.remove(entityInstance.getId());
+        instancesMap.put(entityInstance.getId(), newEntityInstance);
 
         for (PropertyDefinition propertyDefinition : entityDefinition.getProps()) {
             try {
@@ -72,18 +72,13 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     @Override
     public List<EntityInstance> getInstances() {
-        return instances;
-    }
-
-    @Override
-    public synchronized void setInstances(List<EntityInstance> instances) {
-        this.instances = instances;
+        return new ArrayList<>(instancesMap.values());
     }
 
     @Override
     public List<EntityInstance> getEntityInstancesByName(String entityName) {
         List<EntityInstance> res = new ArrayList<>();
-        for (EntityInstance entityInstance : instances) {
+        for (EntityInstance entityInstance : instancesMap.values()) {
             if (entityInstance.getEntityDefinition().getName().equals(entityName)) {
                 res.add(entityInstance);
             }
@@ -93,37 +88,27 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
 
     @Override
     public void killEntity(int id) {
-        for (EntityInstance entityInstance : instances) {
-            if (entityInstance.getId() == id) {
-                entityInstance.getCell().setOccupied(false);
-                instances.remove(entityInstance);
-                entityInstance.getEntityDefinition().decreasePopulation();
-                return;
-            }
+        instancesMap.get(id).getCell().setOccupied(false);
+        EntityInstance remove = instancesMap.remove(id);
+        if (remove == null) {
+            throw new IllegalArgumentException("entity with id [" + id + "] is not exist");
         }
     }
 
     @Override
-    public  boolean isEntityAlive(int id)
-    {
-        for (EntityInstance entityInstance: this.instances)
-        {
-            if (entityInstance.getId() == id){
-                return true;
-            }
-        }
-        return false;
+    public  boolean isEntityAlive(int id) {
+        return instancesMap.containsKey(id);
     }
 
     @Override
     public int getAliveEntityCount() {
-        return instances.size();
+        return instancesMap.size();
     }
 
     @Override
     public int getEntityCountByName(String entityName) {
         int count = 0;
-        for (EntityInstance entityInstance : instances) {
+        for (EntityInstance entityInstance : instancesMap.values()) {
             if (entityInstance.getEntityDefinition().getName().equals(entityName)) {
                 count++;
             }
@@ -134,27 +119,27 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     @Override
     public void moveEntity(EntityInstance entityInstance, GridInstance grid) {
         Cell newCell;
-        if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.UP)) != null) {
+        if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Direction.UP)) != null) {
             entityInstance.setCell(newCell);
-        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.DOWN)) != null) {
+        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Direction.DOWN)) != null) {
             entityInstance.setCell(newCell);
-        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.RIGHT)) != null) {
+        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Direction.RIGHT)) != null) {
             entityInstance.setCell(newCell);
-        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Grid.Direction.LEFT)) != null) {
+        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Direction.LEFT)) != null) {
             entityInstance.setCell(newCell);
         }
     }
 
     @Override
     public void moveAllInstances(GridInstance grid) {
-        for (EntityInstance entityInstance : instances) {
+        for (EntityInstance entityInstance : instancesMap.values()) {
             moveEntity(entityInstance, grid);
         }
     }
 
     @Override
     public List<EntityInstance> getSelectedSeconderyEntites(SecondaryEntity secondaryEntity, ActiveEnvironment activeEnvironment, GridInstance grid, int currentTick) {
-        List<EntityInstance> secondaryEntityInstances = instances
+        List<EntityInstance> secondaryEntityInstances = instancesMap.values()
                 .stream()
                 .filter(instance -> instance.getEntityDefinition().getName().equals(secondaryEntity.getSecondaryEntityDefinition().getName()))
                 .collect(Collectors.toList());
@@ -165,7 +150,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
             //need to select all the secondary entities that are satisfy the condition if the condition is not null
             List<EntityInstance> selectedSecondaryEntityInstances = null;
             if (secondaryEntity.getSelectionCondition() != null) {
-                selectedSecondaryEntityInstances = instances
+                selectedSecondaryEntityInstances = instancesMap.values()
                         .stream()
                         .filter(instance -> secondaryEntity.getSelectionCondition().assertCondition(new ContextImpl(instance, this, activeEnvironment, grid, currentTick)))
                         .collect(Collectors.toList());
@@ -221,18 +206,8 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     public List<EntityPopulation> getCurrEntityPopulationList() {
         List<EntityPopulation> res = new ArrayList<>();
         for (EntityDefinition entityDefinition : entityPopulationMap.keySet()) {
-            res.add(new EntityPopulation(entityDefinition.getName(), getAliveEntityCountByName(entityDefinition.getName())));
+            res.add(new EntityPopulation(entityDefinition.getName(), getEntityCountByName(entityDefinition.getName())));
         }
         return res;
-    }
-
-    private int getAliveEntityCountByName(String entityName) {
-        int count = 0;
-        for (EntityInstance entityInstance : instances) {
-            if (entityInstance.getEntityDefinition().getName().equals(entityName)) {
-                count++;
-            }
-        }
-        return count;
     }
 }

@@ -6,7 +6,6 @@ import world.factors.entity.definition.EntityDefinition;
 import world.factors.entity.execution.EntityInstance;
 import world.factors.entityPopulation.EntityPopulation;
 import world.factors.environment.execution.api.ActiveEnvironment;
-import world.factors.grid.Grid;
 import world.factors.grid.execution.GridInstance;
 
 import java.util.List;
@@ -16,8 +15,6 @@ public interface EntityInstanceManager {
 
     EntityInstance create(EntityDefinition entityDefinition, GridInstance grid);
     List<EntityInstance> getInstances();
-
-    void setInstances(List<EntityInstance> instances);
 
     List<EntityInstance> getEntityInstancesByName(String entityName);
 

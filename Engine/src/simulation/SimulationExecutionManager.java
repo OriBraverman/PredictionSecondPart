@@ -56,6 +56,7 @@ public class SimulationExecutionManager implements Serializable {
 
     public void stopSimulation(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
+        simulationExecutionDetails.setTerminationReason("Stopped by user");
         Thread simulationThread = simulationExecutionDetails.getSimulationThread();
         if (simulationThread != null) {
             //simulationThread.interrupt();

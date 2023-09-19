@@ -410,7 +410,9 @@ public class Engine implements Serializable {
         List<EntityPopulationDTO> entitiesPopulation = getEntityPopulationDTOList(simulationExecutionDetails);
         int currentTick = simulationExecutionDetails.getCurrentTick();
         long secondsPassed = simulationExecutionDetails.getSimulationSeconds();
-        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, isRunning, isPaused, isCompleted, entitiesCount, entitiesPopulation, currentTick, secondsPassed);
+        String status = simulationExecutionDetails.getStatus();
+        String terminationReason = simulationExecutionDetails.getTerminationReason();
+        return new SimulationExecutionDetailsDTO(simulationID, seconds, ticks, isRunning, isPaused, isCompleted, entitiesCount, entitiesPopulation, currentTick, secondsPassed, status, terminationReason);
     }
 
     public List<EntityPopulationDTO> getEntityPopulationDTOList(SimulationExecutionDetails simulationExecutionDetails) {

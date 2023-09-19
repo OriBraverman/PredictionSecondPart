@@ -22,4 +22,6 @@ C:\src\github.com\OriBraverman\PredictionSecondPart\Engine\src\resources\tests\E
 
 C:\src\github.com\OriBraverman\PredictionSecondPart\Engine\src\resources\tests\EX_2\more-elements.xml
 
+C:\src\github.com\OriBraverman\PredictionSecondPart\Engine\src\resources\tests\EX_2\ex2-error-running-simulation.xml
+
 C:\src\github.com\OriBraverman\PredictionSecondPart\Prediction.dat

@@ -65,7 +65,7 @@
 					<PRD-multiply arg1="p1" arg2="environment(e1)"/>
 				</PRD-action>
 				<PRD-action type="calculation" entity="ent-1" result-prop="p2">
-					<PRD-divide arg1="environment(e3)" arg2="3.2"/>
+					<PRD-divide arg1="environment(e3)" arg2="0"/>
 				</PRD-action>
 			</PRD-actions>
 			<PRD-activation ticks="1" probability="0.4"/>
