@@ -68,16 +68,14 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
         initEntityInstancesArray();
         int currentTick = 0;
         while (!simulationED.getWorld().getTermination().isTerminated(currentTick, simulationED.getSimulationSeconds()) && simulationED.isRunning()) {
-            synchronized (this) {
-                while (this.simulationED.isPaused()) {
-                    try {
-                        pauseSemaphore.acquire();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+            while (this.simulationED.isPaused()) {
+                try {
+                    pauseSemaphore.acquire();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-                pauseSemaphore.release();
             }
+            pauseSemaphore.release();
 
             currentTick++;
             simulationED.setCurrentTick(currentTick);

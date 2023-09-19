@@ -156,8 +156,7 @@ public class NewExecutionController {
             return;
         }
         appController.activateSimulation(envVariablesValuesDTO, entityPopulationDTO);
-        Tab resultsTab = appController.getTabPane().getTabs().get(2);
-        appController.getTabPane().getSelectionModel().select(resultsTab);
+        appController.selectTab(AppController.Tab.RESULTS);
     }
 
     private EntitiesPopulationDTO getEntityPopulationDTOS() {

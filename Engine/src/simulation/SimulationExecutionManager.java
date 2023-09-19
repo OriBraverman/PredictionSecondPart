@@ -60,6 +60,11 @@ public class SimulationExecutionManager implements Serializable {
         if (simulationThread != null) {
             //simulationThread.interrupt();
             simulationExecutionDetails.setRunning(false);
+            if (simulationExecutionDetails.isPaused()) {
+                simulationExecutionDetails.setPaused(false);
+                SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationID);
+                simulationRunnerImpl.resumeSimulation();
+            }
         }
     }
 
