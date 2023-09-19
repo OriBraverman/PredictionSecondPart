@@ -25,10 +25,10 @@ public class SimulationExecutionManager implements Serializable {
         this.threadExecutor = Executors.newFixedThreadPool(threadCount);
     }
 
-    public int createSimulation(World world, ActiveEnvironment activeEnvironment, EntityInstanceManager entityInstanceManager) {
+    public int createSimulation(World world, ActiveEnvironment activeEnvironment, EntityInstanceManager entityInstanceManager, boolean isBonusActivated) {
         currentSimulationIndex++;
         SimulationExecutionDetails simulationExecutionDetails = new SimulationExecutionDetails(currentSimulationIndex, activeEnvironment, entityInstanceManager, world);
-        SimulationRunner simulationRunner = new SimulationRunnerImpl(currentSimulationIndex, simulationExecutionDetails);
+        SimulationRunner simulationRunner = new SimulationRunnerImpl(currentSimulationIndex, simulationExecutionDetails, isBonusActivated);
         simulations.put(currentSimulationIndex, simulationRunner);
         simulationDetails.put(currentSimulationIndex, simulationExecutionDetails);
         return currentSimulationIndex;
@@ -57,8 +57,7 @@ public class SimulationExecutionManager implements Serializable {
     public void stopSimulation(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
         simulationExecutionDetails.setTerminationReason("Stopped by user");
-        Thread simulationThread = simulationExecutionDetails.getSimulationThread();
-        if (simulationThread != null) {
+        if (!simulationExecutionDetails.isPending()) {
             //simulationThread.interrupt();
             simulationExecutionDetails.setRunning(false);
             if (simulationExecutionDetails.isPaused()) {
@@ -71,8 +70,7 @@ public class SimulationExecutionManager implements Serializable {
 
     public void pauseSimulation(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
-        Thread simulationThread = simulationExecutionDetails.getSimulationThread();
-        if (simulationThread != null && simulationExecutionDetails.isRunning()) {
+        if (!simulationExecutionDetails.isPending() && simulationExecutionDetails.isRunning()) {
             simulationExecutionDetails.setPaused(true);
             SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationID);
             simulationRunnerImpl.pauseSimulation();
@@ -82,8 +80,7 @@ public class SimulationExecutionManager implements Serializable {
 
     public void resumeSimulation(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
-        Thread simulationThread = simulationExecutionDetails.getSimulationThread();
-        if (simulationThread != null) {
+        if (!simulationExecutionDetails.isPending()) {
             simulationExecutionDetails.setPaused(false);
             SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationID);
             simulationRunnerImpl.resumeSimulation();
@@ -91,10 +88,28 @@ public class SimulationExecutionManager implements Serializable {
         }
     }
 
+    public void getToNextTick(int simulationID) {
+        SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
+        if (!simulationExecutionDetails.isPending()) {
+            SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationID);
+            simulationRunnerImpl.setIsTravelForward(true);
+            simulationRunnerImpl.acquireTravelForwardSemaphore();
+            try {
+                resumeSimulation(simulationID);
+                Thread.sleep(10);
+                pauseSimulation(simulationID);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            simulationRunnerImpl.setIsTravelForward(false);
+            simulationRunnerImpl.releaseTravelForwardSemaphore();
+        }
+    }
+
     public int getPendingSimulationsCount() {
         int count = 0;
         for (SimulationExecutionDetails simulationExecutionDetails : simulationDetails.values()) {
-            if (simulationExecutionDetails.getSimulationThread() == null) {
+            if (simulationExecutionDetails.isPending()) {
                 count++;
             }
         }
@@ -103,7 +118,7 @@ public class SimulationExecutionManager implements Serializable {
     public int getActiveSimulationsCount() {
         int count = 0;
         for (SimulationExecutionDetails simulationExecutionDetails : simulationDetails.values()) {
-            if (simulationExecutionDetails.isRunning() && simulationExecutionDetails.getSimulationThread() != null) {
+            if (simulationExecutionDetails.isRunning() && !simulationExecutionDetails.isPending()) {
                 count++;
             }
         }
@@ -112,7 +127,7 @@ public class SimulationExecutionManager implements Serializable {
     public int getCompletedSimulationsCount() {
         int count = 0;
         for (SimulationExecutionDetails simulationExecutionDetails : simulationDetails.values()) {
-            if (!simulationExecutionDetails.isRunning() && simulationExecutionDetails.getSimulationThread() != null) {
+            if (!simulationExecutionDetails.isRunning() && !simulationExecutionDetails.isPending()) {
                 count++;
             }
         }
@@ -121,7 +136,15 @@ public class SimulationExecutionManager implements Serializable {
 
     public boolean isSimulationCompleted(int simulationID) {
         SimulationExecutionDetails simulationExecutionDetails = simulationDetails.get(simulationID);
-        return !simulationExecutionDetails.isRunning() && simulationExecutionDetails.getSimulationThread() != null;
+        return !simulationExecutionDetails.isRunning() && !simulationExecutionDetails.isPending();
     }
 
+    public void setSEDById(int simulationID, SimulationExecutionDetails simulationExecutionDetails) {
+        if (simulationDetails.containsKey(simulationID)) {
+            simulationExecutionDetails.setPaused(true);
+            simulationDetails.replace(simulationID, simulationExecutionDetails);
+        } else {
+            throw new IllegalArgumentException("Simulation ID " + simulationID + " doesn't exist");
+        }
+    }
 }

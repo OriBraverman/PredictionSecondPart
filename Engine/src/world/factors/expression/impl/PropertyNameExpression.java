@@ -9,6 +9,7 @@ import world.factors.expression.api.ExpressionType;
 import world.factors.property.definition.api.PropertyDefinition;
 import world.factors.property.definition.api.PropertyType;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class PropertyNameExpression extends AbstractExpression {

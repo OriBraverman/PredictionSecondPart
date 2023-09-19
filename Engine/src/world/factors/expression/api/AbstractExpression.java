@@ -6,7 +6,9 @@ import world.factors.expression.impl.PropertyNameExpression;
 import world.factors.expression.impl.UtilFunctionExpression;
 import world.factors.function.api.FunctionType;
 
-public abstract class AbstractExpression implements Expression {
+import java.io.Serializable;
+
+public abstract class AbstractExpression implements Expression, Serializable {
     protected final ExpressionType expressionType;
     protected final String expression;
 

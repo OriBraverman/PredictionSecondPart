@@ -1,6 +1,8 @@
 package world.factors.grid.api;
 
-public class GridDefinitionImpl implements GridDefinition{
+import java.io.Serializable;
+
+public class GridDefinitionImpl implements GridDefinition, Serializable {
 
     private int horizontalDiameter;
     private int verticalDiameter;

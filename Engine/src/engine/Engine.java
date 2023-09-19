@@ -13,6 +13,7 @@ import dtos.world.action.*;
 import resources.schema.generatedWorld.PRDWorld;
 
 import static java.util.Arrays.stream;
+import static simulation.SimulationMemorySaver.readSEDByIdAndTick;
 import static validator.StringValidator.validateStringIsInteger;
 import static validator.XMLValidator.*;
 
@@ -129,8 +130,8 @@ public class Engine implements Serializable {
         }
     }
 
-    public SimulationIDDTO activateSimulation() {
-        int simulationId = this.simulationExecutionManager.createSimulation(this.world, this.activeEnvironment, this.entityInstanceManager);
+    public SimulationIDDTO activateSimulation(boolean isBonusActivated) {
+        int simulationId = this.simulationExecutionManager.createSimulation(this.world, this.activeEnvironment, this.entityInstanceManager, isBonusActivated);
         this.simulationExecutionManager.runSimulation(simulationId);
         return new SimulationIDDTO(simulationId);
     }
@@ -563,6 +564,17 @@ public class Engine implements Serializable {
         return new EntitiesPopulationDTO(entityPopulationDTOS);
     }
 
+    public void setPreviousTick(int simulationID) {
+        int currentTick = this.simulationExecutionManager.getSimulationDetailsByID(simulationID).getCurrentTick();
+        if (currentTick > 0) {
+            SimulationExecutionDetails simulationExecutionDetails = readSEDByIdAndTick(simulationID, currentTick - 1);
+            this.simulationExecutionManager.setSEDById(simulationID, simulationExecutionDetails);
+        }
+    }
+
+    public void getToNextTick(int simulationID) {
+        this.simulationExecutionManager.getToNextTick(simulationID);
+    }
 }
 
 

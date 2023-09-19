@@ -18,6 +18,8 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -179,10 +181,15 @@ public class InformationController {
         javafx.scene.chart.NumberAxis yAxis = (javafx.scene.chart.NumberAxis) barChart.getYAxis();
         yAxis.setLabel("Amount of entities");
 
+        // Create a list of ticks sorted in ascending order
+        List<Integer> sortedTicks = new ArrayList<>(entityPopulationByTicks.keySet());
+        Collections.sort(sortedTicks);
+
         for (String entityName : entityNames) {
             javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
             series.setName(entityName);
-            for (Integer tick : entityPopulationByTicks.keySet()) {
+
+            for (Integer tick : sortedTicks) {
                 for (EntityPopulationDTO entityPopulationDTO : entityPopulationByTicks.get(tick)) {
                     if (entityPopulationDTO.getName().equals(entityName)) {
                         series.getData().add(new javafx.scene.chart.XYChart.Data<>(tick.toString(), Integer.parseInt(entityPopulationDTO.getPopulation())));

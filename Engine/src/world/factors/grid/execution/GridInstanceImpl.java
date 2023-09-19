@@ -8,12 +8,13 @@ import world.factors.grid.Coordinate;
 import world.factors.grid.Direction;
 import world.factors.grid.api.GridDefinition;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-public class GridInstanceImpl implements GridInstance{
+public class GridInstanceImpl implements GridInstance, Serializable {
     private GridDefinition gridDefinition;
     private Cell[][] grid;
 

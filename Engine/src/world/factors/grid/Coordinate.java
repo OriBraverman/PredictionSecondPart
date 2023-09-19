@@ -1,6 +1,8 @@
 package world.factors.grid;
 
-public final class Coordinate {
+import java.io.Serializable;
+
+public final class Coordinate implements Serializable {
     private final int x;
     private final int y;
 

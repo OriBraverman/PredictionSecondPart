@@ -76,11 +76,13 @@ public class GridController {
 
     @FXML
     void leftButtonAction(ActionEvent event) {
-
+        this.appController.setPreviousTick(currentSimulationID.get());
+        updateGrid();
     }
 
     @FXML
     void rightButtonAction(ActionEvent event) {
-
+        this.appController.getToNextTick(currentSimulationID.get());
+        updateGrid();
     }
 }

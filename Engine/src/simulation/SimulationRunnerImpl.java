@@ -20,16 +20,31 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static simulation.SimulationMemorySaver.writeSEDByIdAndTick;
 
 public class SimulationRunnerImpl implements Serializable, Runnable, SimulationRunner {
     private final int id;
+    private final boolean isBonusActivated;
     private final SimulationExecutionDetails simulationED;
+    private AtomicBoolean isTravelForward = new AtomicBoolean(false);
+    private final Semaphore travelForwardSemaphore = new Semaphore(1);
     private final Semaphore pauseSemaphore = new Semaphore(1);
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy | hh.mm.ss");
-    public SimulationRunnerImpl(int id, SimulationExecutionDetails simulationExecutionDetails) {
+    public SimulationRunnerImpl(int id, SimulationExecutionDetails simulationExecutionDetails, boolean isBonusActivated) {
         this.id = id;
         this.simulationED = simulationExecutionDetails;
+        this.isBonusActivated = isBonusActivated;
+    }
+
+    public AtomicBoolean getIsTravelForward() {
+        return isTravelForward;
+    }
+
+    public void setIsTravelForward(boolean isTravelForward) {
+        this.isTravelForward.set(isTravelForward);
     }
 
     public int getId() {
@@ -57,6 +72,18 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
         pauseSemaphore.release(); // Release the semaphore to resume the simulation
     }
 
+    public void acquireTravelForwardSemaphore() {
+        try {
+            travelForwardSemaphore.acquire(); // Acquire the semaphore to travel forward
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void releaseTravelForwardSemaphore() {
+        travelForwardSemaphore.release(); // Release the semaphore to travel forward
+    }
+
     @Override
     public void run() {
         try {
@@ -79,7 +106,7 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
 
     private void runSimulation() {
         synchronized (simulationED) {
-            this.simulationED.setSimulationThread(Thread.currentThread());
+            simulationED.setPending(false);
             simulationED.setRunning(true);
         }
         Date date = new Date();
@@ -88,6 +115,14 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
         initEntityInstancesArray();
         int currentTick = 0;
         while (!simulationED.getWorld().getTermination().isTerminated(currentTick, simulationED.getSimulationSeconds()) && simulationED.isRunning()) {
+            while (this.isTravelForward.get()) {
+                try {
+                    travelForwardSemaphore.acquire();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            travelForwardSemaphore.release();
             while (this.simulationED.isPaused()) {
                 try {
                     pauseSemaphore.acquire();
@@ -96,7 +131,9 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                 }
             }
             pauseSemaphore.release();
-
+            if (isBonusActivated) {
+                writeSEDByIdAndTick(id, currentTick, simulationED);
+            }
             currentTick++;
             simulationED.setCurrentTick(currentTick);
             simulationED.getEntityInstanceManager().moveAllInstances(simulationED.getGridInstance());

@@ -1,14 +1,23 @@
 .button {
-    -fx-background-color: linear-gradient(to bottom, #4a90e2, #357cd1);
-    -fx-background-radius: 20;
-    -fx-text-fill: white;
+    -fx-background-color: #004080; /* Darker blue background color */
+    -fx-text-fill: white; /* Text color */
+    -fx-font-weight: bold;
     -fx-font-size: 14px;
-    -fx-padding: 8 20;
+    -fx-padding: 10px 20px; /* Padding around text */
+    -fx-border-radius: 0; /* No rounded corners */
+    -fx-cursor: hand;
 }
 
+/* Hovered state */
 .button:hover {
-    -fx-background-color: linear-gradient(to bottom, #357cd1, #4a90e2);
+    -fx-background-color: #003366; /* Slightly darker blue on hover */
 }
+
+/* Pressed state */
+.button:pressed {
+    -fx-background-color: #00254D; /* Even darker blue when pressed */
+}
+
 #HeaderLabel {
     -fx-font-size: 32px;
     -fx-font-weight: bold;
