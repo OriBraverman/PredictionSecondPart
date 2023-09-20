@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -12,7 +15,7 @@
 
 <ScrollPane fx:id="applicationScrollPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.app.AppController">
    <content>
-      <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1100.0" styleClass="base" stylesheets="@Application.css">
+      <VBox fx:id="MainVBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1100.0" styleClass="base" stylesheets="@Application.css">
          <children>
             <GridPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1100.0" stylesheets="@../app/Application.css">
               <columnConstraints>
@@ -23,17 +26,29 @@
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
               </columnConstraints>
               <rowConstraints>
-                <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="-Infinity" minHeight="10.0" vgrow="SOMETIMES" />
                 <RowConstraints maxHeight="-Infinity" minHeight="10.0" vgrow="SOMETIMES" />
                 <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label fx:id="HeaderLabel" text="Predictions" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.valignment="CENTER" />
                   <fx:include fx:id="uploadComponent" source="../upload/upload.fxml" GridPane.columnSpan="2147483647" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                  <ListView fx:id="queueManagementListView" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="4" GridPane.rowSpan="2147483647" />
+                  <ListView fx:id="queueManagementListView" prefHeight="105.0" prefWidth="220.0" GridPane.columnIndex="4" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" />
+                  <AnchorPane fx:id="TitleRow" prefWidth="200.0" GridPane.columnSpan="2147483647">
+                     <children>
+                        <Label fx:id="HeaderLabel" text="Predictions">
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <padding>
+                              <Insets bottom="15.0" left="10.0" top="20.0" />
+                           </padding>
+                        </Label>
+                        <CheckBox fx:id="DarkModeCheckBox" layoutX="857.0" layoutY="14.0" mnemonicParsing="false" styleClass="ModeCheckBox" text="Dark Mode" />
+                        <CheckBox fx:id="HappyModeCheckBox" layoutX="969.0" layoutY="14.0" mnemonicParsing="false" styleClass="ModeCheckBox" text="Happy Mode " />
+                     </children></AnchorPane>
                </children>
             </GridPane>
-            <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="650.0" prefWidth="1200.0" tabClosingPolicy="UNAVAILABLE">
+            <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="1200.0" tabClosingPolicy="UNAVAILABLE">
               <tabs>
                 <Tab text="Details">
                   <content>

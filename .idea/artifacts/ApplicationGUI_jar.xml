@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ApplicationGUI:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/ApplicationGUI_jar</output-path>
+    <root id="archive" name="ApplicationGUI.jar">
+      <element id="module-output" name="ApplicationGUI" />
+      <element id="module-output" name="Engine" />
+    </root>
+  </artifact>
+</component>

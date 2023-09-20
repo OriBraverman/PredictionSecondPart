@@ -18,9 +18,13 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.VBox;
 import world.factors.entity.definition.EntityDefinition;
 
 import java.io.File;
@@ -33,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AppController {
     @FXML private ScrollPane applicationScrollPane;
-
+    @FXML private VBox MainVBox;
     @FXML private HBox uploadComponent;
     @FXML private UploadController uploadComponentController;
     @FXML private AnchorPane detailsComponent;
@@ -44,6 +48,9 @@ public class AppController {
     @FXML private ResultsController resultsComponentController;
     @FXML private TabPane tabPane;
     @FXML private ListView queueManagementListView;
+    @FXML private AnchorPane TitleRow;
+    @FXML private CheckBox DarkModeCheckBox;
+    @FXML private CheckBox HappyModeCheckBox;
     private final Engine engine = new Engine();
     private final SimpleBooleanProperty isXMLLoaded;
     private final SimpleBooleanProperty isSimulationExecuted;
@@ -60,6 +67,18 @@ public class AppController {
     }
 
     @FXML public void initialize(){
+        // Add event handlers to the checkboxes
+        DarkModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (DarkModeCheckBox.isSelected()) {
+                HappyModeCheckBox.setSelected(false);
+            }
+        });
+
+        HappyModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (HappyModeCheckBox.isSelected()) {
+                DarkModeCheckBox.setSelected(false);
+            }
+        });
         tabPane.getTabs().get(1).disableProperty().bind(isXMLLoaded.not());
         tabPane.getTabs().get(2).disableProperty().bind(isSimulationExecuted.not());
         if (uploadComponentController != null && detailsComponentController != null && newExecutionComponentController != null
