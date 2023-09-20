@@ -9,6 +9,8 @@ import dtos.result.PropertyConstistencyDTO;
 import dtos.world.WorldDTO;
 import engine.Engine;
 import gui.components.main.PredictionApplication;
+import gui.components.main.animations.FadeInAnimation;
+import gui.components.main.animations.RotateAnimation;
 import gui.components.main.details.scene.DetailsController;
 import gui.components.main.execution.scene.NewExecutionController;
 import gui.components.main.results.scene.ResultsController;
@@ -36,6 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AppController {
+    @FXML private Label HeaderLabel;
     @FXML private ScrollPane applicationScrollPane;
     @FXML private VBox MainVBox;
     @FXML private GridPane UpperGridPane;
@@ -302,5 +305,10 @@ public class AppController {
             }
         }
         applyDesign(cssPath);
+    }
+
+    public void OnAnimationClickAction(){
+        RotateAnimation.applyRotateAnimation(HeaderLabel, 1000, 0, 360);
+        FadeInAnimation.applyFadeInAnimation(queueManagementListView, 1000);
     }
 }

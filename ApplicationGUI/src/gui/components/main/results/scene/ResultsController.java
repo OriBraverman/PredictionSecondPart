@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 
 public class ResultsController {
+    @FXML private AnchorPane resultsAnchorPane;
     @FXML private ListView<String> executionList;
     @FXML private SimulationController simulationComponentController;
     @FXML private AnchorPane simulationComponent;
