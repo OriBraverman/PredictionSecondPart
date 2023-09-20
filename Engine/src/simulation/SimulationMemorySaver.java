@@ -6,16 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 public class SimulationMemorySaver {
-    private static final String path = "simulationMemorySaver";
+    private static final String path = "SimulationMemorySaver";
 
     public static SimulationExecutionDetails readSEDByIdAndTick(int id, int tick) {
         String filePath = getPathForTick(id, tick);
-        File directory = new File(path);
-
-        if (!directory.exists()) {
-            directory.mkdirs(); // Create the directory and any missing parent directories
-        }
-
         try {
             return Serialization.readSystemFromFile(filePath);
         } catch (IOException | ClassNotFoundException e) {
@@ -26,6 +20,12 @@ public class SimulationMemorySaver {
 
     public static void writeSEDByIdAndTick(int id, int tick, SimulationExecutionDetails sed) {
         String filePath = getPathForTick(id, tick);
+        File directory = new File(path);
+
+        if (!directory.exists()) {
+            directory.mkdirs(); // Create the directory and any missing parent directories
+        }
+
         try {
             Serialization.writeSystemToFile(filePath, sed);
         } catch (IOException e) {
@@ -34,6 +34,6 @@ public class SimulationMemorySaver {
     }
 
     private static String getPathForTick(int id, int tick) {
-        return path + "simulation_" + id + "_tick_" + tick + ".sed";
+        return path + "/simulation_" + id + "_tick_" + tick + ".sed";
     }
 }
