@@ -89,11 +89,11 @@ public class SimulationExecutionDetails implements Serializable {
     }
 
     public void incrementCurrentTick() {
+        this.entityPopulationByTicks.put(currentTick.get(), entityInstanceManager.getCurrEntityPopulationList());
         this.currentTick.incrementAndGet();
     }
 
     public void setCurrentTick(int currentTick) {
-        this.entityPopulationByTicks.put(currentTick, entityInstanceManager.getCurrEntityPopulationList());
         this.currentTick.set(currentTick);
     }
 

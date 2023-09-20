@@ -197,6 +197,10 @@ public class InformationController {
                 }
             }
             barChart.getData().add(series);
+            // make all the lines in the bar chart to be more visible
+            for (javafx.scene.chart.XYChart.Data<String, Number> data : series.getData()) {
+                data.getNode().setStyle("-fx-stroke-width: 2px;");
+            }
         }
 
         executionResult.getChildren().add(barChart);
