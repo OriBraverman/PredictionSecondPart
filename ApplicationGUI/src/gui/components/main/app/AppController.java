@@ -13,6 +13,7 @@ import gui.components.main.details.scene.DetailsController;
 import gui.components.main.execution.scene.NewExecutionController;
 import gui.components.main.results.scene.ResultsController;
 import gui.components.main.upload.UploadController;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -27,6 +28,8 @@ import world.factors.entity.definition.EntityDefinition;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -47,15 +50,18 @@ public class AppController {
     @FXML private TabPane tabPane;
     @FXML private ListView queueManagementListView;
     @FXML private AnchorPane TitleRow;
-    @FXML private CheckBox DarkModeCheckBox;
-    @FXML private CheckBox HappyModeCheckBox;
     @FXML private CheckBox animationsCheckBox;
-
+    @FXML private MenuButton SkinsMenuButton;
     private final Engine engine = new Engine();
 
     private final SimpleBooleanProperty isXMLLoaded;
     private final SimpleBooleanProperty isSimulationExecuted;
     private final SimpleBooleanProperty isAnimationChecked;
+    private static final List<String> cssList =
+            new ArrayList<>(Arrays.asList(
+                    "Application.css", "DarkMode-theme.css",
+                    "HappyMode-theme.css", "OrangeApplication.css",
+                    "GreenApplication"));
 
     public enum Tab {
         DETAILS, NEW_EXECUTION, RESULTS
@@ -70,8 +76,6 @@ public class AppController {
     }
 
     @FXML public void initialize(){
-        DarkModeCheckBox.setSelected(false);
-        HappyModeCheckBox.setSelected(false);
         setColorThemeComponents();
         tabPane.getTabs().get(1).disableProperty().bind(isXMLLoaded.not());
         tabPane.getTabs().get(2).disableProperty().bind(isSimulationExecuted.not());
@@ -104,33 +108,36 @@ public class AppController {
     }
 
     private void setColorThemeComponents() {
-        DarkModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (DarkModeCheckBox.isSelected()) {
-                HappyModeCheckBox.setSelected(false);
-                // applyDesign of DarkMode-theme.css
-                applyDesign("DarkMode-theme.css");
-                // remove design of HappyMode-theme.css
-                removeDesign("HappyMode-theme.css");
-            } else {
-                //remove design of DarkMode-theme.css
-                removeDesign("DarkMode-theme.css");
-                applyDesign("Application.css");
-            }
+        // set skins menu button
+        applyDesign("Application.css");
+        SkinsMenuButton.getItems().clear();
+        List<MenuItem> menuItems = new ArrayList<>();
+        MenuItem defaultSkin = new MenuItem("Default");
+        defaultSkin.setOnAction(event -> {
+            switchColorMode("Application.css");
         });
-
-        HappyModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (HappyModeCheckBox.isSelected()) {
-                DarkModeCheckBox.setSelected(false);
-                // applyDesign of HappyMode-theme.css
-                applyDesign("HappyMode-theme.css");
-                // remove design of DarkMode-theme.css
-                removeDesign("DarkMode-theme.css");
-            } else {
-                //remove design of HappyMode-theme.css
-                removeDesign("HappyMode-theme.css");
-                applyDesign("Application.css");
-            }
+        MenuItem darkModeSkin = new MenuItem("Dark Mode");
+        darkModeSkin.setOnAction(event -> {
+            switchColorMode("DarkMode-theme.css");
         });
+        MenuItem happyModeSkin = new MenuItem("Happy Mode");
+        happyModeSkin.setOnAction(event -> {
+            switchColorMode("HappyMode-theme.css");
+        });
+        MenuItem orangeSkin = new MenuItem("Orange Mode");
+        orangeSkin.setOnAction(event -> {
+            switchColorMode("OrangeApplication.css");
+        });
+        MenuItem greenSkin = new MenuItem("Green Mode");
+        greenSkin.setOnAction(event -> {
+            switchColorMode("GreenApplication.css");
+        });
+        menuItems.add(defaultSkin);
+        menuItems.add(darkModeSkin);
+        menuItems.add(happyModeSkin);
+        menuItems.add(orangeSkin);
+        menuItems.add(greenSkin);
+        SkinsMenuButton.getItems().addAll(menuItems);
     }
 
     private void updateQueueManagement() {
@@ -273,12 +280,27 @@ public class AppController {
     }
 
     private void applyDesign(String cssPath){
-        MainVBox.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
-        UpperGridPane.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+        if (getClass().getResource(cssPath) != null) {
+            MainVBox.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+            UpperGridPane.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+            uploadComponent.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+        }
     }
 
     private void removeDesign(String cssPath){
-        MainVBox.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
-        UpperGridPane.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
+        if (getClass().getResource(cssPath) != null) {
+            MainVBox.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
+            UpperGridPane.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
+            uploadComponent.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
+        }
+    }
+
+    private void switchColorMode(String cssPath){
+        for (String css : cssList) {
+            if (!css.equals(cssPath)) {
+                removeDesign(css);
+            }
+        }
+        applyDesign(cssPath);
     }
 }

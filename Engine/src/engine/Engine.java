@@ -582,7 +582,9 @@ public class Engine implements Serializable {
     }
 
     public void stopThreadPool() {
-        this.simulationExecutionManager.stopThreadPool();
+        if (this.simulationExecutionManager != null) {
+            this.simulationExecutionManager.stopThreadPool();
+        }
     }
 }
 

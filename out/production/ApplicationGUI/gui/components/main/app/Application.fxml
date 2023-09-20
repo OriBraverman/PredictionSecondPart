@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -14,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane fx:id="applicationScrollPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.app.AppController">
+<ScrollPane fx:id="applicationScrollPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gui.components.main.app.AppController">
    <content>
       <VBox fx:id="MainVBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1100.0" styleClass="base">
          <children>
@@ -44,16 +45,15 @@
                               <Insets bottom="15.0" left="10.0" top="20.0" />
                            </padding>
                         </Label>
-                        <CheckBox fx:id="DarkModeCheckBox" layoutX="857.0" layoutY="14.0" mnemonicParsing="false" styleClass="ModeCheckBox" text="Dark Mode" />
-                        <CheckBox fx:id="HappyModeCheckBox" layoutX="969.0" layoutY="14.0" mnemonicParsing="false" styleClass="ModeCheckBox" text="Happy Mode " />
-                         <CheckBox fx:id="animationsCheckBox" layoutX="753.0" layoutY="16.0" mnemonicParsing="false" text="Animations" />
+                         <CheckBox fx:id="animationsCheckBox" layoutX="926.0" layoutY="16.0" mnemonicParsing="false" text="Animations" />
+                        <MenuButton fx:id="SkinsMenuButton" layoutX="841.0" layoutY="12.0" mnemonicParsing="false" text="Skins">
+                          <items>
+                            <MenuItem mnemonicParsing="false" text="Action 1" />
+                            <MenuItem mnemonicParsing="false" text="Action 2" />
+                          </items>
+                        </MenuButton>
                      </children></AnchorPane>
                </children>
-               <stylesheets>
-                  <URL value="@Application.css" />
-                  <URL value="@DarkMode-theme.css" />
-                  <URL value="@HappyMode-theme.css" />
-               </stylesheets>
             </GridPane>
             <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="1200.0" tabClosingPolicy="UNAVAILABLE">
               <tabs>
@@ -75,13 +75,6 @@
               </tabs>
             </TabPane>
          </children>
-         <stylesheets>
-            <URL value="@DarkMode-theme.css" />
-            <URL value="@HappyMode-theme.css" />
-            <URL value="@GreenApplication.css" />
-            <URL value="@OrangeApplication.css" />
-            <URL value="@Application.css" />
-         </stylesheets>
       </VBox>
    </content>
 </ScrollPane>
