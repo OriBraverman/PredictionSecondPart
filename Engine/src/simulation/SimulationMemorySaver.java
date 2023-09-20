@@ -33,6 +33,17 @@ public class SimulationMemorySaver {
         }
     }
 
+    public static void deleteDirectory() {
+        File directory = new File(path);
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            for (File file : files) {
+                file.delete();
+            }
+            directory.delete();
+        }
+    }
+
     private static String getPathForTick(int id, int tick) {
         return path + "/simulation_" + id + "_tick_" + tick + ".sed";
     }

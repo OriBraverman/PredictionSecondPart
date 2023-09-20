@@ -141,10 +141,21 @@ public class SimulationExecutionManager implements Serializable {
 
     public void setSEDById(int simulationID, SimulationExecutionDetails simulationExecutionDetails) {
         if (simulationDetails.containsKey(simulationID)) {
+            simulationExecutionDetails.setPending(false);
+            simulationExecutionDetails.setRunning(true);
             simulationExecutionDetails.setPaused(true);
+            simulationExecutionDetails.setDurations(simulationDetails.get(simulationID).getDurations());
             simulationDetails.replace(simulationID, simulationExecutionDetails);
+            SimulationRunnerImpl simulationRunnerImpl = (SimulationRunnerImpl) simulations.get(simulationID);
+            simulationRunnerImpl.setSimulationED(simulationExecutionDetails);
         } else {
             throw new IllegalArgumentException("Simulation ID " + simulationID + " doesn't exist");
+        }
+    }
+
+    public void stopThreadPool() {
+        if (threadExecutor != null && !threadExecutor.isShutdown()) {
+            threadExecutor.shutdown();
         }
     }
 }

@@ -13,6 +13,7 @@ import dtos.world.action.*;
 import resources.schema.generatedWorld.PRDWorld;
 
 import static java.util.Arrays.stream;
+import static simulation.SimulationMemorySaver.deleteDirectory;
 import static simulation.SimulationMemorySaver.readSEDByIdAndTick;
 import static validator.StringValidator.validateStringIsInteger;
 import static validator.XMLValidator.*;
@@ -574,6 +575,14 @@ public class Engine implements Serializable {
 
     public void getToNextTick(int simulationID) {
         this.simulationExecutionManager.getToNextTick(simulationID);
+    }
+
+    public void deleteInDepthMemoryFolder() {
+        deleteDirectory();
+    }
+
+    public void stopThreadPool() {
+        this.simulationExecutionManager.stopThreadPool();
     }
 }
 

@@ -28,7 +28,7 @@ import static simulation.SimulationMemorySaver.writeSEDByIdAndTick;
 public class SimulationRunnerImpl implements Serializable, Runnable, SimulationRunner {
     private final int id;
     private final boolean isBonusActivated;
-    private final SimulationExecutionDetails simulationED;
+    private SimulationExecutionDetails simulationED;
     private AtomicBoolean isTravelForward = new AtomicBoolean(false);
     private final Semaphore travelForwardSemaphore = new Semaphore(1);
     private final Semaphore pauseSemaphore = new Semaphore(1);
@@ -51,6 +51,10 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
         return id;
     }
 
+    public void setSimulationED(SimulationExecutionDetails simulationED) {
+        this.simulationED = simulationED;
+    }
+
     private void initEntityInstancesArray() {
         List<EntityDefinition> entityDefinitions = this.simulationED.getWorld().getEntities();
         for (EntityDefinition entityDefinition : entityDefinitions) {
@@ -67,7 +71,6 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
             Thread.currentThread().interrupt();
         }
     }
-
     public void resumeSimulation() {
         pauseSemaphore.release(); // Release the semaphore to resume the simulation
     }
@@ -113,8 +116,7 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
         this.simulationED.setFormattedStartTime(this.dateFormat.format(date));
 
         initEntityInstancesArray();
-        int currentTick = 0;
-        while (!simulationED.getWorld().getTermination().isTerminated(currentTick, simulationED.getSimulationSeconds()) && simulationED.isRunning()) {
+        while (!simulationED.getWorld().getTermination().isTerminated(simulationED.getCurrentTick(), simulationED.getSimulationSeconds()) && simulationED.isRunning()) {
             while (this.isTravelForward.get()) {
                 try {
                     travelForwardSemaphore.acquire();
@@ -123,6 +125,10 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                 }
             }
             travelForwardSemaphore.release();
+
+            if (isBonusActivated) {
+                writeSEDByIdAndTick(id, simulationED.getCurrentTick(), simulationED);
+            }
             while (this.simulationED.isPaused()) {
                 try {
                     pauseSemaphore.acquire();
@@ -131,17 +137,13 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                 }
             }
             pauseSemaphore.release();
-            if (isBonusActivated) {
-                writeSEDByIdAndTick(id, currentTick, simulationED);
-            }
-            currentTick++;
-            simulationED.setCurrentTick(currentTick);
+
+            simulationED.incrementCurrentTick();
             simulationED.getEntityInstanceManager().moveAllInstances(simulationED.getGridInstance());
-            int finalCurrentTick = currentTick;
             // get all runnable rules
             List<Action> actionableRules = simulationED.getWorld().getRules()
                     .stream()
-                    .filter(rule -> rule.isRuleActive(finalCurrentTick))
+                    .filter(rule -> rule.isRuleActive(simulationED.getCurrentTick()))
                     .flatMap(rule -> rule.getActionsToPerform().stream())
                     .collect(Collectors.toList());
             /*List<Action> firstActions = actionableRules.stream()
@@ -155,19 +157,19 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                 for (Action action : actionableRules) {
                     if (action.getPrimaryEntityDefinition().getName().equals(entityInstance.getEntityDefinition().getName())) {
                         if (action.getSecondaryEntity() != null) {
-                            List<EntityInstance> selectedSecondaryEntityInstances = simulationED.getEntityInstanceManager().getSelectedSeconderyEntites(action.getSecondaryEntity(),  simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick);
+                            List<EntityInstance> selectedSecondaryEntityInstances = simulationED.getEntityInstanceManager().getSelectedSeconderyEntites(action.getSecondaryEntity(),  simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick());
                             for (EntityInstance secondaryEntityInstance : selectedSecondaryEntityInstances) {
-                                action.invoke(new ContextImpl(entityInstance, secondaryEntityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick));
+                                action.invoke(new ContextImpl(entityInstance, secondaryEntityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick()));
                             }
                         } else {
-                            action.invoke(new ContextImpl(entityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick));
+                            action.invoke(new ContextImpl(entityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick()));
                         }
                     }
                 }
             }
         }
         simulationED.setIsTerminatedBySecondsCount(simulationED.getWorld().getTermination().isTerminatedBySecondsCount(simulationED.getSimulationSeconds()));
-        simulationED.setIsTerminatedByTicksCount(simulationED.getWorld().getTermination().isTerminatedByTicksCount(currentTick));
+        simulationED.setIsTerminatedByTicksCount(simulationED.getWorld().getTermination().isTerminatedByTicksCount(simulationED.getCurrentTick()));
         simulationED.setRunning(false);
     }
     public void printDebug(List<EntityInstance> instances) {

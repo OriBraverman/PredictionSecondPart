@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimulationExecutionDetails implements Serializable {
     private final int id;
@@ -30,7 +31,7 @@ public class SimulationExecutionDetails implements Serializable {
     private Instant currStartTime;
     private List<Duration> durations;
     private String formattedStartTime;
-    private int currentTick = 0;
+    private AtomicInteger currentTick;
     private Map<Integer, List<EntityPopulation>> entityPopulationByTicks;
     private String status = "Pending";
     private String terminationReason = "";
@@ -48,6 +49,7 @@ public class SimulationExecutionDetails implements Serializable {
         this.isRunning = new AtomicBoolean(false);
         this.isPaused = new AtomicBoolean(false);
         this.entityPopulationByTicks = new HashMap<>();
+        this.currentTick = new AtomicInteger(0);
     }
 
     public ActiveEnvironment getActiveEnvironment() { return activeEnvironment; }
@@ -83,12 +85,16 @@ public class SimulationExecutionDetails implements Serializable {
     public void setTerminationReason(String terminationReason) {this.terminationReason = terminationReason; }
 
     public int getCurrentTick() {
-        return currentTick;
+        return currentTick.get();
+    }
+
+    public void incrementCurrentTick() {
+        this.currentTick.incrementAndGet();
     }
 
     public void setCurrentTick(int currentTick) {
         this.entityPopulationByTicks.put(currentTick, entityInstanceManager.getCurrEntityPopulationList());
-        this.currentTick = currentTick;
+        this.currentTick.set(currentTick);
     }
 
     public Instant getCurrStartTime() {
@@ -157,5 +163,13 @@ public class SimulationExecutionDetails implements Serializable {
 
     public void setPending(boolean isPending) {
         this.isPending.set(isPending);
+    }
+
+    public List<Duration> getDurations() {
+        return durations;
+    }
+
+    public void setDurations(List<Duration> durations) {
+        this.durations = durations;
     }
 }

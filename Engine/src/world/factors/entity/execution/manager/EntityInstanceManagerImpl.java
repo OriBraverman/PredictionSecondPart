@@ -143,7 +143,7 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
                 .stream()
                 .filter(instance -> instance.getEntityDefinition().getName().equals(secondaryEntity.getSecondaryEntityDefinition().getName()))
                 .collect(Collectors.toList());
-        if (secondaryEntity.getSelectionCount() == "ALL") {
+        if (secondaryEntity.getSelectionCount().toUpperCase().equals("ALL")) {
             return secondaryEntityInstances;
         } else if (validateStringIsInteger(secondaryEntity.getSelectionCount())) {
             int count = Integer.parseInt(secondaryEntity.getSelectionCount());

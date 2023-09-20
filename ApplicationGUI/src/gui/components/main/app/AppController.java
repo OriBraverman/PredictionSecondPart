@@ -57,6 +57,11 @@ public class AppController {
     public AppController() {
         this.isXMLLoaded = new SimpleBooleanProperty(false);
         this.isSimulationExecuted = new SimpleBooleanProperty(false);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            engine.deleteInDepthMemoryFolder();
+            resultsComponentController.stopExecutorService();
+            engine.stopThreadPool();
+        }));
     }
 
     @FXML public void initialize(){
