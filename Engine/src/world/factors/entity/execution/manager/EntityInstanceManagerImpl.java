@@ -16,10 +16,7 @@ import world.factors.property.execution.PropertyInstance;
 import world.factors.property.execution.PropertyInstanceImpl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -119,14 +116,15 @@ public class EntityInstanceManagerImpl implements EntityInstanceManager, Seriali
     @Override
     public void moveEntity(EntityInstance entityInstance, GridInstance grid) {
         Cell newCell;
-        if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Direction.UP)) != null) {
-            entityInstance.setCell(newCell);
-        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Direction.DOWN)) != null) {
-            entityInstance.setCell(newCell);
-        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Direction.RIGHT)) != null) {
-            entityInstance.setCell(newCell);
-        } else if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), Direction.LEFT)) != null) {
-            entityInstance.setCell(newCell);
+        // get a list of 4 directions and shuffle it
+        List<Direction> directions = new ArrayList<>();
+        directions.addAll(Direction.getDirections());
+        Collections.shuffle(directions);
+        for (Direction direction : directions) {
+            if ((newCell = grid.moveEntity(entityInstance.getCoordinate(), direction)) != null) {
+                entityInstance.setCell(newCell);
+                return;
+            }
         }
     }
 
