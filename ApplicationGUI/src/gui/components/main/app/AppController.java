@@ -275,10 +275,12 @@ public class AppController {
     private void applyDesign(String cssPath){
         MainVBox.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
         UpperGridPane.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+        uploadComponent.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
     }
 
     private void removeDesign(String cssPath){
         MainVBox.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
         UpperGridPane.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
+        uploadComponent.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
     }
 }
