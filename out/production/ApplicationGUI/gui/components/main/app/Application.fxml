@@ -18,7 +18,7 @@
    <content>
       <VBox fx:id="MainVBox" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="750.0" prefWidth="1100.0" styleClass="base">
          <children>
-            <GridPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1100.0">
+            <GridPane fx:id="UpperGridPane" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1100.0">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -46,6 +46,7 @@
                         </Label>
                         <CheckBox fx:id="DarkModeCheckBox" layoutX="857.0" layoutY="14.0" mnemonicParsing="false" styleClass="ModeCheckBox" text="Dark Mode" />
                         <CheckBox fx:id="HappyModeCheckBox" layoutX="969.0" layoutY="14.0" mnemonicParsing="false" styleClass="ModeCheckBox" text="Happy Mode " />
+                         <CheckBox fx:id="animationsCheckBox" layoutX="753.0" layoutY="16.0" mnemonicParsing="false" text="Animations" />
                      </children></AnchorPane>
                </children>
                <stylesheets>

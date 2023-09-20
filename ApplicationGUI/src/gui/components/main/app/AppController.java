@@ -21,10 +21,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import world.factors.entity.definition.EntityDefinition;
 
 import java.io.File;
@@ -38,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class AppController {
     @FXML private ScrollPane applicationScrollPane;
     @FXML private VBox MainVBox;
+    @FXML private GridPane UpperGridPane;
     @FXML private HBox uploadComponent;
     @FXML private UploadController uploadComponentController;
     @FXML private AnchorPane detailsComponent;
@@ -51,9 +49,13 @@ public class AppController {
     @FXML private AnchorPane TitleRow;
     @FXML private CheckBox DarkModeCheckBox;
     @FXML private CheckBox HappyModeCheckBox;
+    @FXML private CheckBox animationsCheckBox;
+
     private final Engine engine = new Engine();
+
     private final SimpleBooleanProperty isXMLLoaded;
     private final SimpleBooleanProperty isSimulationExecuted;
+    private final SimpleBooleanProperty isAnimationChecked;
 
     public enum Tab {
         DETAILS, NEW_EXECUTION, RESULTS
@@ -64,12 +66,16 @@ public class AppController {
     public AppController() {
         this.isXMLLoaded = new SimpleBooleanProperty(false);
         this.isSimulationExecuted = new SimpleBooleanProperty(false);
+        this.isAnimationChecked = new SimpleBooleanProperty(false);
     }
 
     @FXML public void initialize(){
+        DarkModeCheckBox.setSelected(false);
+        HappyModeCheckBox.setSelected(false);
         setColorThemeComponents();
         tabPane.getTabs().get(1).disableProperty().bind(isXMLLoaded.not());
         tabPane.getTabs().get(2).disableProperty().bind(isSimulationExecuted.not());
+        animationsCheckBox.selectedProperty().bindBidirectional(isAnimationChecked);
         if (uploadComponentController != null && detailsComponentController != null && newExecutionComponentController != null
                 && resultsComponentController != null && resultsComponentController.getSimulationComponentController() != null
                 && resultsComponentController.getSimulationComponentController().getInformationComponentController() != null) {
@@ -101,12 +107,28 @@ public class AppController {
         DarkModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (DarkModeCheckBox.isSelected()) {
                 HappyModeCheckBox.setSelected(false);
+                // applyDesign of DarkMode-theme.css
+                applyDesign("DarkMode-theme.css");
+                // remove design of HappyMode-theme.css
+                removeDesign("HappyMode-theme.css");
+            } else {
+                //remove design of DarkMode-theme.css
+                removeDesign("DarkMode-theme.css");
+                applyDesign("Application.css");
             }
         });
 
         HappyModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (HappyModeCheckBox.isSelected()) {
                 DarkModeCheckBox.setSelected(false);
+                // applyDesign of HappyMode-theme.css
+                applyDesign("HappyMode-theme.css");
+                // remove design of DarkMode-theme.css
+                removeDesign("DarkMode-theme.css");
+            } else {
+                //remove design of HappyMode-theme.css
+                removeDesign("HappyMode-theme.css");
+                applyDesign("Application.css");
             }
         });
     }
@@ -250,7 +272,13 @@ public class AppController {
         engine.getToNextTick(simulationID);
     }
 
-    /*private void setDesign(String cssPath){
-        MainVBox.setSt
-    }*/
+    private void applyDesign(String cssPath){
+        MainVBox.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+        UpperGridPane.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+    }
+
+    private void removeDesign(String cssPath){
+        MainVBox.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
+        UpperGridPane.getStylesheets().remove(getClass().getResource(cssPath).toExternalForm());
+    }
 }

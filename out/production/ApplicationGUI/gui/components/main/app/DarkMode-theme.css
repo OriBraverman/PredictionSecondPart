@@ -1,3 +1,7 @@
+.label{
+    -fx-text-fill: #4aff00;
+}
+
 /* Base button style */
 .button {
     -fx-background-color: linear-gradient(to bottom, #1e1e1e, #000000); /* Dark background gradient */
