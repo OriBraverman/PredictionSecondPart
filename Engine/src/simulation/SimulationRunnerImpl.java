@@ -146,15 +146,14 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                     .filter(rule -> rule.isRuleActive(simulationED.getCurrentTick()))
                     .flatMap(rule -> rule.getActionsToPerform().stream())
                     .collect(Collectors.toList());
-            /*List<Action> firstActions = actionableRules.stream()
+            List<Action> firstActions = actionableRules.stream()
                     .filter(action -> action.isFirstAction())
                     .collect(Collectors.toList());
             List<Action> lastActions = actionableRules.stream()
                     .filter(action -> action.isLastAction())
-                    .collect(Collectors.toList());*/
-
+                    .collect(Collectors.toList());
             for (EntityInstance entityInstance : simulationED.getEntityInstanceManager().getInstances()) {
-                for (Action action : actionableRules) {
+                for (Action action : firstActions) {
                     if (action.getPrimaryEntityDefinition().getName().equals(entityInstance.getEntityDefinition().getName())) {
                         if (action.getSecondaryEntity() != null) {
                             List<EntityInstance> selectedSecondaryEntityInstances = simulationED.getEntityInstanceManager().getSelectedSeconderyEntites(action.getSecondaryEntity(),  simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick());
@@ -163,6 +162,24 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                             }
                         } else {
                             action.invoke(new ContextImpl(entityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick()));
+                        }
+                    }
+                }
+            }
+            for (EntityInstance entityInstance : simulationED.getEntityInstanceManager().getInstances()) {
+                for (Action action : lastActions) {
+                    if (action.getPrimaryEntityDefinition().getName().equals(entityInstance.getEntityDefinition().getName())) {
+                        if (action.getSecondaryEntity() != null) {
+                            List<EntityInstance> selectedSecondaryEntityInstances = simulationED.getEntityInstanceManager().getSelectedSeconderyEntites(action.getSecondaryEntity(),  simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick());
+                            for (EntityInstance secondaryEntityInstance : selectedSecondaryEntityInstances) {
+                                if (simulationED.getEntityInstanceManager().isEntityAlive(entityInstance.getId()) && simulationED.getEntityInstanceManager().isEntityAlive(secondaryEntityInstance.getId())) {
+                                    action.invoke(new ContextImpl(entityInstance, secondaryEntityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick()));
+                                }
+                            }
+                        } else {
+                            if (simulationED.getEntityInstanceManager().isEntityAlive(entityInstance.getId())) {
+                                action.invoke(new ContextImpl(entityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick()));
+                            }
                         }
                     }
                 }

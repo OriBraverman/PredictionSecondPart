@@ -114,6 +114,45 @@
     -fx-shape: "M0,4 L3,7 L6,0"; /* Custom check mark shape (a simple "V" shape) */
 }
 
+/* Define a style for the MenuButton */
+.menu-button {
+    -fx-background-color: #FFFFFF; /* White background color */
+    -fx-background-radius: 5px; /* Rounded corners */
+    -fx-padding: 5px 10px; /* Padding around the button */
+    -fx-font-size: 14px; /* Font size */
+    -fx-text-fill: #333333; /* Dark gray text color */
+    -fx-border-color: #CCCCCC; /* Light gray border color */
+    -fx-border-radius: 5px; /* Rounded corners for the border */
+    -fx-border-width: 1px; /* Border width */
+}
+
+/* Define a style for the MenuButton when hovered */
+.menu-button:hover {
+    -fx-background-color: #F5F5F5; /* Lighter gray background color on hover */
+}
+
+/* Define a style for the MenuButton when pressed */
+.menu-button:pressed {
+    -fx-background-color: #E0E0E0; /* Even darker gray background color when pressed */
+}
+
+/* Define a style for the arrow icon on the MenuButton */
+.menu-button > .arrow-button {
+    -fx-background-color: transparent; /* Transparent background for the arrow icon */
+    -fx-background-insets: 0; /* No background insets */
+    -fx-padding: 0; /* No padding */
+}
+
+/* Define a style for the arrow icon on the MenuButton when hovered */
+.menu-button:hover > .arrow-button {
+    -fx-background-color: transparent; /* Transparent background for the arrow icon on hover */
+}
+
+/* Define a style for the arrow icon on the MenuButton when pressed */
+.menu-button:pressed > .arrow-button {
+    -fx-background-color: transparent; /* Transparent background for the arrow icon when pressed */
+}
+
 
 
 

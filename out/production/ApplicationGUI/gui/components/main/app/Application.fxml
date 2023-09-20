@@ -45,12 +45,15 @@
                               <Insets bottom="15.0" left="10.0" top="20.0" />
                            </padding>
                         </Label>
-                         <CheckBox fx:id="animationsCheckBox" layoutX="926.0" layoutY="16.0" mnemonicParsing="false" onAction="#OnAnimationClickAction" text="Animations" />
-                        <MenuButton fx:id="SkinsMenuButton" layoutX="841.0" layoutY="12.0" mnemonicParsing="false" text="Skins">
+                         <CheckBox fx:id="animationsCheckBox" layoutX="923.0" layoutY="16.0" mnemonicParsing="false" onAction="#OnAnimationClickAction" text="Animations" />
+                        <MenuButton fx:id="SkinsMenuButton" layoutX="808.0" layoutY="7.0" mnemonicParsing="false" text="Skins">
                           <items>
                             <MenuItem mnemonicParsing="false" text="Action 1" />
                             <MenuItem mnemonicParsing="false" text="Action 2" />
                           </items>
+                           <padding>
+                              <Insets right="20.0" />
+                           </padding>
                         </MenuButton>
                      </children></AnchorPane>
                </children>
