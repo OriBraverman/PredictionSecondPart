@@ -64,26 +64,10 @@ public class AppController {
     public AppController() {
         this.isXMLLoaded = new SimpleBooleanProperty(false);
         this.isSimulationExecuted = new SimpleBooleanProperty(false);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            engine.deleteInDepthMemoryFolder();
-            resultsComponentController.stopExecutorService();
-            engine.stopThreadPool();
-        }));
     }
 
     @FXML public void initialize(){
-        // Add event handlers to the checkboxes
-        DarkModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (DarkModeCheckBox.isSelected()) {
-                HappyModeCheckBox.setSelected(false);
-            }
-        });
-
-        HappyModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (HappyModeCheckBox.isSelected()) {
-                DarkModeCheckBox.setSelected(false);
-            }
-        });
+        setColorThemeComponents();
         tabPane.getTabs().get(1).disableProperty().bind(isXMLLoaded.not());
         tabPane.getTabs().get(2).disableProperty().bind(isSimulationExecuted.not());
         if (uploadComponentController != null && detailsComponentController != null && newExecutionComponentController != null
@@ -104,6 +88,26 @@ public class AppController {
             applicationScrollPane.prefHeightProperty().bind(PredictionApplication.getStage().heightProperty());
             applicationScrollPane.setFitToWidth(true);
             applicationScrollPane.setFitToHeight(true);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                engine.deleteInDepthMemoryFolder();
+                resultsComponentController.stopExecutorService();
+                engine.stopThreadPool();
+            }));
+        });
+    }
+
+    private void setColorThemeComponents() {
+        DarkModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (DarkModeCheckBox.isSelected()) {
+                HappyModeCheckBox.setSelected(false);
+            }
+        });
+
+        HappyModeCheckBox.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (HappyModeCheckBox.isSelected()) {
+                DarkModeCheckBox.setSelected(false);
+            }
         });
     }
 
@@ -245,4 +249,8 @@ public class AppController {
     public void getToNextTick(int simulationID) {
         engine.getToNextTick(simulationID);
     }
+
+    /*private void setDesign(String cssPath){
+        MainVBox.setSt
+    }*/
 }
