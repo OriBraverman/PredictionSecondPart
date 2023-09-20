@@ -1,6 +1,8 @@
 package world.factors.grid;
 
-public class Cell {
+import java.io.Serializable;
+
+public class Cell implements Serializable {
     private final Coordinate coordinate;
     private boolean isOccupied;
     //todo: entity

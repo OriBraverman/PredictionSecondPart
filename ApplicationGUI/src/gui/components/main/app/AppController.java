@@ -64,6 +64,11 @@ public class AppController {
     public AppController() {
         this.isXMLLoaded = new SimpleBooleanProperty(false);
         this.isSimulationExecuted = new SimpleBooleanProperty(false);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            engine.deleteInDepthMemoryFolder();
+            resultsComponentController.stopExecutorService();
+            engine.stopThreadPool();
+        }));
     }
 
     @FXML public void initialize(){
@@ -140,11 +145,11 @@ public class AppController {
         engine.validateEnvVariableValue(envVariableValueDTO);
     }
 
-    public void activateSimulation(EnvVariablesValuesDTO envVariablesValuesDTO, EntitiesPopulationDTO entityPopulationDTO) {
+    public void activateSimulation(EnvVariablesValuesDTO envVariablesValuesDTO, EntitiesPopulationDTO entityPopulationDTO, boolean isBonusActivated) {
         isSimulationExecuted.set(true);
         engine.updateActiveEnvironmentAndInformUser(envVariablesValuesDTO);
         engine.updateActiveEntityPopulation(entityPopulationDTO);
-        SimulationIDDTO simulationIDDTO = engine.activateSimulation();
+        SimulationIDDTO simulationIDDTO = engine.activateSimulation(isBonusActivated);
         resultsComponentController.addSimulationToExecutionList(simulationIDDTO);
         resultsComponentController.setIsActive(true);
 
@@ -231,5 +236,13 @@ public class AppController {
 
     public  EntitiesPopulationDTO getEntitiesPopulationDTO(int simulationID){
         return this.engine.getEntityPopulationDTO(simulationID);
+    }
+
+    public void setPreviousTick(int simulationID) {
+        engine.setPreviousTick(simulationID);
+    }
+
+    public void getToNextTick(int simulationID) {
+        engine.getToNextTick(simulationID);
     }
 }

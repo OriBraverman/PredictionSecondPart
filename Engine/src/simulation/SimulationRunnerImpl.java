@@ -20,20 +20,39 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static simulation.SimulationMemorySaver.writeSEDByIdAndTick;
 
 public class SimulationRunnerImpl implements Serializable, Runnable, SimulationRunner {
     private final int id;
-    private final SimulationExecutionDetails simulationED;
+    private final boolean isBonusActivated;
+    private SimulationExecutionDetails simulationED;
+    private AtomicBoolean isTravelForward = new AtomicBoolean(false);
+    private final Semaphore travelForwardSemaphore = new Semaphore(1);
     private final Semaphore pauseSemaphore = new Semaphore(1);
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy | hh.mm.ss");
-    public SimulationRunnerImpl(int id, SimulationExecutionDetails simulationExecutionDetails) {
+    public SimulationRunnerImpl(int id, SimulationExecutionDetails simulationExecutionDetails, boolean isBonusActivated) {
         this.id = id;
         this.simulationED = simulationExecutionDetails;
+        this.isBonusActivated = isBonusActivated;
+    }
+
+    public AtomicBoolean getIsTravelForward() {
+        return isTravelForward;
+    }
+
+    public void setIsTravelForward(boolean isTravelForward) {
+        this.isTravelForward.set(isTravelForward);
     }
 
     public int getId() {
         return id;
+    }
+
+    public void setSimulationED(SimulationExecutionDetails simulationED) {
+        this.simulationED = simulationED;
     }
 
     private void initEntityInstancesArray() {
@@ -52,9 +71,20 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
             Thread.currentThread().interrupt();
         }
     }
-
     public void resumeSimulation() {
         pauseSemaphore.release(); // Release the semaphore to resume the simulation
+    }
+
+    public void acquireTravelForwardSemaphore() {
+        try {
+            travelForwardSemaphore.acquire(); // Acquire the semaphore to travel forward
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void releaseTravelForwardSemaphore() {
+        travelForwardSemaphore.release(); // Release the semaphore to travel forward
     }
 
     @Override
@@ -79,15 +109,26 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
 
     private void runSimulation() {
         synchronized (simulationED) {
-            this.simulationED.setSimulationThread(Thread.currentThread());
+            simulationED.setPending(false);
             simulationED.setRunning(true);
         }
         Date date = new Date();
         this.simulationED.setFormattedStartTime(this.dateFormat.format(date));
 
         initEntityInstancesArray();
-        int currentTick = 0;
-        while (!simulationED.getWorld().getTermination().isTerminated(currentTick, simulationED.getSimulationSeconds()) && simulationED.isRunning()) {
+        while (!simulationED.getWorld().getTermination().isTerminated(simulationED.getCurrentTick(), simulationED.getSimulationSeconds()) && simulationED.isRunning()) {
+            while (this.isTravelForward.get()) {
+                try {
+                    travelForwardSemaphore.acquire();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            travelForwardSemaphore.release();
+
+            if (isBonusActivated) {
+                writeSEDByIdAndTick(id, simulationED.getCurrentTick(), simulationED);
+            }
             while (this.simulationED.isPaused()) {
                 try {
                     pauseSemaphore.acquire();
@@ -97,14 +138,12 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
             }
             pauseSemaphore.release();
 
-            currentTick++;
-            simulationED.setCurrentTick(currentTick);
+            simulationED.incrementCurrentTick();
             simulationED.getEntityInstanceManager().moveAllInstances(simulationED.getGridInstance());
-            int finalCurrentTick = currentTick;
             // get all runnable rules
             List<Action> actionableRules = simulationED.getWorld().getRules()
                     .stream()
-                    .filter(rule -> rule.isRuleActive(finalCurrentTick))
+                    .filter(rule -> rule.isRuleActive(simulationED.getCurrentTick()))
                     .flatMap(rule -> rule.getActionsToPerform().stream())
                     .collect(Collectors.toList());
             /*List<Action> firstActions = actionableRules.stream()
@@ -118,19 +157,19 @@ public class SimulationRunnerImpl implements Serializable, Runnable, SimulationR
                 for (Action action : actionableRules) {
                     if (action.getPrimaryEntityDefinition().getName().equals(entityInstance.getEntityDefinition().getName())) {
                         if (action.getSecondaryEntity() != null) {
-                            List<EntityInstance> selectedSecondaryEntityInstances = simulationED.getEntityInstanceManager().getSelectedSeconderyEntites(action.getSecondaryEntity(),  simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick);
+                            List<EntityInstance> selectedSecondaryEntityInstances = simulationED.getEntityInstanceManager().getSelectedSeconderyEntites(action.getSecondaryEntity(),  simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick());
                             for (EntityInstance secondaryEntityInstance : selectedSecondaryEntityInstances) {
-                                action.invoke(new ContextImpl(entityInstance, secondaryEntityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick));
+                                action.invoke(new ContextImpl(entityInstance, secondaryEntityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick()));
                             }
                         } else {
-                            action.invoke(new ContextImpl(entityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), currentTick));
+                            action.invoke(new ContextImpl(entityInstance, simulationED.getEntityInstanceManager(), simulationED.getActiveEnvironment(), simulationED.getGridInstance(), simulationED.getCurrentTick()));
                         }
                     }
                 }
             }
         }
         simulationED.setIsTerminatedBySecondsCount(simulationED.getWorld().getTermination().isTerminatedBySecondsCount(simulationED.getSimulationSeconds()));
-        simulationED.setIsTerminatedByTicksCount(simulationED.getWorld().getTermination().isTerminatedByTicksCount(currentTick));
+        simulationED.setIsTerminatedByTicksCount(simulationED.getWorld().getTermination().isTerminatedByTicksCount(simulationED.getCurrentTick()));
         simulationED.setRunning(false);
     }
     public void printDebug(List<EntityInstance> instances) {

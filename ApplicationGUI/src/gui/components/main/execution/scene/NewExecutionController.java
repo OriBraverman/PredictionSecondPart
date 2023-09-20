@@ -23,13 +23,18 @@ public class NewExecutionController {
     @FXML private ListView entityPopulationListView;
     @FXML private Button clearSimulationButton;
     @FXML private Button startSimulationButton;
+    @FXML private CheckBox isBonusActivatedCheckBox;
     private AppController appController;
+
+    private SimpleBooleanProperty isBonusActivated;
     public void setAppController(AppController appController) {
         this.appController = appController;
     }
 
     @FXML public void initialize(){
+        isBonusActivated = new SimpleBooleanProperty(false);
         entityPopulationListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        isBonusActivatedCheckBox.selectedProperty().bindBidirectional(isBonusActivated);
     }
 
     public void updateEnvVariablesInputVBox(NewExecutionInputDTO newExecutionInputDTO) {
@@ -155,7 +160,7 @@ public class NewExecutionController {
         if (envVariablesValuesDTO == null || entityPopulationDTO == null) {
             return;
         }
-        appController.activateSimulation(envVariablesValuesDTO, entityPopulationDTO);
+        appController.activateSimulation(envVariablesValuesDTO, entityPopulationDTO, isBonusActivated.get());
         appController.selectTab(AppController.Tab.RESULTS);
     }
 

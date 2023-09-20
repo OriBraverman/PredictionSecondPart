@@ -4,7 +4,9 @@ import world.factors.condition.Condition;
 import world.factors.entity.definition.EntityDefinition;
 import world.factors.expression.api.Expression;
 
-public class SecondaryEntity {
+import java.io.Serializable;
+
+public class SecondaryEntity implements Serializable {
     private final EntityDefinition secondaryEntityDefinition;
     private final String selectionCount;
     private final Condition selectionCondition;

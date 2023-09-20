@@ -14,6 +14,7 @@ import world.factors.functionArgument.impl.EntityPropertyFunctionArgument;
 import world.factors.functionArgument.impl.EnvPropertyFunctionArgument;
 import world.factors.functionArgument.impl.ExpressionFunctionArgument;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

@@ -7,6 +7,7 @@ import world.factors.environment.execution.api.ActiveEnvironment;
 import world.factors.grid.execution.GridInstance;
 import world.factors.grid.execution.GridInstanceImpl;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -14,8 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class SimulationExecutionDetails {
+public class SimulationExecutionDetails implements Serializable {
     private final int id;
     private final ActiveEnvironment activeEnvironment;
     private final GridInstance grid;
@@ -23,13 +25,13 @@ public class SimulationExecutionDetails {
     private final EntityInstanceManager entityInstanceManager;
     private boolean isTerminatedBySecondsCount = false;
     private boolean isTerminatedByTicksCount = false;
+    private AtomicBoolean isPending;
     private AtomicBoolean isRunning;
     private AtomicBoolean isPaused;
     private Instant currStartTime;
     private List<Duration> durations;
     private String formattedStartTime;
-    private int currentTick = 0;
-    private Thread simulationThread;
+    private AtomicInteger currentTick;
     private Map<Integer, List<EntityPopulation>> entityPopulationByTicks;
     private String status = "Pending";
     private String terminationReason = "";
@@ -43,9 +45,11 @@ public class SimulationExecutionDetails {
         this.entityInstanceManager = entityInstanceManager;
         this.currStartTime = Instant.now();
         this.durations = new ArrayList<>();
+        this.isPending = new AtomicBoolean(true);
         this.isRunning = new AtomicBoolean(false);
         this.isPaused = new AtomicBoolean(false);
         this.entityPopulationByTicks = new HashMap<>();
+        this.currentTick = new AtomicInteger(0);
     }
 
     public ActiveEnvironment getActiveEnvironment() { return activeEnvironment; }
@@ -81,12 +85,16 @@ public class SimulationExecutionDetails {
     public void setTerminationReason(String terminationReason) {this.terminationReason = terminationReason; }
 
     public int getCurrentTick() {
-        return currentTick;
+        return currentTick.get();
+    }
+
+    public void incrementCurrentTick() {
+        this.currentTick.incrementAndGet();
     }
 
     public void setCurrentTick(int currentTick) {
         this.entityPopulationByTicks.put(currentTick, entityInstanceManager.getCurrEntityPopulationList());
-        this.currentTick = currentTick;
+        this.currentTick.set(currentTick);
     }
 
     public Instant getCurrStartTime() {
@@ -126,7 +134,9 @@ public class SimulationExecutionDetails {
     public void setTerminatedByTicksCount(boolean terminatedByTicksCount) {
         isTerminatedByTicksCount = terminatedByTicksCount;
     }
-
+    public boolean isPending() {
+        return isPending.get();
+    }
     public void setRunning(boolean running) {
         isRunning.set(running);
     }
@@ -135,20 +145,12 @@ public class SimulationExecutionDetails {
         isPaused.set(paused);
     }
 
-    public Thread getSimulationThread() {
-        return simulationThread;
-    }
-
-    public void setSimulationThread(Thread simulationThread) {
-        this.simulationThread = simulationThread;
-    }
-
     public Map<Integer, List<EntityPopulation>> getEntityPopulationByTicks() {
         return entityPopulationByTicks;
     }
 
     public boolean isCompleted() {
-        return !isRunning.get() && simulationThread != null;
+        return !isRunning.get() && !isPending.get();
     }
 
     public GridInstance getGridInstance() {
@@ -158,4 +160,16 @@ public class SimulationExecutionDetails {
     public String getStatus(){return this.status;}
 
     public String getTerminationReason(){return this.terminationReason;}
+
+    public void setPending(boolean isPending) {
+        this.isPending.set(isPending);
+    }
+
+    public List<Duration> getDurations() {
+        return durations;
+    }
+
+    public void setDurations(List<Duration> durations) {
+        this.durations = durations;
+    }
 }
