@@ -55,7 +55,7 @@ public class AppController {
             new ArrayList<>(Arrays.asList(
                     "Application.css", "DarkMode-theme.css",
                     "HappyMode-theme.css", "OrangeApplication.css",
-                    "GreenApplication"));
+                    "GreenApplication.css"));
 
     public enum Tab {
         DETAILS, NEW_EXECUTION, RESULTS

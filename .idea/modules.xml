@@ -5,7 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/ApplicationGUI/ApplicationGUI.iml" filepath="$PROJECT_DIR$/ApplicationGUI/ApplicationGUI.iml" />
       <module fileurl="file://$PROJECT_DIR$/DTO/DTO.iml" filepath="$PROJECT_DIR$/DTO/DTO.iml" />
       <module fileurl="file://$PROJECT_DIR$/Engine/Engine.iml" filepath="$PROJECT_DIR$/Engine/Engine.iml" />
-      <module fileurl="file://$PROJECT_DIR$/PredictionFirstPart.iml" filepath="$PROJECT_DIR$/PredictionFirstPart.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PredictionSecondPart.iml" filepath="$PROJECT_DIR$/PredictionSecondPart.iml" />
     </modules>
   </component>
 </project>
